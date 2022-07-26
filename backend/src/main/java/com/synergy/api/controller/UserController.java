@@ -71,4 +71,19 @@ public class UserController {
 
 		return ResponseEntity.status(200).body(UserRes.of(user));
 	}
+
+	@PostMapping("/email")
+	@ApiOperation(value = "이메일 중복 검사", notes = "이미 가입된 이메일인지 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "사용 가능한 이메일"),
+			@ApiResponse(code = 409, message = "중복된 이메일"),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> isEmailExist(@RequestBody User user){
+		if(userService.isExistEmail(user.getEmail())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 이메일"));
+		}
+		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 이메일"));
+	}
+
 }

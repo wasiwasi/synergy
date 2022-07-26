@@ -39,4 +39,13 @@ public class UserServiceImpl implements UserService {
 		User user = userRepositorySupport.findUserByUserId(userId).get();
 		return user;
 	}
+
+	@Override
+	public boolean isExistEmail(String email) {
+		if(userRepository.countByEmail(email) > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
