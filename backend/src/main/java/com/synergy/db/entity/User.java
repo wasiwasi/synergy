@@ -32,4 +32,7 @@ public class User{
     @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String password;
+
+    // 본인 인증이 완료되었는지 여부
+    Boolean auth_status;
 }
