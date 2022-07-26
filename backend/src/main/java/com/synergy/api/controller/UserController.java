@@ -86,4 +86,18 @@ public class UserController {
 		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 이메일"));
 	}
 
+	@PostMapping("/nickname")
+	@ApiOperation(value = "닉네임 중복 검사", notes = "이미 등록된 닉네임인지 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "사용 가능한 닉네임"),
+			@ApiResponse(code = 409, message = "중복된 닉네임"),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> isNicknameExist(@RequestBody User user){
+		if(userService.isExistNickname(user.getNickname())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 닉네임"));
+		}
+		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 닉네임"));
+	}
+
 }

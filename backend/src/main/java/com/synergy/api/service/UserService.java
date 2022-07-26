@@ -10,4 +10,5 @@ public interface UserService {
 	User createUser(UserRegisterPostReq userRegisterInfo);
 	User getUserByUserId(String userId);
     boolean isExistEmail(String email);
+    boolean isExistNickname(String nickname);
 }

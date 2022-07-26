@@ -48,4 +48,13 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 	}
+
+	@Override
+	public boolean isExistNickname(String nickname) {
+		if(userRepository.countByNickname(nickname) > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
