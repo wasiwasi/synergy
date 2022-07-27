@@ -42,7 +42,7 @@ repositories {
 
 group 'com.synergy'
 version '1.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '1.8' //synergy java version 11 ??
 
 
 configurations {
@@ -133,6 +133,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.20")
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    // Openvidu 의존성
+    implementation group: 'io.openvidu', name: 'openvidu-java-client', version: '2.18.0'
+
 }
 
 test {
