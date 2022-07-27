@@ -3,7 +3,7 @@ import { Link, Outlet } from "react-router-dom";
 import { useState, useCallback } from "react";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
-import { areOptionsEqual } from "@mui/base";
+import './Signup.css';
 
 const Signup = () => {
   //닉네임, 이메일, 비밀번호, 비밀번호 확인
@@ -29,13 +29,14 @@ const Signup = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
   const [usableEmail, setUsableEmail] = useState<boolean>(false);
 
+  // 회원가입 버튼 클릭
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       try {
         await axios
           .post(
-            "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API KEY]",
+            "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDxRwa2AMB8A0ngXcvVZhLCmMhfNBw6Uu8",
             {
               email: email,
               password: password,
@@ -45,6 +46,8 @@ const Signup = () => {
             console.log("response:", res);
             if (res.status === 200) {
               console.log(res.status);
+              alert('이메일 인증 완료 후 로그인 해주세요 :)')
+              // 로그인 페이지로 리다이렉트 코드 넣어야함!
               // router.push("/sign_up/profile_start");
             }
           });
@@ -65,12 +68,12 @@ const Signup = () => {
       if (
         nickNameCurrent.length < 6 ||
         nickNameCurrent.length > 12 ||
-        nickNameRegex.test(nickNameCurrent)
+        !nickNameRegex.test(nickNameCurrent)
       ) {
-        setNickNameError("6~12자 영소문자와 한글만 가능합니다.");
+        setNickNameError("공백 없이 6~12자 영소문자와 한글만 가능합니다.");
         setIsNickName(false);
       } else {
-        setNickNameError("올바른 이름 형식입니다 :)");
+        setNickNameError("올바른 이름 형식입니다!");
         setIsNickName(true);
       }
     },
@@ -108,7 +111,7 @@ const Signup = () => {
         setPasswordError("비밀번호는 8자리 이상이어야 합니다.");
         setIsPassword(false);
       } else {
-        setPasswordError("올바른 비밀번호 형식입니다.");
+        setPasswordError("올바른 비밀번호 형식입니다!");
         setIsPassword(true);
       }
     },
@@ -146,7 +149,7 @@ const Signup = () => {
         alert("사용가능한 닉네임입니다.");
         setUsableNickName(true);
       } else if (response.status === 409) {
-        alert("이미 존재하는 닉네임입니다.");
+        alert("중복된 닉네임입니다.");
       } else {
         alert("사용 불가능한 닉네임입니다.");
       }
@@ -192,7 +195,7 @@ const Signup = () => {
           />
           <button onClick={nickNameCheck}>닉네임 중복체크</button>
           {nickName.length > 0 && (
-            <div className={`message ${isNickName ? "success" : "error"}`}>
+            <div className={`${isNickName ? "success" : "error"}`}>
               {nickNameError}
             </div>
           )}
@@ -209,7 +212,7 @@ const Signup = () => {
           />
           <button onClick={emailCheck}>이메일 중복체크</button>
           {email.length > 0 && (
-            <div className={`message ${isEmail ? "success" : "error"}`}>
+            <div className={`${isEmail ? "success" : "error"}`}>
               {emailError}
             </div>
           )}
@@ -225,7 +228,7 @@ const Signup = () => {
             onChange={onChangePassword}
           />
           {password.length > 0 && (
-            <div className={`message ${isPassword ? "success" : "error"}`}>
+            <div className={`${isPassword ? "success" : "error"}`}>
               {passwordError}
             </div>
           )}
@@ -243,26 +246,15 @@ const Signup = () => {
           />
           {passwordConfirm.length > 0 && (
             <div
-              className={`message ${isPasswordConfirm ? "success" : "error"}`}
+              className={`${isPasswordConfirm ? "success" : "error"}`}
             >
               {passwordConfirmError}
             </div>
           )}
         </div>
 
-        {/* 이름, 이메일, 패스워드, 패스워드 확인이 다 맞다면 주황버튼으로 */}
-        {/* <div css={footButtonWrapper}>
-        <section>
-          <FootButton
-            type="submit"
-            footButtonType={FootButtonType.ACTIVATION}
-            disabled={!(isName && isEmail && isPassword && isPasswordConfirm)}
-          >
-            다음
-          </FootButton>
-        </section>
-      </div> */}
-        <button type="submit">회원 가입</button>
+        <button type="submit"
+        disabled={!(isNickName && isEmail && isPassword && isPasswordConfirm)}>회원 가입</button>
         <p>* 등록하신 이메일을 확인하세요. 인증을 위한 메일이 전송됩니다.</p>
       </form>
     </>
