@@ -9,4 +9,7 @@ import com.synergy.db.entity.User;
 public interface UserService {
 	User createUser(UserRegisterPostReq userRegisterInfo);
 	User getUserByUserId(String userId);
+    boolean isExistEmail(String email);
+    boolean isExistNickname(String nickname);
+    boolean authorizeUser(String id, String code);
 }
