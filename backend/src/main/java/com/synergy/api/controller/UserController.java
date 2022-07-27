@@ -1,13 +1,12 @@
 package com.synergy.api.controller;
 
+import com.synergy.api.service.MailService;
+import com.synergy.common.util.RedisUtil;
+import com.synergy.db.entity.UserEmailForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.synergy.api.request.UserRegisterPostReq;
 import com.synergy.api.response.UserRes;
@@ -23,6 +22,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.NoSuchElementException;
+
 /**
  * 유저 관련 API 요청 처리를 위한 컨트롤러 정의.
  */
@@ -33,6 +34,12 @@ public class UserController {
 
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	MailService mailService;
+
+	@Autowired
+	RedisUtil redisUtil;
 
 	@PostMapping("/signup")
 	@ApiOperation(value = "회원 가입", notes = "<strong>아이디와 패스워드</strong>를 통해 회원가입 한다.")
@@ -47,7 +54,8 @@ public class UserController {
 		//임의로 리턴된 User 인스턴스. 현재 코드는 회원 가입 성공 여부만 판단하기 때문에 굳이 Insert 된 유저 정보를 응답하지 않음.
 		User user = userService.createUser(registerInfo);
 
-		//TODO: Redis UUID 생성, 이메일 발송 로직
+		UserEmailForm userEmailForm = new UserEmailForm(user.getId(), user.getEmail(), redisUtil.makeUUID(user.getId()));
+		mailService.sendAuthEmail(userEmailForm);
 
 		return ResponseEntity.status(201).body(BaseResponseBody.of(201, "Created"));
 	}
@@ -98,6 +106,31 @@ public class UserController {
 			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 닉네임"));
 		}
 		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 닉네임"));
+	}
+
+	@GetMapping("/email-auth")
+	@ApiOperation(value = "이메일 본인 인증", notes = "넘어온 코드가 일치하는지 확인 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "본인 인증이 완료되었습니다."),
+			@ApiResponse(code = 401, message = "인증코드가 일치하지 않습니다."),
+			@ApiResponse(code = 404, message = "만료된 요청입니다."),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> authorizeUser(
+			@RequestParam("id") String id,
+			@RequestParam("code") String code){
+
+		//Redis 조회한 후 코드일치하는지 확인
+		try {
+			if (userService.authorizeUser(id, code)) {
+				return ResponseEntity.status(200).body(BaseResponseBody.of(200, "본인 인증이 완료되었습니다."));
+			} else {
+				return ResponseEntity.status(404).body(BaseResponseBody.of(401, "인증코드가 일치하지 않습니다."));
+			}
+		} catch(NoSuchElementException e) {
+			return ResponseEntity.status(404).body(BaseResponseBody.of(404, "만료된 요청입니다."));
+		}
+
 	}
 
 }

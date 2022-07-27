@@ -11,4 +11,5 @@ public interface UserService {
 	User getUserByUserId(String userId);
     boolean isExistEmail(String email);
     boolean isExistNickname(String nickname);
+    boolean authorizeUser(String id, String code);
 }
