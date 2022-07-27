@@ -1,9 +1,46 @@
+import React from "react";
+import ReactDOM from "react-dom";
+import axios from "axios";
+
 import Header from "../components/common/Header";
 import { Link, Outlet } from "react-router-dom";
+
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+
 import { useState, useCallback } from "react";
-import axios from "axios";
+
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+import Button from '@mui/material/Button';
+
 import TextField from "@mui/material/TextField";
 import './Signup.css';
+
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const themeA306 = createTheme({
+  palette: {
+    primary: {
+      // Purple and green play nicely together.
+			main: '#39A2DB',
+			contrastText: '#ffffff',
+    },
+    secondary: {
+      // This is green.A700 as hex.
+      main: '#769FCD',
+    },
+  },
+});
 
 const Signup = () => {
   //닉네임, 이메일, 비밀번호, 비밀번호 확인
@@ -11,6 +48,10 @@ const Signup = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordConfirm, setPasswordConfirm] = useState<string>("");
+
+  // 비밀번호 보여줄지 여부
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState<boolean>(false)
 
   //에러메시지 저장
   const [nickNameError, setNickNameError] = useState<string>("");
@@ -30,33 +71,31 @@ const Signup = () => {
   const [usableEmail, setUsableEmail] = useState<boolean>(false);
 
   // 회원가입 버튼 클릭
-  const onSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      try {
-        await axios
-          .post(
-            "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDxRwa2AMB8A0ngXcvVZhLCmMhfNBw6Uu8",
-            {
-              email: email,
-              password: password,
-            }
-          )
-          .then((res: any) => {
-            console.log("response:", res);
-            if (res.status === 200) {
-              console.log(res.status);
-              alert('이메일 인증 완료 후 로그인 해주세요 :)')
-              // 로그인 페이지로 리다이렉트 코드 넣어야함!
-              // router.push("/sign_up/profile_start");
-            }
-          });
-      } catch (err) {
-        console.error(err);
+  const onSignUp = () => {
+    fetch(
+      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDxRwa2AMB8A0ngXcvVZhLCmMhfNBw6Uu8",
+      { method: "POST",
+      body: JSON.stringify({ 
+        email: email,
+        password: password,
+      returnSecureToken: true}),
+       headers: {
+        "Content-Type": "application/json",
+       }
       }
-    },
-    [email, password]
-  );
+    ).then((res: any) => {
+      console.log("response:", res);
+      if (res.status === 200) {
+        console.log(res.status);
+        alert('이메일 인증 완료 후 로그인 해주세요 :)')
+        // 로그인 페이지로 리다이렉트 코드 넣어야함!
+        
+      }
+    }).catch(error => {
+    })
+  };
+
+  
 
   // 닉네임
   const onChangeNickName = useCallback(
@@ -64,6 +103,8 @@ const Signup = () => {
       const nickNameRegex = /^[ㄱ-ㅎ|가-힣|a-z]+$/; // 한글, 영어소문자만
       const nickNameCurrent = e.target.value;
       setNickName(nickNameCurrent);
+      // 닉네임 변경시 중복체크 다시하도록 false로 상태 변경
+      setUsableNickName(false)
 
       if (
         nickNameCurrent.length < 6 ||
@@ -87,7 +128,9 @@ const Signup = () => {
         /([\w-.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
       const emailCurrent = e.target.value;
       setEmail(emailCurrent);
-
+      // 이메일 변경시 중복체크 다시하도록 false로 상태 변경
+      setUsableEmail(false);
+      
       if (!emailRegex.test(emailCurrent)) {
         setEmailError("이메일 형식에 맞게 입력해 주세요.");
         setIsEmail(false);
@@ -110,12 +153,21 @@ const Signup = () => {
       if (passwordCurrent.length < 8) {
         setPasswordError("비밀번호는 8자리 이상이어야 합니다.");
         setIsPassword(false);
-      } else {
+      } else if (passwordConfirm && passwordCurrent !== passwordConfirm) {
+        setPasswordError("비밀번호를 다시 확인해 주세요.")
+        setPasswordConfirmError("비밀번호가 일치하지 않아요.")
+        setIsPassword(false)
+        setIsPasswordConfirm(false)
+      }
+      
+      else {
         setPasswordError("올바른 비밀번호 형식입니다!");
+        setIsPasswordConfirm(true);
+        setPasswordConfirmError("비밀번호가 같습니다.")
         setIsPassword(true);
       }
     },
-    []
+    [passwordConfirm]
   );
 
   // 비밀번호 확인
@@ -126,24 +178,48 @@ const Signup = () => {
 
       if (password === passwordConfirmCurrent) {
         setPasswordConfirmError("비밀번호가 같습니다.");
+        setPasswordError("올바른 비밀번호 형식입니다!");
         setIsPasswordConfirm(true);
+        setIsPassword(true);
       } else {
         setPasswordConfirmError("비밀번호를 다시 확인해 주세요.");
+        setPasswordError("");
         setIsPasswordConfirm(false);
       }
     },
     [password]
   );
 
+  // 패스워드 보기 버튼이 눌릴때마다 동작
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
+  const handleClickShowPasswordConfirm = () => {
+    setShowPasswordConfirm(!showPasswordConfirm);
+  };
+
+  const handleMouseDownPasswordConfirm = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
+
   // 닉네임 중복확인
   const nickNameCheck = (e: any) => {
     e.preventDefault();
-    fetch("보낼주소넣기", {
+    fetch("http://localhost:8080/users/nickname", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ nickName: nickName }),
+      body: JSON.stringify({ nickname: nickName }),
     }).then((response) => {
       if (response.status === 200) {
         alert("사용가능한 닉네임입니다.");
@@ -159,7 +235,7 @@ const Signup = () => {
   // 이메일 중복확인
   const emailCheck = (e: any) => {
     e.preventDefault();
-    fetch("보낼주소넣기", {
+    fetch("http://localhost:8080/users/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -168,7 +244,7 @@ const Signup = () => {
     }).then((response) => {
       if (response.status === 200) {
         alert("사용가능한 이메일입니다.");
-        setUsableNickName(true);
+        setUsableEmail(true);
       } else if (response.status === 409) {
         alert("이미 가입된 이메일입니다.");
       } else {
@@ -178,87 +254,295 @@ const Signup = () => {
   };
 
   return (
-    <>
-      <h1>회원 가입</h1>
+    <Container>
+      <Wrapper>
+     <ThemeProvider theme={themeA306}>
+      <SignupForm>
+      <SignupHead>회원 가입</SignupHead>
 
-      <p>이미 Brand 회원이신가요? 로그인</p>
+<SignupMsg>이미 Brand 회원이신가요? 
+  <LinkLogin to="/login"> 로그인</LinkLogin>
+  </SignupMsg>
 
-      <form onSubmit={onSubmit}>
-        <div>
-          <TextField
-            required
-            id="nickName"
-            label="Nick Name"
-            placeholder="닉네임을 입력해주세요."
-            variant="standard"
-            onChange={onChangeNickName}
-          />
-          <button onClick={nickNameCheck}>닉네임 중복체크</button>
-          {nickName.length > 0 && (
+<SignupInput>
+<FormControl variant="standard" fullWidth>
+  <InputLabel htmlFor="component-helper" shrink>Nick Name</InputLabel>
+    <Input
+      id="component-helper-nickname"
+      placeholder="닉네임을 입력해 주세요."
+      onChange={onChangeNickName}
+      aria-describedby="component-helper-text"
+    />
+  </FormControl>
+  <NickNameButton onClick={nickNameCheck}>닉네임 중복체크</NickNameButton>
+  {nickName.length > 0 && (
             <div className={`${isNickName ? "success" : "error"}`}>
               {nickNameError}
             </div>
           )}
-        </div>
-
-        <div>
-          <TextField
-            required
-            id="email"
-            label="Email"
-            placeholder="이메일을 입력해주세요."
-            variant="standard"
-            onChange={onChangeEmail}
-          />
-          <button onClick={emailCheck}>이메일 중복체크</button>
-          {email.length > 0 && (
+</SignupInput>
+<SignupInput>
+<FormControl variant="standard" fullWidth>
+  <InputLabel htmlFor="component-helper" shrink>Email</InputLabel>
+    <Input
+      id="component-helper-email"
+      placeholder="이메일을 입력해 주세요."
+      onChange={onChangeEmail}
+      aria-describedby="component-helper-text"
+    />
+  </FormControl>
+  <EmailButton onClick={emailCheck}>이메일 중복체크</EmailButton>
+  {email.length > 0 && (
             <div className={`${isEmail ? "success" : "error"}`}>
               {emailError}
             </div>
           )}
-        </div>
-        <div>
-          <TextField
-            required
-            id="password"
-            label="Password"
-            type="password"
-            placeholder="비밀번호를 입력해주세요."
-            variant="standard"
-            onChange={onChangePassword}
-          />
-          {password.length > 0 && (
-            <div className={`${isPassword ? "success" : "error"}`}>
-              {passwordError}
-            </div>
-          )}
-        </div>
+</SignupInput>
 
-        <div>
-          <TextField
-            required
-            id="passwordConfirm"
-            label="Password Confirmation"
-            type="password"
-            placeholder="비밀번호를 다시 입력해주세요."
-            variant="standard"
-            onChange={onChangePasswordConfirm}
-          />
-          {passwordConfirm.length > 0 && (
+<SignupInput>
+    <FormControl variant="standard" fullWidth>
+      <InputLabel htmlFor="standard-adornment-password" shrink>
+        Password
+      </InputLabel>
+      <Input
+        id="standard-adornment-password"
+        type={showPassword ? 'text' : 'password'}
+        value={password}
+        placeholder="비밀번호를 입력해 주세요."
+        onChange={onChangePassword}
+        required
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={handleClickShowPassword}
+              onMouseDown={handleMouseDownPassword}
+            >
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        }
+      />
+    </FormControl>
+    {password.length > 0 && (
+      <div className={`${isPassword ? "success" : "error"}`}>
+        {passwordError}
+      </div>
+    )}
+    
+  </SignupInput>
+
+  <SignupInput>
+    <FormControl variant="standard" fullWidth>
+      <InputLabel htmlFor="standard-adornment-passwordConfirm" shrink>
+        Password Confirmation
+      </InputLabel>
+      <Input
+        id="standard-adornment-passwordConfirm"
+        type={showPasswordConfirm ? 'text' : 'password'}
+        value={passwordConfirm}
+        placeholder="비밀번호를 다시 입력해 주세요."
+        onChange={onChangePasswordConfirm}
+        required
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={handleClickShowPasswordConfirm}
+              onMouseDown={handleMouseDownPasswordConfirm}
+            >
+              {showPasswordConfirm ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        }
+      />
+    </FormControl>
+    {passwordConfirm.length > 0 && (
             <div
               className={`${isPasswordConfirm ? "success" : "error"}`}
             >
               {passwordConfirmError}
             </div>
           )}
-        </div>
+  </SignupInput>
+<SignupInput onClick={onSignUp}>
+  <Button type="submit" variant="contained" size="medium" fullWidth
+  // && usableNickName && usableEmail 추가하기
+  disabled={!(isNickName && isEmail && isPassword && isPasswordConfirm)}>
+    회원 가입
+  </Button>
+  </SignupInput>
 
-        <button type="submit"
-        disabled={!(isNickName && isEmail && isPassword && isPasswordConfirm)}>회원 가입</button>
-        <p>* 등록하신 이메일을 확인하세요. 인증을 위한 메일이 전송됩니다.</p>
-      </form>
-    </>
+
+      </SignupForm>
+
+     </ThemeProvider>
+      </Wrapper>
+    </Container>
   );
 };
+
+const Container = styled.div`
+  // position: sticky;
+  // align-self: center;
+  // top: 0;
+  // left: 0;
+  // height: 60px;
+  // width: 100%;
+  // // padding:150px 0;
+  // background-color: #D7D7D7;
+`;
+
+const Wrapper = styled.div`
+	display: flex;
+	// align-items: center;
+	// text-align: center;
+	// background-color: #D7D7D7;
+	justify-content: center;
+	// z-index: 5;
+`;
+
+const SignupHead = styled.h1`
+	color: #000000;
+  margin: 40px;
+`;
+
+const SignupMsg = styled.h5`
+	color: #000000;
+  margin: 40px;
+  font-size: 16px
+`;
+
+const SignupForm = styled.div`
+  // display: flex;
+  // flex-direction: column;
+	// align-items: right;
+	width: 500px;
+	display: inline-block;
+	// position: absolute;
+	
+`;
+
+const SignupInput = styled.div`
+  // display: flex;
+  // flex-direction: column;
+	// width: 500px;
+	// text-align: center;
+	// align-items: center;
+  margin: 15px 0px;
+`;
+
+const SignupButton = styled.button`
+  height: 40px;
+  margin-bottom: 24px;
+  border: none;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  background-color: #3396f4;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.08s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: #2878c3;
+  }
+  @media (max-width: 575px) {
+    font-size: 15px;
+  }
+`;
+
+const NickNameButton = styled.button`
+height: 40px;
+margin-bottom: 24px;
+  border: none;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  background-color: #3396f4;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.08s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: #2878c3;
+  }
+  @media (max-width: 100px) {
+    font-size: 15px;
+  }
+`
+const EmailButton = styled.button`
+height: 40px;
+margin-bottom: 24px;
+  border: none;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  background-color: #3396f4;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.08s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: #2878c3;
+  }
+  @media (max-width: 100px) {
+    font-size: 15px;
+  }
+`
+
+const LinkFindPassword = styled(Link)`
+  // position: absolute;
+  display: block;
+	text-decoration: none;
+  margin: 10px;
+  // padding: 4px 8px;
+  font-size: 13px;
+  // font-weight: 500;
+  // line-height: 1.6;
+  color: #769FCD;
+  // transition: color 0.08s ease-in-out;
+
+  // &:hover {
+  //   color: #fff;
+  // }
+
+  
+  // display: block;
+  // margin: auto;
+  // margin-bottom: 8px;
+  // padding: 12px;
+  // color: #000000;
+  // text-decoration: none;
+  // font-size: 16px;
+  // // align-self: center;
+  // font-weight: 600;
+
+  // &:hover {
+  //   color: #000000;
+  // }
+`;
+
+const LoginMsg = styled.div`
+	text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  
+`;
+
+const LinkLogin = styled(Link)`
+	text-decoration: none;
+  color: #39A2DB;
+`;
+
+// const LoginInput = styled.div`
+//   // display: flex;
+//   // flex-direction: column;
+// 	width: 500px;
+// 	// text-align: center;
+// 	// align-items: center;
+// `;
+
+
 
 export default Signup;

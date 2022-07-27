@@ -5,10 +5,12 @@ import './App.css';
 // import Routes from 'react-router-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
 import Router from './router/Router';
 import Header from './components/common/Header';
+import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
 
 
@@ -19,8 +21,10 @@ const App = () => {
       <div>
         <BrowserRouter>
           <Header />
-          
-          <Router />
+            <Main>
+              <Router />
+            </Main>
+          <Footer />
         </BrowserRouter>
       </div>
     </div>
@@ -58,3 +62,7 @@ const App = () => {
 export default App;
 
 
+const Main = styled.main`
+  min-height: calc(100vh - 80px);
+  padding-top: 60px;
+`;

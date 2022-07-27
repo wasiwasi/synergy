@@ -1,6 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+
 import Header from "../components/common/Header";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
@@ -26,3 +29,10 @@ const Router = () => {
 };
 
 export default Router;
+
+
+
+
+const Main = styled.main`
+  min - height: calc(100vh - 180px);
+`;
