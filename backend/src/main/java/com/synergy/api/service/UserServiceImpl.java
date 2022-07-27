@@ -38,4 +38,10 @@ public class UserServiceImpl implements UserService {
 		User user = userRepositorySupport.findUserByUserId(userId).get();
 		return user;
 	}
+
+	@Override
+	public User getUserByEmail(String email) {
+		User user = userRepository.findByEmail(email).get();
+		return user;
+	}
 }
