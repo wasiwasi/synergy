@@ -1,5 +1,6 @@
 package com.synergy.api.service;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.common.util.RedisUtil;
 import com.synergy.db.entity.RedisUserAuth;
 import org.springframework.beans.factory.annotation.Autowired;
