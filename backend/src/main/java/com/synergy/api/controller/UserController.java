@@ -1,5 +1,6 @@
 package com.synergy.api.controller;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.api.service.MailService;
 import com.synergy.common.util.RedisUtil;
 import com.synergy.db.entity.UserEmailForm;
@@ -108,7 +109,7 @@ public class UserController {
 		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 닉네임"));
 	}
 
-	@GetMapping("/email-auth")
+	@PostMapping("/email-auth")
 	@ApiOperation(value = "이메일 본인 인증", notes = "넘어온 코드가 일치하는지 확인 확인한다.")
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "본인 인증이 완료되었습니다."),
@@ -117,12 +118,11 @@ public class UserController {
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
 	public ResponseEntity<? extends BaseResponseBody> authorizeUser(
-			@RequestParam("id") String id,
-			@RequestParam("code") String code){
+			@RequestBody EmailAuthPostReq emailAuthPostReq){
 
 		//Redis 조회한 후 코드일치하는지 확인
 		try {
-			if (userService.authorizeUser(id, code)) {
+			if (userService.authorizeUser(emailAuthPostReq)) {
 				return ResponseEntity.status(200).body(BaseResponseBody.of(200, "본인 인증이 완료되었습니다."));
 			} else {
 				return ResponseEntity.status(404).body(BaseResponseBody.of(401, "인증코드가 일치하지 않습니다."));
