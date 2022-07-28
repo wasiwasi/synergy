@@ -134,8 +134,10 @@ dependencies {
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
-    // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //mail smtp
+    implementation('org.springframework.boot:spring-boot-starter-mail')
+    //redis
+    implementation('org.springframework.boot:spring-boot-starter-data-redis')
 }
 
 test {

@@ -24,12 +24,14 @@ public class RedisConfig {
     public CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory){
         RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
-                .entryTtl(Duration.ofSeconds(60)) // TODO: 60은 테스트용임! 테스트 후 수정
+                .entryTtl(Duration.ofSeconds(600))
                 .computePrefixWith(CacheKeyPrefix.simple())
                 .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer
-                        (new GenericJackson2JsonRedisSerializer()));
+                        RedisSerializationContext.SerializationPair
+                                .fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext
+                        .SerializationPair
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
 
         return RedisCacheManager.RedisCacheManagerBuilder
