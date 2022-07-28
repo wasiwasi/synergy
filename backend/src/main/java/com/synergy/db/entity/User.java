@@ -4,14 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import org.checkerframework.common.aliasing.qual.Unique;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * 유저 모델 정의.
@@ -22,17 +17,21 @@ import javax.persistence.Id;
 public class User{
 
     @Id
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id = null;
 
-    String userId;
+    @Column(nullable = false)
     String email;
+    @Column(nullable = false)
     String nickname;
+    String refresh_token;
+
+    @Column(nullable = false, columnDefinition = "boolean default False")
+    boolean auth_status = false;
 
     @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(nullable = false)
     String password;
-
-    // 본인 인증이 완료되었는지 여부
-    Boolean auth_status;
 }
