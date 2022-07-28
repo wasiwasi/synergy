@@ -37,12 +37,12 @@ public class MailService {
         String subject = "Synergy 본인 인증 확인 메일입니다.";
         StringBuilder text = new StringBuilder();
         text
-                .append("<p>Synergy 본인 인증 확인 메일입니다.</p><p>아래 링크를 클릭하셔서 가입 인증을 완료하세요.</p>")
-                .append("<div><a href='http://localhost:8080/users/email-auth?id=")
-                .append(userEmailForm.getUserId())
-                .append("&code=")
-                .append(userEmailForm.getAuthCode())
-                .append("'>가입 완료</a></div>");
+        .append("<p>Synergy 본인 인증 확인 메일입니다.</p><p>아래 링크를 클릭하셔서 가입 인증을 완료하세요.</p>")
+        .append("<div><a href='http://localhost:8080/users/email-auth?id=")
+        .append(userEmailForm.getUserId())
+        .append("&code=")
+        .append(userEmailForm.getAuthCode())
+        .append("'>가입 완료</a></div>");
         sendMail(email, subject, text.toString());
     }
 }
