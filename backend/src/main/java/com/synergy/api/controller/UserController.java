@@ -47,11 +47,19 @@ public class UserController {
 	@ApiResponses({
 			@ApiResponse(code = 201, message = "Created"),
 			@ApiResponse(code = 400, message = "잠시 후 다시 시도해주세요."),
+			@ApiResponse(code = 409, message = "이미 가입된 이메일입니다."),
+			@ApiResponse(code = 409, message = "이미 가입된 닉네임입니다."),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
 	public ResponseEntity<? extends BaseResponseBody> register(
 			@RequestBody @ApiParam(value="회원가입 정보", required = true) UserRegisterPostReq registerInfo) {
 
+		//중복 가입 체크
+		if(userService.isExistEmail(registerInfo.getEmail())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 이메일입니다."));
+		} else if (userService.isExistNickname(registerInfo.getNickname())) {
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 닉네임입니다."));
+		}
 		//임의로 리턴된 User 인스턴스. 현재 코드는 회원 가입 성공 여부만 판단하기 때문에 굳이 Insert 된 유저 정보를 응답하지 않음.
 		User user = userService.createUser(registerInfo);
 
