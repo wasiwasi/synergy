@@ -11,6 +11,7 @@ import Mypage from "../pages/Mypage";
 import CreateChannel from "../pages/CreateChannel";
 import GameChannel from "../pages/GameChannel";
 import HomePage from "../pages/HomePage";
+import EmailAUth from "../pages/EmailAuth";
 
 const Router = () => {
   // const HomePage: React.FC = () => {
@@ -20,6 +21,7 @@ const Router = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/EmailAuth" element={<EmailAUth />} />
         <Route path="/users/mypage" element={<Mypage />} />
         <Route path="/channel/createchannel" element={<CreateChannel />} />
         <Route path="/channel/gamechannel" element={<GameChannel />} />
