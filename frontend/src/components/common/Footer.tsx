@@ -6,7 +6,11 @@ import { Link, Route, BrowserRouter } from "react-router-dom";
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-
+import GitHubIcon from '@mui/icons-material/GitHub';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import TwitterIcon from '@mui/icons-material/Twitter';
 
 const Footer = () => {
   return (
@@ -24,12 +28,34 @@ const Footer = () => {
           </Brand>
         </BrandWrapper>
         <Line></Line>
-        <HeadMsg>문의 및 고객센터</HeadMsg>
-        <ServiceMsg>
-          1:1 라이브챗<br />
-          Email: A306@gmail.com<br />
-          운영 시간 : 오전 9시 ~ 오후 6시 (주말 및 공휴일 휴무)
-        </ServiceMsg>
+        <ServiceWrapper>
+          <ServiceMsg>
+            <HeadMsg>문의 및 고객센터</HeadMsg>
+            1:1 라이브챗<br />
+            Email: A306@gmail.com<br />
+            운영 시간 : 오전 9시 ~ 오후 6시 (주말 및 공휴일 휴무)
+          </ServiceMsg>
+          <SnsWrapper>
+            <SnsIcon>
+              <GitHubIcon></GitHubIcon>
+            </SnsIcon>
+            <SnsIcon
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <YouTubeIcon></YouTubeIcon>
+            </SnsIcon>
+            <SnsIcon
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer">
+              <InstagramIcon></InstagramIcon>
+            </SnsIcon>
+            <TwitterIcon></TwitterIcon>
+          </SnsWrapper>
+
+        </ServiceWrapper>
       </Wrapper>
     </Container>
   )
@@ -125,16 +151,50 @@ const Line = styled.div`
 
 const HeadMsg = styled.div`
   // border-bottom: 1px solid;
-  margin: 0px 25px;
+  // margin: 0px 25px;
   text-align: left;
   font-size: 17px;
   font-weight: 700;
 `
+
+const ServiceWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
 const ServiceMsg = styled.div`
   // border-bottom: 1px solid;
   margin: 5px 25px;
   text-align: left;
   font-size: 14px;
 `
+
+const SnsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 5px 25px;
+`;
+
+const SnsIcon = styled.a`
+  margin-left: 10px;
+  color: #000;
+  
+  &:first-of-type {
+    margin-left: 0;
+  }
+  &:hover {
+    color: #000;
+  }
+`
+
+const SnsIcon2 = css`
+  font-size: 26px;
+  color: #98a8b9;
+  transition: color 0.08s ease-in-out;
+  &:hover {
+    color: #3396f4;
+  }
+`;
+
 
 export default Footer

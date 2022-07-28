@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 
+import { useState, useCallback } from "react";
+
 import Header from '../components/common/Header';
 import { Link, Outlet } from 'react-router-dom';
 
@@ -26,6 +28,10 @@ import Button from '@mui/material/Button';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+
+
+
+
 axios.defaults.baseURL = "https://www.abc.com";
 axios.defaults.withCredentials = true;
 
@@ -48,34 +54,22 @@ const themeA306 = createTheme({
 
 interface State {
   amount: string;
+  email: string;
   password: string;
   weight: string;
   weightRange: string;
   showPassword: boolean;
 }
 
-// const onLogin = (string: amount, password) => {
-// 	const data = {
-// 		amount,
-// 		password,
-// 	};
-// 	axios.post('/login', data).then(response => {
-// 		const { accessToken } = response.data;
 
-// 		// API 요청하는 콜마다 헤더에 accessToken 담아 보내도록 설정
-// 		axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-// 		// accessToken을 localStorage, cookie 등에 저장하지 않는다!
 
-// 	}).catch(error => {
-// 		// ... 에러 처리
-// 	});
-// }
 
 const Login = () => {
 
 	const [values, setValues] = React.useState<State>({
     amount: '',
+    email: '',
     password: '',
     weight: '',
     weightRange: '',
@@ -85,12 +79,70 @@ const Login = () => {
 
 
 // const HomePage: React.FC = () => {
-	const [name, setName] = React.useState('Composed TextField');
+  const [name, setName] = React.useState('Composed TextField');
+  
+  // // 회원가입 버튼 클릭
+  // const onSubmit = useCallback(
+  //   async (e: React.FormEvent<HTMLFormElement>) => {
+  //     e.preventDefault();
+  //     try {
+  //       await axios
+  //         .post(
+  //           "https://localhost:8080/auth/login",
+  //           {
+  //             email: values.email,
+  //             password: values.password,
+  //           }
+  //         )
+  //         .then((res: any) => {
+  //           console.log("response:", res);
+  //           if (res.status === 200) {
+  //             console.log(res.status);
+  //             alert('이메일 인증 완료 후 로그인 해주세요 :)')
+  //             // 로그인 페이지로 리다이렉트 코드 넣어야함!
+  //             // router.push("/sign_up/profile_start");
+  //           }
+  //         });
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   },
+  //   [values.email, values.password]
+  // );
+  const onLogin = () => {
+    axios.post('http://192.168.0.54:5000/auth/login',
+    {
+      email: values.email,
+      password: values.password,
+    }
+    ).then(response => {
+      const { accessToken } = response.data;
+  
+      // API 요청하는 콜마다 헤더에 accessToken 담아 보내도록 설정
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+  
+      // accessToken을 localStorage, cookie 등에 저장하지 않는다!
+  
+    }).catch(error => {
+      // ... 에러 처리
+    });
+  }
+
 
 	// 텍스트 필드가 바뀔때 마다 동작
   const handleChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setName(event.target.value);
-		console.log(event.target.value);
+    setValues({
+      ...values,
+      email: event.target.value,
+		});
+  };
+  
+  // 텍스트 필드가 바뀔때 마다 동작
+  const handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValues({
+      ...values,
+      password: event.target.value,
+		});
 	};
 
   const handleChange =
@@ -104,6 +156,11 @@ const Login = () => {
       ...values,
       showPassword: !values.showPassword,
 		});
+  };
+
+  const login = () => {
+    console.log(values.password)
+    console.log(values.email)
   };
 
   const handleMouseDownPassword = (
@@ -142,7 +199,7 @@ const Login = () => {
 									type={values.showPassword ? 'text' : 'password'}
 									value={values.password}
 									placeholder="비밀번호를 입력해 주세요."
-									onChange={handleChange('password')}
+									onChange={handleChangePassword}
 									required
 									endAdornment={
 										<InputAdornment position="end">
@@ -160,19 +217,15 @@ const Login = () => {
 						</LoginInput>
 						
 							<LoginInput>
-							<Button variant="contained" size="medium" fullWidth>
+							<Button variant="contained" size="medium" fullWidth onClick={onLogin}>
 								Login
 							</Button>
 							</LoginInput>
-
 						<LinkFindPassword to="/signup">비밀번호를 잊으셨나요?</LinkFindPassword>
 						<SignupMsg>
 							계정이 없으신가요?
 							<LinkSignup to="/signup"> 가입하기</LinkSignup>
 						</SignupMsg>
-
-						
-
 
 
 						</LoginForm>
@@ -281,22 +334,26 @@ const LinkFindPassword = styled(Link)`
   // // align-self: center;
   // font-weight: 600;
 
-  // &:hover {
-  //   color: #000000;
-  // }
+  &:hover {
+    color: #769FCD;
+  }
 `;
 
 const SignupMsg = styled.div`
 	text-decoration: none;
   font-size: 14px;
   font-weight: bold;
-  
 `;
 
 const LinkSignup = styled(Link)`
 	text-decoration: none;
   color: #39A2DB;
+  
+  &:hover {
+    color: #39A2DB;
+  }
 `;
+
 
 // const LoginInput = styled.div`
 //   // display: flex;
