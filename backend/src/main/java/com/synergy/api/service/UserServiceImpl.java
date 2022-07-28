@@ -1,5 +1,6 @@
 package com.synergy.api.service;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.common.util.RedisUtil;
 import com.synergy.db.entity.RedisUserAuth;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +71,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean authorizeUser(String id, String code) {
+	public boolean authorizeUser(EmailAuthPostReq emailAuthPostReq) {
 
-		User user = userRepository.findById(Long.valueOf(id)).get();
-		RedisUserAuth userAuth =  redisUtil.getUserAuth(id);
+		User user = userRepository.findById(Long.valueOf(emailAuthPostReq.getId())).get();
+		RedisUserAuth userAuth =  redisUtil.getUserAuth(emailAuthPostReq.getId());
 		// 저장된 코드와 링크에서 얻어온 코드 확인
-		if (userAuth.getAuthCode().equals(code)) {
+		if (userAuth.getAuthCode().equals(emailAuthPostReq.getCode())) {
 			user.setAuth_status(true);
 			userRepository.save(user);
 			return true;

@@ -1,5 +1,6 @@
 package com.synergy.api.service;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.api.request.UserRegisterPostReq;
 import com.synergy.db.entity.User;
 
@@ -12,5 +13,5 @@ public interface UserService {
 	User getUserByEmail(String email); // 로그인 위해 추가
 	boolean isExistEmail(String email);
 	boolean isExistNickname(String nickname);
-	boolean authorizeUser(String id, String code);
+	boolean authorizeUser(EmailAuthPostReq emailAuthPostReq);
 }
