@@ -15,4 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long userId);
     int countByEmail(String email);
     int countByNickname(String nickname);
+    Optional<User> findByEmail(String email); // 로그인 위해 추가
 }
