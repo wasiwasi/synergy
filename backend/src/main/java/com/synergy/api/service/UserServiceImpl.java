@@ -46,6 +46,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User getUserByEmail(String email) { // 로그인 위해 추가
+		User user = userRepository.findByEmail(email).get();
+		return user;
+	}
+
+	@Override
 	public boolean isExistEmail(String email) {
 		if(userRepository.countByEmail(email) > 0) {
 			return true;
