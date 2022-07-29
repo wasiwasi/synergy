@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -91,6 +92,7 @@ public class ChannelServiceImpl implements ChannelService{
 
     }
 
+    //채널 목록에서 삭제하기.
     @Override
     public void removeChannel(String channelId) {
         channelList.remove(channelId);
@@ -156,6 +158,7 @@ public class ChannelServiceImpl implements ChannelService{
         else return false;//중복이 아니면 거짓
     }
 
+    //팀원이 떠나는 경우.
     @Override
     public void leaveChannel(String channelId, String nickName) {
         Channel channel = channelList.get(channelId);
@@ -170,6 +173,7 @@ public class ChannelServiceImpl implements ChannelService{
         }
     }
 
+    //채널에서 영구 삭제 -> 방장이 떠났을경우
     @Override
     public void deleteChannel(String channelId, String nickName) {
         Channel channel = channelList.get(channelId);
@@ -206,5 +210,26 @@ public class ChannelServiceImpl implements ChannelService{
                     channel.findAllParticipant());
             return channelInfoReq;
         }
+    }
+    public String generateRandomChannelId(){
+        StringBuffer channelId = new StringBuffer();
+        Random random = new Random();
+
+        channelId.append((char)((int)(random.nextInt(26))+65));
+        channelId.append((char)((int)(random.nextInt(26))+65));
+        channelId.append(random.nextInt(10));
+        channelId.append(random.nextInt(10));
+        channelId.append(random.nextInt(10));
+        channelId.append(random.nextInt(10));
+        return channelId.toString();
+    }
+
+    @Override
+    public String getRandomChannelId() {
+        String channelId = this.generateRandomChannelId();
+        while (channelList.containsKey(channelId)){
+            channelId=this.generateRandomChannelId();
+        }
+        return channelId;
     }
 }

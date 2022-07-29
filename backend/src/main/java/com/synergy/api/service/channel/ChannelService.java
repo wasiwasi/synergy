@@ -29,4 +29,5 @@ public interface ChannelService {
     ChannelInfoReq getChannelInfo(String channelId);
 
 
+    String getRandomChannelId();
 }
