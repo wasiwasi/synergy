@@ -279,8 +279,9 @@ const Signup = () => {
                 <Input
                   id="component-helper-nickname"
                   placeholder="닉네임을 입력해 주세요."
-                  value={nickName}
+                  // value={nickName}
                   onChange={onChangeNickName}
+                  required
                   aria-describedby="component-helper-text"
                 />
               </FormControl>
@@ -302,8 +303,9 @@ const Signup = () => {
                 <Input
                   id="component-helper-email"
                   placeholder="이메일을 입력해 주세요."
-                  value={email}
+                  // value={email}
                   onChange={onChangeEmail}
+                  required
                   aria-describedby="component-helper-text"
                 />
               </FormControl>
@@ -323,7 +325,7 @@ const Signup = () => {
                 <Input
                   id="standard-adornment-password"
                   type={showPassword ? "text" : "password"}
-                  value={password}
+                  // value={password}
                   placeholder="비밀번호를 입력해 주세요."
                   onChange={onChangePassword}
                   required
@@ -355,7 +357,7 @@ const Signup = () => {
                 <Input
                   id="standard-adornment-passwordConfirm"
                   type={showPasswordConfirm ? "text" : "password"}
-                  value={passwordConfirm}
+                  // value={passwordConfirm}
                   placeholder="비밀번호를 다시 입력해 주세요."
                   onChange={onChangePasswordConfirm}
                   required
