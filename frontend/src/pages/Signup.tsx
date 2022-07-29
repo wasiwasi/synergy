@@ -220,7 +220,7 @@ const Signup = () => {
   // 닉네임 중복확인
   const nickNameCheck = (e: any) => {
     e.preventDefault();
-    if (nickName.length >= 6 && nickName.length <= 12) {
+    if (isNickName) {
       axios
         .post("http://i7a306.p.ssafy.io:8080/users/nickname", {
           nickname: nickName,
@@ -235,7 +235,7 @@ const Signup = () => {
           alert("중복된 닉네임입니다.");
         });
     } else {
-      alert("6~12자의 닉네임만 사용 가능합니다.");
+      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
     }
   };
 
