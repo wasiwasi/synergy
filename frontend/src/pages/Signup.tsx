@@ -76,7 +76,7 @@ const Signup = () => {
   const onSignUp = () => {
     axios
       .post(
-        "http://i7a306.p.ssafy.io:8080/users/signup",
+        "https://i7a306.p.ssafy.io:8080/users/signup",
 
         {
           email: email,
@@ -222,7 +222,7 @@ const Signup = () => {
     e.preventDefault();
     if (isNickName) {
       axios
-        .post("http://i7a306.p.ssafy.io:8080/users/nickname", {
+        .post("https://i7a306.p.ssafy.io:8080/users/nickname", {
           nickname: nickName,
         })
         .then((response) => {
@@ -244,7 +244,7 @@ const Signup = () => {
     e.preventDefault();
     if (isEmail) {
       axios
-        .post("http://i7a306.p.ssafy.io:8080/users/email", { email: email })
+        .post("https://i7a306.p.ssafy.io:8080/users/email", { email: email })
         .then((response) => {
           {
             alert("사용가능한 이메일입니다.");
