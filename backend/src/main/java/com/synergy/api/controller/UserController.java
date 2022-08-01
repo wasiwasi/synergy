@@ -1,13 +1,13 @@
 package com.synergy.api.controller;
 
+import com.synergy.api.request.EmailAuthPostReq;
+import com.synergy.api.service.MailService;
+import com.synergy.common.util.RedisUtil;
+import com.synergy.db.entity.UserEmailForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.synergy.api.request.UserRegisterPostReq;
 import com.synergy.api.response.UserRes;
@@ -23,6 +23,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.NoSuchElementException;
+
 /**
  * 유저 관련 API 요청 처리를 위한 컨트롤러 정의.
  */
@@ -34,21 +36,37 @@ public class UserController {
 	@Autowired
 	UserService userService;
 
+	@Autowired
+	MailService mailService;
+
+	@Autowired
+	RedisUtil redisUtil;
+
 	@PostMapping("/signup")
 	@ApiOperation(value = "회원 가입", notes = "<strong>아이디와 패스워드</strong>를 통해 회원가입 한다.")
 	@ApiResponses({
-			@ApiResponse(code = 200, message = "성공"),
-			@ApiResponse(code = 401, message = "인증 실패"),
-			@ApiResponse(code = 404, message = "사용자 없음"),
+			@ApiResponse(code = 201, message = "Created"),
+			@ApiResponse(code = 400, message = "잠시 후 다시 시도해주세요."),
+			@ApiResponse(code = 409, message = "이미 가입된 이메일입니다."),
+			@ApiResponse(code = 409, message = "이미 가입된 닉네임입니다."),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
 	public ResponseEntity<? extends BaseResponseBody> register(
 			@RequestBody @ApiParam(value="회원가입 정보", required = true) UserRegisterPostReq registerInfo) {
 
+		//중복 가입 체크
+		if(userService.isExistEmail(registerInfo.getEmail())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 이메일입니다."));
+		} else if (userService.isExistNickname(registerInfo.getNickname())) {
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 닉네임입니다."));
+		}
 		//임의로 리턴된 User 인스턴스. 현재 코드는 회원 가입 성공 여부만 판단하기 때문에 굳이 Insert 된 유저 정보를 응답하지 않음.
 		User user = userService.createUser(registerInfo);
 
-		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "Success"));
+		UserEmailForm userEmailForm = new UserEmailForm(user.getId(), user.getEmail(), redisUtil.makeUUID(user.getId()));
+		mailService.sendAuthEmail(userEmailForm);
+
+		return ResponseEntity.status(201).body(BaseResponseBody.of(201, "Created"));
 	}
 
 	@GetMapping("")
@@ -70,4 +88,57 @@ public class UserController {
 
 		return ResponseEntity.status(200).body(UserRes.of(user));
 	}
+
+	@PostMapping("/email")
+	@ApiOperation(value = "이메일 중복 검사", notes = "이미 가입된 이메일인지 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "사용 가능한 이메일"),
+			@ApiResponse(code = 409, message = "중복된 이메일"),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> isEmailExist(@RequestBody User user){
+		if(userService.isExistEmail(user.getEmail())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 이메일"));
+		}
+		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 이메일"));
+	}
+
+	@PostMapping("/nickname")
+	@ApiOperation(value = "닉네임 중복 검사", notes = "이미 등록된 닉네임인지 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "사용 가능한 닉네임"),
+			@ApiResponse(code = 409, message = "중복된 닉네임"),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> isNicknameExist(@RequestBody User user){
+		if(userService.isExistNickname(user.getNickname())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 닉네임"));
+		}
+		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 닉네임"));
+	}
+
+	@PostMapping("/email-auth")
+	@ApiOperation(value = "이메일 본인 인증", notes = "넘어온 코드가 일치하는지 확인 확인한다.")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "본인 인증이 완료되었습니다."),
+			@ApiResponse(code = 401, message = "인증코드가 일치하지 않습니다."),
+			@ApiResponse(code = 404, message = "만료된 요청입니다."),
+			@ApiResponse(code = 500, message = "서버 오류")
+	})
+	public ResponseEntity<? extends BaseResponseBody> authorizeUser(
+			@RequestBody EmailAuthPostReq emailAuthPostReq){
+
+		//Redis 조회한 후 코드일치하는지 확인
+		try {
+			if (userService.authorizeUser(emailAuthPostReq)) {
+				return ResponseEntity.status(200).body(BaseResponseBody.of(200, "본인 인증이 완료되었습니다."));
+			} else {
+				return ResponseEntity.status(404).body(BaseResponseBody.of(401, "인증코드가 일치하지 않습니다."));
+			}
+		} catch(NoSuchElementException e) {
+			return ResponseEntity.status(404).body(BaseResponseBody.of(404, "만료된 요청입니다."));
+		}
+
+	}
+
 }
