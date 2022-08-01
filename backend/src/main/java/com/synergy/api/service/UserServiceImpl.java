@@ -1,5 +1,6 @@
 package com.synergy.api.service;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.common.util.RedisUtil;
 import com.synergy.db.entity.RedisUserAuth;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User createUser(UserRegisterPostReq userRegisterInfo) {
 		User user = new User();
-		user.setEmail(userRegisterInfo.getEmail());
+		user.setUserId(userRegisterInfo.getId());
 		// 보안을 위해서 유저 패스워드 암호화 하여 디비에 저장.
 		user.setPassword(passwordEncoder.encode(userRegisterInfo.getPassword()));
-		user.setNickname(userRegisterInfo.getNickname());
 		return userRepository.save(user);
 	}
 
@@ -42,6 +42,12 @@ public class UserServiceImpl implements UserService {
 	public User getUserByUserId(String userId) {
 		// 디비에 유저 정보 조회 (userId 를 통한 조회).
 		User user = userRepositorySupport.findUserByUserId(userId).get();
+		return user;
+	}
+
+	@Override
+	public User getUserByEmail(String email) { // 로그인 위해 추가
+		User user = userRepository.findByEmail(email).get();
 		return user;
 	}
 
@@ -64,12 +70,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean authorizeUser(String id, String code) {
+	public boolean authorizeUser(EmailAuthPostReq emailAuthPostReq) {
 
-		User user = userRepository.findById(Long.valueOf(id)).get();
-		RedisUserAuth userAuth =  redisUtil.getUserAuth(id);
+		User user = userRepository.findById(Long.valueOf(emailAuthPostReq.getId())).get();
+		RedisUserAuth userAuth =  redisUtil.getUserAuth(emailAuthPostReq.getId());
 		// 저장된 코드와 링크에서 얻어온 코드 확인
-		if (userAuth.getAuthCode().equals(code)) {
+		if (userAuth.getAuthCode().equals(emailAuthPostReq.getCode())) {
 			user.setAuth_status(true);
 			userRepository.save(user);
 			return true;
