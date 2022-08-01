@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { css } from '@emotion/react';
-import styled from '@emotion/styled';
+import { css } from "@emotion/react";
+import styled from "@emotion/styled";
 
 import Header from "../components/common/Header";
 import Login from "../pages/Login";
@@ -16,25 +16,21 @@ import EmailAUth from "../pages/EmailAuth";
 const Router = () => {
   // const HomePage: React.FC = () => {
   return (
-
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/EmailAuth" element={<EmailAUth />} />
-        <Route path="/users/mypage" element={<Mypage />} />
-        <Route path="/channel/createchannel" element={<CreateChannel />} />
-        <Route path="/channel/gamechannel" element={<GameChannel />} />
-      </Routes>
-
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/EmailAuth" element={<EmailAUth />} />
+      <Route path="/users/mypage" element={<Mypage />} />
+      <Route path="/channel/createchannel" element={<CreateChannel />} />
+      <Route path="/channel/gamechannel" element={<GameChannel />} />
+    </Routes>
   );
 };
 
 export default Router;
 
-
-
-
 const Main = styled.main`
   min - height: calc(100vh - 180px);
+
 `;
