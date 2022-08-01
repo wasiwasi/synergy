@@ -1,6 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+
 import Header from "../components/common/Header";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
@@ -8,7 +11,7 @@ import Mypage from "../pages/Mypage";
 import CreateChannel from "../pages/CreateChannel";
 import GameChannel from "../pages/GameChannel";
 import HomePage from "../pages/HomePage";
-import EmailAuth from "../pages/EmailAuth";
+import EmailAUth from "../pages/EmailAuth";
 
 const Router = () => {
   // const HomePage: React.FC = () => {
@@ -18,7 +21,7 @@ const Router = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/emailauth" element={<EmailAuth />} />
+        <Route path="/EmailAuth" element={<EmailAUth />} />
         <Route path="/users/mypage" element={<Mypage />} />
         <Route path="/channel/createchannel" element={<CreateChannel />} />
         <Route path="/channel/gamechannel" element={<GameChannel />} />
@@ -28,3 +31,10 @@ const Router = () => {
 };
 
 export default Router;
+
+
+
+
+const Main = styled.main`
+  min - height: calc(100vh - 180px);
+`;
