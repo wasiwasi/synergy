@@ -1,5 +1,6 @@
 package com.synergy.api.controller;
 
+import com.synergy.api.request.EmailAuthPostReq;
 import com.synergy.api.service.MailService;
 import com.synergy.common.util.RedisUtil;
 import com.synergy.db.entity.UserEmailForm;
@@ -46,11 +47,19 @@ public class UserController {
 	@ApiResponses({
 			@ApiResponse(code = 201, message = "Created"),
 			@ApiResponse(code = 400, message = "잠시 후 다시 시도해주세요."),
+			@ApiResponse(code = 409, message = "이미 가입된 이메일입니다."),
+			@ApiResponse(code = 409, message = "이미 가입된 닉네임입니다."),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
 	public ResponseEntity<? extends BaseResponseBody> register(
 			@RequestBody @ApiParam(value="회원가입 정보", required = true) UserRegisterPostReq registerInfo) {
 
+		//중복 가입 체크
+		if(userService.isExistEmail(registerInfo.getEmail())){
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 이메일입니다."));
+		} else if (userService.isExistNickname(registerInfo.getNickname())) {
+			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "이미 가입된 닉네임입니다."));
+		}
 		//임의로 리턴된 User 인스턴스. 현재 코드는 회원 가입 성공 여부만 판단하기 때문에 굳이 Insert 된 유저 정보를 응답하지 않음.
 		User user = userService.createUser(registerInfo);
 
@@ -108,7 +117,7 @@ public class UserController {
 		return ResponseEntity.status(200).body(BaseResponseBody.of(200, "사용 가능한 닉네임"));
 	}
 
-	@GetMapping("/email-auth")
+	@PostMapping("/email-auth")
 	@ApiOperation(value = "이메일 본인 인증", notes = "넘어온 코드가 일치하는지 확인 확인한다.")
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "본인 인증이 완료되었습니다."),
@@ -117,12 +126,11 @@ public class UserController {
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
 	public ResponseEntity<? extends BaseResponseBody> authorizeUser(
-			@RequestParam("id") String id,
-			@RequestParam("code") String code){
+			@RequestBody EmailAuthPostReq emailAuthPostReq){
 
 		//Redis 조회한 후 코드일치하는지 확인
 		try {
-			if (userService.authorizeUser(id, code)) {
+			if (userService.authorizeUser(emailAuthPostReq)) {
 				return ResponseEntity.status(200).body(BaseResponseBody.of(200, "본인 인증이 완료되었습니다."));
 			} else {
 				return ResponseEntity.status(404).body(BaseResponseBody.of(401, "인증코드가 일치하지 않습니다."));
