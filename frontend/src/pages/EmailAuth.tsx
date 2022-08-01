@@ -14,7 +14,7 @@ const EmailAuth = () => {
     const code = params.get("code");
     //axios
     axios
-      .post("http://i7a306.p.ssafy.io:8080/users/email-auth", {
+      .post("https://i7a306.p.ssafy.io:8080/users/email-auth", {
         id: id,
         code: code,
       })

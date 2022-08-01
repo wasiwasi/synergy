@@ -38,7 +38,7 @@ public class MailService {
         StringBuilder text = new StringBuilder();
         text
         .append("<p>Synergy 본인 인증 확인 메일입니다.</p><p>아래 링크를 클릭하셔서 가입 인증을 완료하세요.</p>")
-        .append("<div><a href='http://i7a306.p.ssafy.io:3000/emailauth?id=")
+        .append("<div><a href='i7a306.p.ssafy.io/emailauth?id=")
         .append(userEmailForm.getUserId())
         .append("&code=")
         .append(userEmailForm.getAuthCode())
