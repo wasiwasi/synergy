@@ -134,9 +134,14 @@ dependencies {
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
+
     // Openvidu 의존성
     implementation group: 'io.openvidu', name: 'openvidu-java-client', version: '2.18.0'
 
+    //mail smtp
+    implementation('org.springframework.boot:spring-boot-starter-mail')
+    //redis
+    implementation('org.springframework.boot:spring-boot-starter-data-redis')
 }
 
 test {
