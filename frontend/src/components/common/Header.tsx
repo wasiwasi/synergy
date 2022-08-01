@@ -176,15 +176,18 @@ const NavMobile = styled.div<MenuListProps>`
   width: 100%;
   height: 100vh;
   background-color: #F7FBFC;
-  opacity: 0.98;
+  opacity: 1;
   transition: 0.5s;
   transform: translateX(100%)
-
+  
+  
   ${(props) =>
     props.isExpanded &&
   css`
+    z-index: 9;
     transition: 0.5s;
     transform: translateX(0%)
+
   `}
 `;
 
