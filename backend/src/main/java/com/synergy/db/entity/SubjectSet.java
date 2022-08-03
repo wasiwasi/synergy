@@ -27,9 +27,4 @@ public class SubjectSet {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "subjectSet")
-    private List<Bodytalk> bodytalks = new ArrayList<>();
-
-    @OneToMany(mappedBy = "subjectSet")
-    private List<Goldenbell> goldenbells = new ArrayList<>();
 }
