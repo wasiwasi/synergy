@@ -1,5 +1,7 @@
 package com.synergy.api.service;
 
+import com.synergy.db.entity.Bodytalk;
+import com.synergy.db.entity.SubjectSet;
 import com.synergy.db.entity.SubjectSetDto;
 import com.synergy.db.repository.SubjectSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,4 +20,9 @@ public class SubjectServiceImpl implements SubjectService {
         return subjectSetRepository.findByuser_idIn(ids);
     }
 
+    @Override
+    public List<Bodytalk> getBodytalk(Long subjectId) {
+        SubjectSet subjectSet = subjectSetRepository.findById(subjectId).get();
+        return subjectSet.getBodytalks();
+    }
 }
