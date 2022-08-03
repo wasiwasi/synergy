@@ -1,5 +1,6 @@
 package com.synergy.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +20,6 @@ public class Bodytalk {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_set_id")
+    @JsonBackReference
     SubjectSet subjectSet;
 }

@@ -1,5 +1,6 @@
 package com.synergy.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,5 +27,9 @@ public class SubjectSet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
+
+    @OneToMany(mappedBy = "subjectSet")
+    @JsonManagedReference
+    List<Bodytalk> bodytalks = new ArrayList<>();
 
 }
