@@ -46,7 +46,7 @@ public class SubjectController {
         Long userId = Long.valueOf(userDetails.getUsername());
         List<SubjectSetDto> list = null;
         //0번은 기본의 문제집
-        list = subjectService.getSubjectSets(Arrays.asList(0L, userId));
+        list = subjectService.getSubjectSets(Arrays.asList(1L, userId));
         if(list.size() == 0) {
             return ResponseEntity.status(404).body(SubjectSetRes.of(404, "문제집이 없습니다."));
         }
@@ -70,7 +70,7 @@ public class SubjectController {
         // 본인의 문제집이 맞는지 검증
         try {
             Long subjectOwner = subjectService.getSubjectSet(subjectId).getUser().getId();
-            if (subjectOwner != 0 && subjectOwner != userId) {
+            if (subjectOwner != 1 && subjectOwner != userId) {
                 return ResponseEntity.status(403).body(BodytalkRes.of(403, "본인의 문제집만 조회 가능합니다."));
             }
         } catch(NoSuchElementException exception) {
