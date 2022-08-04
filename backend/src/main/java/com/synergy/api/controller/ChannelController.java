@@ -60,12 +60,11 @@ public class ChannelController {
         if(!channelService.channelExistenceOnOV(channelId)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if(channelService.checkChannelNickNameDuplicate(channelId, participantPostReq.getNickName())){
-            return new ResponseEntity(HttpStatus.IM_USED); // 226 이미 사용중임
-        }
+        channelService.createAndPutRoom(channelId);
 
         Participant participant = new Participant();
-        participant.setChannelId(participantPostReq.getConnectionId());
+        participant.setChannelId(channelId);
+        participant.setConnectionId(participantPostReq.getConnectionId());
         participant.setNickName(participantPostReq.getNickName());
         participant.setEmail(participantPostReq.getUserEmail());
         if(channelService.joinChannel(participant)){
@@ -110,7 +109,6 @@ public class ChannelController {
 
         Participant participant = new Participant();
         participant.setChannelId(channelId);
-        participant.setEmail(participantPostReq.getUserEmail());
         participant.setNickName(participantPostReq.getNickName());
         participant.setConnectionId(participantPostReq.getConnectionId());
         if(channelService.joinChannel(participant)){
