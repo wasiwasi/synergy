@@ -24,13 +24,13 @@ public class ChannelServiceImpl implements ChannelService{
 
     private final Logger log = LoggerFactory.getLogger(ChannelController.class);
 
-//    @Value("${OPENVIDU_URL}")
-//    private String OPENVIDU_URL;
-//    @Value("${OPENVIDU_SECRET}")
-//    private String OPENVIDU_SECRET;
+    @Value("${OPENVIDU_URL}")
+    private String OPENVIDU_URL;
+    @Value("${OPENVIDU_SECRET}")
+    private String OPENVIDU_SECRET;
 
-    private String   OPENVIDU_URL="";
-    private String OPENVIDU_SECRET="";
+//    private String   OPENVIDU_URL="";
+//    private String OPENVIDU_SECRET="";
     private String OPENVIDU_AUTH;
 
     private final ConcurrentMap<String,Channel> channelList = new ConcurrentHashMap<>();//channelid, channel
