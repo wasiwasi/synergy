@@ -61,7 +61,6 @@ public class ChannelServiceImpl implements ChannelService{
                 return new ResponseEntity(channel.getChannelId(), HttpStatus.OK);
             }else{
                 log.debug("channel : {} is NOT on Memory",channelId);
-                this.createAndPutRoom(channelId);
                 channel = this.bringChannel(channelId);
                 return new ResponseEntity(channel.getChannelId(), HttpStatus.OK);
             }
@@ -109,8 +108,9 @@ public class ChannelServiceImpl implements ChannelService{
     public boolean channelExistenceOnOV(String channelId) {
         if(OPENVIDU_AUTH==null){
             OPENVIDU_AUTH = "Basic "+ Base64.getEncoder().encodeToString(OPENVIDU_SECRET.getBytes(StandardCharsets.UTF_8));
+
+            log.debug(OPENVIDU_AUTH);
             //확인용도
-            System.out.println(OPENVIDU_AUTH +"channel Existencd on Openvidu & this is openvidu_auth");
 
             HttpURLConnection  connection = null;
 
@@ -154,7 +154,7 @@ public class ChannelServiceImpl implements ChannelService{
     @Override
     public boolean checkChannelNickNameDuplicate(String channelId, String nickName) {
         Channel channel= channelList.get(channelId);
-        if(channel.getParticipantList().containsKey(nickName))return true;// 중복이면 참
+        if(channel.getParticipantList()==null||channel.getParticipantList().containsKey(nickName))return true;// 중복이면 참
         else return false;//중복이 아니면 거짓
     }
 
