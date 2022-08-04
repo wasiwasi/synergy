@@ -16,7 +16,7 @@ public class SubjectServiceImpl implements SubjectService {
     SubjectSetRepository subjectSetRepository;
 
     @Override
-    public List<SubjectSetDto> getSubjectSet(List<Long> ids) {
+    public List<SubjectSetDto> getSubjectSets(List<Long> ids) {
         return subjectSetRepository.findByuser_idIn(ids);
     }
 
@@ -24,5 +24,10 @@ public class SubjectServiceImpl implements SubjectService {
     public List<Bodytalk> getBodytalk(Long subjectId) {
         SubjectSet subjectSet = subjectSetRepository.findById(subjectId).get();
         return subjectSet.getBodytalks();
+    }
+
+    @Override
+    public SubjectSet getSubjectSet(Long subjectId) {
+        return subjectSetRepository.findById(subjectId).get();
     }
 }
