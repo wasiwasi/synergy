@@ -106,8 +106,11 @@ public class ChannelServiceImpl implements ChannelService{
 
     @Override
     public boolean channelExistenceOnOV(String channelId) {
-        if(OPENVIDU_AUTH==null) {
-            OPENVIDU_AUTH = "Basic " + Base64.getEncoder().encodeToString(OPENVIDU_SECRET.getBytes(StandardCharsets.UTF_8));
+        if(OPENVIDU_AUTH==null){
+            OPENVIDU_AUTH = "Basic "+ Base64.getEncoder().encodeToString(OPENVIDU_SECRET.getBytes(StandardCharsets.UTF_8));
+
+            log.debug(OPENVIDU_AUTH);
+            //확인용도
 
         }
 
