@@ -3,7 +3,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import axios from 'axios'
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
@@ -18,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
-export const steps = [
+const steps = [
   {
     label: '게임을 선택해주세요',
     choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '준비 중']
@@ -33,12 +33,14 @@ export const steps = [
   },
 ];
 
-const data = [
-   ['스포츠', '음식', '영화', '드라마', '동물'],
-   ['5', '10', '15', '20'],
-]
+const accessToken = localStorage.getItem("access-token");
 
 function SwipeableTextMobileStepper() {
+  const [selectData, setSelectData] = useState([
+    [],
+    ['5', '10', '15', '20'],
+  ])
+
   const [info, setInfo] = useState<string[]>([]);
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
@@ -66,10 +68,6 @@ function SwipeableTextMobileStepper() {
     setInfo(copy)
     handleBack()
   }
-
-  // const postData = useCallback(()=>{
-
-  // })
 
   return (
     <Box sx={{ flexGrow: 1, 
@@ -110,7 +108,6 @@ function SwipeableTextMobileStepper() {
           <div key={index}>
             {activeStep < maxSteps - 1 ?
               <Button
-                // disabled={}
                 onClick={()=>{
                   activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                   }}
@@ -127,11 +124,12 @@ function SwipeableTextMobileStepper() {
                 {steps[activeStep].choice[index]}
               </Button> : 
               <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
-              setInfo = {setInfo}/>
+              setInfo = {setInfo}
+              selectData = {selectData}
+              setSelectData = {setSelectData}/>
               // 
             }
           </div>
-        
         ))}
       </div>
       <MobileStepper
@@ -182,16 +180,6 @@ function SwipeableTextMobileStepper() {
           </Button>
         }
       />
-      {/* api 받아오기 */}
-      {/* <button onClick={()=>{
-        axios.get('api')
-        .then((결과)=>{
-          setAAA()
-        })
-        .catch(()=>{
-          console.log('fail to get')
-        })
-      }}></button>*/} 
     </Box>
   );
 }
@@ -199,7 +187,7 @@ function SwipeableTextMobileStepper() {
 export default SwipeableTextMobileStepper;
 
 function BasicSelect(props: any) {
-  const [category, setCategory] = useState(`${data[props.index][0]}`);
+  const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
 
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
@@ -218,11 +206,31 @@ function BasicSelect(props: any) {
           label="Category"
           onChange={handleChange}
         >
-          {data[props.index].map((d, i)=> (
+          {props.selectData[props.index].map((d: any, i: any)=> (
             <MenuItem key={i} value={d}>{d}</MenuItem>
           ))}
         </Select>
+        {/* <getData /> */}
       </FormControl>
     </Box>
   );
+}
+
+function getData(props: any) {
+  console.log('hi')
+  useEffect(()=> {
+    axios.get("https://i7a306.p.ssafy.io:8080/subjects", {
+    headers: {
+        Authorization: `Bearer ${accessToken}`
+    }
+    }).then((res)=>{
+      // console.log(res.data.data)
+      const copy = [...props.selectData]
+      res.data.data.map((d:any, i:any)=> (
+        copy[0].push(d.subject_name)
+      ))
+      console.log(copy)
+      props.setSelectData(copy)
+    })
+  }, [])
 }
