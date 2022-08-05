@@ -75,6 +75,24 @@ public class ChannelController {
 
     }
 
+    @ApiOperation(value = "방의 호스트 이름 반환하는 api ")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "방장 이름 전송 성공"),
+                    @ApiResponse(code = 404,message = "방이 존재 하지 않아 방장을 못 찾고 있음")
+            }
+    )
+    @GetMapping("/findHost/{channelId}")
+    public ResponseEntity getHostByChannelId(@PathVariable String channelId){
+        channelId = channelId.trim();
+        Participant Host = channelService.getChannelByChannelId(channelId).getHost();
+        String hostName = Host.getNickName();
+
+        if(Host!=null)return new ResponseEntity(hostName,HttpStatus.OK);
+        else return new ResponseEntity(HttpStatus.NOT_FOUND);
+    }
+
+
     @ApiOperation(value = "방생성 하기 위한 방코드")
     @ApiResponses(
             value = {
@@ -86,6 +104,26 @@ public class ChannelController {
         String channelId = channelService.getRandomChannelId();
         return new ResponseEntity(channelId,HttpStatus.OK);
     }
+
+    @ApiOperation(value = "닉네임 중복 여부 확인")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "닉네임 중복 아님"),
+                    @ApiResponse(code = 226,message = "닉네임 중복")
+            }
+    )
+    @PostMapping("/duplicate/nickname/{channelId}")
+    public ResponseEntity nickNameDuplicateCheck(@PathVariable String channelId, @RequestBody ParticipantPostReq participantPostReq){
+        channelId = channelId.trim();
+        if(channelService.checkChannelNickNameDuplicate(channelId, participantPostReq.getNickName())){
+            return new ResponseEntity(HttpStatus.IM_USED);
+        }
+        else {
+            return new ResponseEntity(HttpStatus.OK);
+        }
+
+    }
+
 
     @ApiOperation(value = "원하는 방에 조인", notes = "방이 존재하는지, 닉네임은 중복되는 지 여부 체크")
     @ApiResponses(
@@ -119,6 +157,7 @@ public class ChannelController {
 
 
     }
+
 
     @ApiOperation(value = "방 떠나기",notes = "뒤로가기를 눌러도, 나갈떄도 호출")
     @ApiResponses(
