@@ -42,10 +42,10 @@ public class AuthService {
         // 입력으로 들어온 비밀번호와 DB에 저장된 암호를 비교해 비밀번호가 맞는지 확인
         checkPassword(req.getPassword(), user.getPassword());
 
-        String accessToken = JwtTokenUtil.getToken(req.getEmail());
+        String accessToken = JwtTokenUtil.getToken(String.valueOf(user.getId()));
         log.debug("created access token "+accessToken);
 
-        RefreshToken refreshToken = saveRefreshToken(req.getEmail());
+        RefreshToken refreshToken = saveRefreshToken(String.valueOf(user.getId()));
         log.debug("created refresh token "+refreshToken);
 
         return new TokenRes(accessToken, refreshToken.getRefreshToken());
@@ -57,9 +57,9 @@ public class AuthService {
         }
     }
 
-    public RefreshToken saveRefreshToken(String userEmail) {
-        return refreshTokenRedisRepository.save(RefreshToken.createRefreshToken(userEmail,
-                JwtTokenUtil.getToken(userEmail), TokenConfig.DEFAULT_EXPIRE_SEC));
+    public RefreshToken saveRefreshToken(String userId) {
+        return refreshTokenRedisRepository.save(RefreshToken.createRefreshToken(userId,
+                JwtTokenUtil.getToken(userId), TokenConfig.DEFAULT_EXPIRE_SEC));
     }
 
     public String resolveToken(String token) {

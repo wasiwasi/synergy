@@ -24,13 +24,13 @@ public class ChannelServiceImpl implements ChannelService{
 
     private final Logger log = LoggerFactory.getLogger(ChannelController.class);
 
-//    @Value("${OPENVIDU_URL}")
-//    private String OPENVIDU_URL;
-//    @Value("${OPENVIDU_SECRET}")
-//    private String OPENVIDU_SECRET;
+    @Value("${OPENVIDU_URL}")
+    private String OPENVIDU_URL;
+    @Value("${OPENVIDU_SECRET}")
+    private String OPENVIDU_SECRET;
 
-    private String   OPENVIDU_URL="";
-    private String OPENVIDU_SECRET="";
+//    private String   OPENVIDU_URL="";
+//    private String OPENVIDU_SECRET="";
     private String OPENVIDU_AUTH;
 
     private final ConcurrentMap<String,Channel> channelList = new ConcurrentHashMap<>();//channelid, channel
@@ -42,7 +42,7 @@ public class ChannelServiceImpl implements ChannelService{
 
     @Override
     public Channel getChannelByChannelId(String channelId) {
-        return null;
+        return channelList.get(channelId);
     }
 
     @Override
@@ -61,7 +61,6 @@ public class ChannelServiceImpl implements ChannelService{
                 return new ResponseEntity(channel.getChannelId(), HttpStatus.OK);
             }else{
                 log.debug("channel : {} is NOT on Memory",channelId);
-                this.createAndPutRoom(channelId);
                 channel = this.bringChannel(channelId);
                 return new ResponseEntity(channel.getChannelId(), HttpStatus.OK);
             }
@@ -109,34 +108,35 @@ public class ChannelServiceImpl implements ChannelService{
     public boolean channelExistenceOnOV(String channelId) {
         if(OPENVIDU_AUTH==null){
             OPENVIDU_AUTH = "Basic "+ Base64.getEncoder().encodeToString(OPENVIDU_SECRET.getBytes(StandardCharsets.UTF_8));
+
+            log.debug(OPENVIDU_AUTH);
             //확인용도
-            System.out.println(OPENVIDU_AUTH +"channel Existencd on Openvidu & this is openvidu_auth");
-
-            HttpURLConnection  connection = null;
-
-            try{
-                URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
-                connection = (HttpURLConnection) url.openConnection();
-
-                connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
-
-                int responseCode = connection.getResponseCode();
-                log.debug("Find Channel in OpenVidu response code : {}",responseCode);
-
-                if(responseCode==200)return true;
-                else return false;
-
-            }catch (Exception e){
-                e.printStackTrace();
-                return  false;
-            }finally {
-                if(connection!=null){
-                    connection.disconnect();
-                }
-            }
 
         }
-        return false;
+
+        HttpURLConnection  connection = null;
+
+        try{
+            URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
+
+            int responseCode = connection.getResponseCode();
+            log.debug("Find Channel in OpenVidu response code : {}",responseCode);
+
+            if(responseCode==200)return true;
+            else return false;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return  false;
+        }finally {
+            if(connection!=null){
+                connection.disconnect();
+            }
+        }
+
     }
 
     @Override
@@ -154,7 +154,7 @@ public class ChannelServiceImpl implements ChannelService{
     @Override
     public boolean checkChannelNickNameDuplicate(String channelId, String nickName) {
         Channel channel= channelList.get(channelId);
-        if(channel.getParticipantList().containsKey(nickName))return true;// 중복이면 참
+        if(channel.getParticipantList()==null||channel.getParticipantList().containsKey(nickName))return true;// 중복이면 참
         else return false;//중복이 아니면 거짓
     }
 
@@ -190,7 +190,7 @@ public class ChannelServiceImpl implements ChannelService{
 
         for(Channel channel: channelList.values()){
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channel.getChannelId(),
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             list.add(channelInfoReq);
@@ -205,7 +205,7 @@ public class ChannelServiceImpl implements ChannelService{
         if(channel==null)return null;
         else{
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channelId,
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             return channelInfoReq;
