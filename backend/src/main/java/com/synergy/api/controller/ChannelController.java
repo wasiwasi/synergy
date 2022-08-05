@@ -66,8 +66,8 @@ public class ChannelController {
         participant.setChannelId(channelId);
         participant.setConnectionId(participantPostReq.getConnectionId());
         participant.setNickName(participantPostReq.getNickName());
-        participant.setEmail(participantPostReq.getUserEmail());
         if(channelService.joinChannel(participant)){
+            channelService.getChannelByChannelId(channelId).setHost(participant);
             return new ResponseEntity(HttpStatus.OK);
         }else{
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
@@ -99,7 +99,6 @@ public class ChannelController {
     @PostMapping("/join/{channelId}")
     public ResponseEntity joinChannel(@PathVariable String channelId, @RequestBody ParticipantPostReq participantPostReq){
         channelId = channelId.trim();
-
         if(!channelService.channelExistenceOnOV(channelId)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
@@ -140,7 +139,7 @@ public class ChannelController {
                     @ApiResponse(code = 200,message = "방 떠나기 성공")
             }
     )
-    @PostMapping("/delete/{channelId}")
+    @DeleteMapping("/delete/{channelId}")
     public ResponseEntity deleteChannel(@PathVariable String channelId,@RequestBody ParticipantPostReq participantPostReq){
         channelId = channelId.trim();
         channelService.deleteChannel(channelId, participantPostReq.getNickName());
@@ -169,7 +168,7 @@ public class ChannelController {
                     @ApiResponse(code = 404,message = "방 존재하지 않음")
             }
     )
-    @PostMapping("/infoList")
+    @GetMapping("/infoList")
     public ResponseEntity getChannelInfoList(){
         ArrayList<ChannelInfoReq> channelList = channelService.getChannelList();
         return new ResponseEntity(channelList,HttpStatus.OK);
