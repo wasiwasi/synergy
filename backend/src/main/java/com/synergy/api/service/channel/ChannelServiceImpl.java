@@ -42,7 +42,7 @@ public class ChannelServiceImpl implements ChannelService{
 
     @Override
     public Channel getChannelByChannelId(String channelId) {
-        return null;
+        return channelList.get(channelId);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class ChannelServiceImpl implements ChannelService{
 
         for(Channel channel: channelList.values()){
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channel.getChannelId(),
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             list.add(channelInfoReq);
@@ -205,7 +205,7 @@ public class ChannelServiceImpl implements ChannelService{
         if(channel==null)return null;
         else{
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channelId,
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             return channelInfoReq;
