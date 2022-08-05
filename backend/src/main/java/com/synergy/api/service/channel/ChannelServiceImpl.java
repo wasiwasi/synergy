@@ -112,31 +112,31 @@ public class ChannelServiceImpl implements ChannelService{
             log.debug(OPENVIDU_AUTH);
             //확인용도
 
-        }
+            HttpURLConnection  connection = null;
 
-        HttpURLConnection  connection = null;
+            try{
+                URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
+                connection = (HttpURLConnection) url.openConnection();
 
-        try{
-            URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
-            connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
 
-            connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
+                int responseCode = connection.getResponseCode();
+                log.debug("Find Channel in OpenVidu response code : {}",responseCode);
 
-            int responseCode = connection.getResponseCode();
-            log.debug("Find Channel in OpenVidu response code : {}",responseCode);
+                if(responseCode==200)return true;
+                else return false;
 
-            if(responseCode==200)return true;
-            else return false;
-
-        }catch (Exception e){
-            e.printStackTrace();
-            return  false;
-        }finally {
-            if(connection!=null){
-                connection.disconnect();
+            }catch (Exception e){
+                e.printStackTrace();
+                return  false;
+            }finally {
+                if(connection!=null){
+                    connection.disconnect();
+                }
             }
-        }
 
+        }
+        return false;
     }
 
     @Override
