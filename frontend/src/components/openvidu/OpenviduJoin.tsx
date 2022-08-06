@@ -8,8 +8,7 @@ import UserVideoComponent from "./UserVideoComponent";
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 
-// const SPRINGBOOT_SERVER_URL = "https://i7a306.p.ssafy.io:8080/api/channels";
-const SPRINGBOOT_SERVER_URL = "http://localhost:12345/api/channels";
+const SPRINGBOOT_SERVER_URL = `${process.env.REACT_APP_BACKEND_URL}/api/channels`;
 
 interface IProps {
 
