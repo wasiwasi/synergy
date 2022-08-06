@@ -120,7 +120,8 @@ const InvitePage = () => {
 
   // 닉네임 중복 체크
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
-  // 입장 버튼 클릭
+
+  const [hostName, sethostName] = useState<string>("");
 
   const didMount = useRef(false);
 
@@ -130,12 +131,12 @@ const InvitePage = () => {
     const params = new URLSearchParams(sch);
     const channelId = params.get("channelId");
     setMySessionId(channelId);
-    //axios
+    //호스트 닉네임을 가져옴
     axios
-      .get(`${BE_URL}/api/channels/info/${channelId}`)
+      .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res) => {
-        console.log(channelId);
         console.log(res);
+        sethostName(res.data);
       })
       .catch((error) => {
         console.log(error);
@@ -579,7 +580,7 @@ const InvitePage = () => {
             <InvitePageForm>
               <InvitePageHead>Brand</InvitePageHead>
             
-              <InvitePageMsg>ooo 님의 방에 입장하시겠습니까? : </InvitePageMsg>
+              <InvitePageMsg>{hostName} 님의 방에 입장하시겠습니까? : </InvitePageMsg>
 
               <InvitePageInput>
                 <FormControl variant="standard" fullWidth>
