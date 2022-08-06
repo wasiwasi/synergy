@@ -129,7 +129,7 @@ const InvitePage = () => {
   useEffect(() => {
     const sch = location.search;
     const params = new URLSearchParams(sch);
-    const channelId = params.get("channelId");
+    const channelId = params.get("channelid");
     setMySessionId(channelId);
     //호스트 닉네임을 가져옴
     axios
