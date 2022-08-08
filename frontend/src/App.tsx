@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
@@ -61,5 +61,5 @@ export default App;
 
 const Main = styled.main`
   min-height: calc(100vh - 80px);
-  padding-top: 60px;
+  //padding-top: 60px;
 `;
