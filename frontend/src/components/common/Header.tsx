@@ -30,7 +30,7 @@ const Header = () => {
     setIsExpanded(!isExpanded);
     console.log(isExpanded)
   };
-
+  if (window.location.pathname === '/channel/gamechannel') return null;
   return ( 
     <>
       <div></div>
