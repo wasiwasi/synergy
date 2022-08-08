@@ -185,34 +185,6 @@ const InvitePage = () => {
       console.warn(exception);
     });
 
-    // chatting
-    mySession?.on("signal:chat", (event : any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      // if (chatdata[0] !== myUserName) {
-        if(true){
-        // console.log("chatdata: "+chatdata);
-        console.log("messages: "+messages);
-
-        messages.push({
-          userName: chatdata[0],
-          text: chatdata[1],
-          boxClass: "messages__box--visitor",
-        });
-
-        setMessages([...messages]);
-
-        // setMessages([
-        //     ...messages,
-        //     {
-        //       userName: chatdata[0],
-        //       text: chatdata[1],
-        //       boxClass: "messages__box--visitor",
-        //     },
-        //   ],
-        // );
-      }
-    });
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -260,6 +232,35 @@ const InvitePage = () => {
         });
     });
   }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
+    mySession?.on("signal:chat", (event : any) => {
+      let chatdata = event.data.split(",");
+      // let chatdata = event.;
+      if (chatdata[0] !== myUserName) {
+        console.log("messages: "+messages);
+
+        // messages.push({
+        //   userName: chatdata[0],
+        //   text: chatdata[1],
+        //   boxClass: "messages__box--visitor",
+        // });
+
+        // setMessages([...messages]);
+
+        setMessages([
+            ...messages,
+            {
+              userName: chatdata[0],
+              text: chatdata[1],
+              boxClass: "messages__box--visitor",
+            },
+          ],
+        );
+      }
+    });
+  }, [session, messages]);
 
   const onEnter = async () => {
     await joinSession();
@@ -323,16 +324,16 @@ const InvitePage = () => {
 
       // setMessages([...messages]);
 
-      // setMessages(
-      //   [
-      //     ...messages,
-      //     {
-      //       userName: myUserName,
-      //       text: message,
-      //       boxClass: "messages__box--operator",
-      //     },
-      //   ],
-      // );
+      setMessages(
+        [
+          ...messages,
+          {
+            userName: myUserName,
+            text: message,
+            boxClass: "messages__box--operator",
+          },
+        ],
+      );
       setMessage("");
       const mySession = session;
 
@@ -348,23 +349,23 @@ const InvitePage = () => {
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
       if (message !== "") {
-        messages.push({
-          userName: myUserName,
-          text: message,
-          boxClass: "messages__box--operator",
-        });
+        // messages.push({
+        //   userName: myUserName,
+        //   text: message,
+        //   boxClass: "messages__box--operator",
+        // });
   
-        setMessages([...messages]);
+        // setMessages([...messages]);
 
-        // setMessages([
-        //     ...messages,
-        //     {
-        //       userName: myUserName,
-        //       text: message,
-        //       boxClass: "messages__box--operator",
-        //     },
-        //   ],
-        // );
+        setMessages([
+            ...messages,
+            {
+              userName: myUserName,
+              text: message,
+              boxClass: "messages__box--operator",
+            },
+          ],
+        );
         setMessage("");
         const mySession = session;
 
