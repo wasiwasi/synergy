@@ -12,6 +12,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 
 const Footer = () => {
+  if (window.location.pathname === '/channel/gamechannel') return null;
   return (
     <Container>
       <Wrapper>
