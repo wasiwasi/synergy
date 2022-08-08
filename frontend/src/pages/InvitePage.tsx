@@ -189,17 +189,28 @@ const InvitePage = () => {
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
-      console.log(chatdata);
-      if (chatdata[0] !== myUserName) {
-        setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
+      // if (chatdata[0] !== myUserName) {
+        if(true){
+        // console.log("chatdata: "+chatdata);
+        console.log("messages: "+messages);
+
+        messages.push({
+          userName: chatdata[0],
+          text: chatdata[1],
+          boxClass: "messages__box--visitor",
+        });
+
+        setMessages([...messages]);
+
+        // setMessages([
+        //     ...messages,
+        //     {
+        //       userName: chatdata[0],
+        //       text: chatdata[1],
+        //       boxClass: "messages__box--visitor",
+        //     },
+        //   ],
+        // );
       }
     });
 
@@ -304,16 +315,24 @@ const InvitePage = () => {
 
   const sendMessageByClick = () => {
     if (message !== "") {
-      setMessages(
-        [
-          ...messages,
-          {
-            userName: myUserName,
-            text: message,
-            boxClass: "messages__box--operator",
-          },
-        ],
-      );
+      // messages.push({
+      //   userName: myUserName,
+      //   text: message,
+      //   boxClass: "messages__box--operator",
+      // });
+
+      // setMessages([...messages]);
+
+      // setMessages(
+      //   [
+      //     ...messages,
+      //     {
+      //       userName: myUserName,
+      //       text: message,
+      //       boxClass: "messages__box--operator",
+      //     },
+      //   ],
+      // );
       setMessage("");
       const mySession = session;
 
@@ -325,18 +344,27 @@ const InvitePage = () => {
     }
   }
 
+
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
       if (message !== "") {
-        setMessages([
-            ...messages,
-            {
-              userName: myUserName,
-              text: message,
-              boxClass: "messages__box--operator",
-            },
-          ],
-        );
+        messages.push({
+          userName: myUserName,
+          text: message,
+          boxClass: "messages__box--operator",
+        });
+  
+        setMessages([...messages]);
+
+        // setMessages([
+        //     ...messages,
+        //     {
+        //       userName: myUserName,
+        //       text: message,
+        //       boxClass: "messages__box--operator",
+        //     },
+        //   ],
+        // );
         setMessage("");
         const mySession = session;
 
@@ -351,6 +379,7 @@ const InvitePage = () => {
   }
 
   const handleChatMessageChange = (e : any) => {
+    console.log("message event occur");
     setMessage(e.target.value);
   }
   // chatting
