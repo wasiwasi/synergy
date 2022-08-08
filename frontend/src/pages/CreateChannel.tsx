@@ -40,6 +40,22 @@ function SwipeableTextMobileStepper() {
     [],
     ['5', '10', '15', '20'],
   ])
+  const [category, setCategory] = useState('')
+  const [round, setRound] = useState('')
+  useEffect(()=> {
+    axios.get("https://i7a306.p.ssafy.io:8080/subjects", {
+    headers: {
+        Authorization: `Bearer ${accessToken}`
+    }
+    }).then((res)=>{
+      const copy = [...selectData]
+      res.data.data.map((d:any, i:any)=> (
+        copy[0].push(d.subject_name)
+      ))
+      console.log(copy[0])
+      setSelectData(copy)
+    })
+  }, [])
 
   const [info, setInfo] = useState<string[]>([]);
   const theme = useTheme();
@@ -58,7 +74,6 @@ function SwipeableTextMobileStepper() {
     let copy: string[] = [...info]
     copy.push(e)
     setInfo(copy)
-    console.log(info)
     handleNext()
   }
 
@@ -126,8 +141,12 @@ function SwipeableTextMobileStepper() {
               <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
               setInfo = {setInfo}
               selectData = {selectData}
-              setSelectData = {setSelectData}/>
-              // 
+              setSelectData = {setSelectData}
+              category = {category}
+              round = {round}
+              setCategory = {setCategory}
+              setRound = {setRound}
+              />
             }
           </div>
         ))}
@@ -191,7 +210,12 @@ function BasicSelect(props: any) {
 
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
-    console.log(category)
+    if (props.index == 0) {
+      props.setCategory(category)
+    }
+    else {
+      props.setRound(category)
+    }
   };
 
   return (
@@ -210,27 +234,7 @@ function BasicSelect(props: any) {
             <MenuItem key={i} value={d}>{d}</MenuItem>
           ))}
         </Select>
-        {/* <getData /> */}
       </FormControl>
     </Box>
   );
-}
-
-function getData(props: any) {
-  console.log('hi')
-  useEffect(()=> {
-    axios.get("https://i7a306.p.ssafy.io:8080/subjects", {
-    headers: {
-        Authorization: `Bearer ${accessToken}`
-    }
-    }).then((res)=>{
-      // console.log(res.data.data)
-      const copy = [...props.selectData]
-      res.data.data.map((d:any, i:any)=> (
-        copy[0].push(d.subject_name)
-      ))
-      console.log(copy)
-      props.setSelectData(copy)
-    })
-  }, [])
 }
