@@ -55,8 +55,6 @@ const Header = () => {
             <PageLink to="/signup">회원가입</PageLink>
             <PageLink to="/users/mypage">마이페이지</PageLink>
             <PageLink to="/channel/createchannel">채널생성</PageLink>
-            <PageLink to="/channel/gamechannel">게임채널</PageLink>
-            <Button variant="contained">문의하기</Button>
 
 
           </Navigate>
@@ -72,8 +70,6 @@ const Header = () => {
             <PageLinkMobile to="/signup">회원가입</PageLinkMobile>
             <PageLinkMobile to="/users/mypage">마이페이지</PageLinkMobile>
             <PageLinkMobile to="/channel/createchannel">채널생성</PageLinkMobile>
-            <PageLinkMobile to="/channel/gamechannel">게임채널</PageLinkMobile>
-            <Button variant="contained">문의하기</Button>
         </NavMobile>
       </Container>
     </>
