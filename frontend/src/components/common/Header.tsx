@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Route, BrowserRouter, useLocation } from "react-router-dom";
+import { Link, Route, BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
@@ -19,6 +19,7 @@ const Header = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleMenuClick = () => {
     setIsExpanded(!isExpanded);
@@ -26,6 +27,13 @@ const Header = () => {
   };
 
   useEffect(() => {
+    //잘못된 접근 제한
+    if (isLogin) {
+      if (window.location.pathname === '/login' || window.location.pathname === '/signup') navigate("/");
+    } else {
+      if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage' || window.location.pathname === '/channel/gamechannel') navigate("/");
+    }
+    //로그인 상태 체크
     if (localStorage.getItem("access-token")) {
       setIslogin(true);
     } else {
@@ -34,6 +42,7 @@ const Header = () => {
   }, [location]);
 
   if (window.location.pathname === '/channel/gamechannel') return null;
+
   return ( 
     <>
       <div></div>
@@ -62,7 +71,7 @@ const Header = () => {
               <>
                 <PageLink to="/logout">로그아웃</PageLink>
                 <PageLink to="/users/mypage">마이페이지</PageLink>
-                <PageLink to="/channel/createchannel">채널생성</PageLink>
+                  <PageLink to="/channel/createchannel">채널생성</PageLink>
               </>
             )}
           </Navigate>
