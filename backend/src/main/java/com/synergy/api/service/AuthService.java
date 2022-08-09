@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -34,6 +35,11 @@ public class AuthService {
         if(req.getEmail() == null || req.getPassword() == null)
             throw new IllegalArgumentException("please enter email and password");
 
+        // 이메일 형식(프론트 코드에서 가져옴)이 맞아야 하고, 비밀번호도 8자리 이상이어야 한다
+        String regex = "/([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$/";
+        if(!Pattern.matches(regex, req.getEmail()) || req.getPassword().length() < 8)
+            throw new IllegalArgumentException("please check email or password");
+
         log.debug("req email: "+req.getEmail()+" req password: "+req.getPassword());
 
         // 사용자 이메일로 사용자가 존재하는지 확인
@@ -49,6 +55,11 @@ public class AuthService {
         log.debug("created refresh token "+refreshToken);
 
         return new TokenRes(accessToken, refreshToken.getRefreshToken());
+    }
+
+    public void logout(String accessToken) {
+        if(accessToken == null)
+            throw new IllegalStateException("Access Denied");
     }
 
     public void checkPassword(String rawPass, String encodedPassword) {
