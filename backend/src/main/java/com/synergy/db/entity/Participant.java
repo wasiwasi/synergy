@@ -9,5 +9,4 @@ public class Participant {
     String nickName;
     String channelId;
     String connectionId;
-    String email;
 }
