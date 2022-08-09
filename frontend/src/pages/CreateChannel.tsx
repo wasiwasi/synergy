@@ -98,6 +98,9 @@ function SwipeableTextMobileStepper() {
      
   const [messages, setMessages] = useState<object[]>([]);
   const [message, setMessage] = useState<string>("");
+
+  const [joinLink, setJoinLink] = useState<string>("");
+
   const emptyAllOV = () => {
     setOV(null);
     setSession(undefined);
@@ -122,7 +125,6 @@ function SwipeableTextMobileStepper() {
   const [hostName, sethostName] = useState<string>("");
 
   const didMount = useRef(false);
-
 
   useEffect(() => {
     axios.get(`${BE_URL}/subjects`, {
@@ -176,11 +178,10 @@ function SwipeableTextMobileStepper() {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      var varSubscribers = subscribers;
-      varSubscribers.push(subscriber as Subscriber);
+      subscribers.push(subscriber as Subscriber);
 
       // Update the state with the new subscribers
-      setSubscribers(varSubscribers);
+      setSubscribers(subscribers);
     });
 
     // On every Stream destroyed...
@@ -200,6 +201,7 @@ function SwipeableTextMobileStepper() {
     // 'getToken' method is simulating what your server-side should do.
     // 'token' parameter should be retrieved and returned by your own backend
     getToken().then((token) => {
+      console.log("getToken 들어옴=====", token);
       // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
       // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
       mySession?.connect(String(token), { clientData: myUserName })
@@ -498,8 +500,8 @@ function SwipeableTextMobileStepper() {
    */
 
    const getToken = () => {
-    return createSession(mySessionId as string).then((sessionId) =>
-      createToken(sessionId as string)
+     return createSession(mySessionId as string).then((sessionId) => 
+      createToken(sessionId as string)     
     );
   }
 
@@ -548,7 +550,8 @@ function SwipeableTextMobileStepper() {
     });
   }
 
-  const createToken = (sessionId : string) => {
+  const createToken = (sessionId: string) => {
+    generateJoinLink(sessionId as string);
     return new Promise((resolve, reject) => {
       var data = {};
       axios
@@ -565,12 +568,12 @@ function SwipeableTextMobileStepper() {
         )
         .then((response) => {
           console.log("TOKEN", response);
-          resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
           //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
           //임시로 connectionId를 인자로 넘겨주어 해결
           recordParticipant(response.data.id);
+          resolve(response.data.token);
         })
         .catch((error) => reject(error));
     });
@@ -604,6 +607,15 @@ function SwipeableTextMobileStepper() {
           resolve();
         });
     });
+  }
+
+  const generateJoinLink = (sessionId: string) => {
+    const str = "https://i7a306.p.ssafy.io/join?channelid="+sessionId;
+    setJoinLink(str);
+  }
+
+  const handleCopyClipBoard = () => {
+    navigator.clipboard.writeText(joinLink);
   }
 
   return (
@@ -741,6 +753,9 @@ function SwipeableTextMobileStepper() {
           <div id="session">
             <div id="session-header">
               <h1 id="session-title">{mySessionId}</h1>
+              <div>
+                <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
+               </div>
               <input
                 className="btn btn-large btn-danger"
                 type="button"
@@ -748,7 +763,7 @@ function SwipeableTextMobileStepper() {
                 onClick={leaveSession}
                 value="Leave session"
               />
-            </div>
+          </div>
             {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
                 <UserVideoComponent
