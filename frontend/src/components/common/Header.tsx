@@ -106,7 +106,7 @@ const Wrapper = styled.div`
   align-self: center;
 `;
 
-const BrandWrapper = styled.div`
+export const BrandWrapper = styled.div`
   // position: relative;
   // margin: 100px 100px
   align-items: center;
@@ -115,18 +115,18 @@ const BrandWrapper = styled.div`
   align-self: center;
 `;
 
-const Brand = styled(Link)`
+export const Brand = styled(Link)`
   // position: absolute;
   // display: flex;
   text-decoration: none;
 `;
 
-const Logo = styled.div`
+export const Logo = styled.div`
   // position: absolute; 
   display: flex;
 `;
 
-const LogoImg = styled.img`
+export const LogoImg = styled.img`
   width: 30px;
   height: 30px;
   // margin: 0 auto;
@@ -134,7 +134,7 @@ const LogoImg = styled.img`
   margin-right: 10px;
 `;
 
-const LogoName = styled.span`
+export const LogoName = styled.span`
   margin-left: 6px;
   // padding-top: 1px;
   font-size: 20px;
