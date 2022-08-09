@@ -1,8 +1,12 @@
 import { Link, Outlet } from 'react-router-dom';
-import { bgcolor, Box, display, height, width } from '@mui/system';
-import { Paper, Button } from '@mui/material';
+import { bgcolor, Box, display, flexbox, height, width } from '@mui/system';
+import { Paper, Button, Modal, Typography } from '@mui/material';
+import { accessToken } from './CreateChannel';
+import { useState } from 'react';
+import{ Brand, Logo, LogoImg, LogoName, BrandWrapper } from '../components/common/Header';
 
 const GameChannel = () => {
+  console.log(accessToken === localStorage.getItem("access-token"))
   return (
     <Box id='full'
     sx={{
@@ -26,9 +30,27 @@ const GameChannel = () => {
           sx={{
             width: '20%',
             height: '100%',
-            bgcolor: 'green'
           }}>
-          <h1>로고</h1>
+          <BrandWrapper
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%'
+            }}>
+            <Brand to="/">
+              <Logo>
+                <LogoImg
+                  style={{
+                    margin: 0
+                  }}
+                  src="/images/common/logo_A306.png"
+                  alt="A306 logo img"
+                />
+              <LogoName>A306</LogoName>
+              </Logo>
+            </Brand>
+          </BrandWrapper>
         </Box>
         <Paper id='info'
           sx={{
@@ -52,9 +74,14 @@ const GameChannel = () => {
           sx={{
             width: '20%',
             height: '100%',
-            bgcolor: 'green'
+            display: 'flex',
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
         }}>
-          <h1>버튼 두개</h1>
+          {accessToken === localStorage.getItem("access-token")
+          ? <Button>게임 시작</Button>
+          : 'Nickname'}
+          <BasicModal/>
         </Box>
       </Box>
       <Box id='main'
@@ -106,7 +133,50 @@ const GameChannel = () => {
       </Box>
     </Box>
   );
-  
 };
 
 export default GameChannel;
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '40%',
+  height: '75%',
+  bgcolor: 'white',
+  border: '2px solid #000',
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 4,
+};
+
+function BasicModal() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <Button onClick={handleOpen}>게임 방법</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            몸으로 말해요
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
+            3. 참여자는 채팅으로 정답을 맞춥니다.
+          </Typography>
+          <Button onClick={handleClose}>닫기</Button>
+        </Box>
+      </Modal>
+    </div>
+  );
+}

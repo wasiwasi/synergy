@@ -33,7 +33,7 @@ const steps = [
   },
 ];
 
-const accessToken = localStorage.getItem("access-token");
+export const accessToken = localStorage.getItem("access-token");
 
 function SwipeableTextMobileStepper() {
   const [selectData, setSelectData] = useState([
@@ -52,7 +52,7 @@ function SwipeableTextMobileStepper() {
       res.data.data.map((d:any, i:any)=> (
         copy[0].push(d.subject_name)
       ))
-      console.log(copy[0])
+      console.log(res.data.data)
       setSelectData(copy)
     })
   }, [])
