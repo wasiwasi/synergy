@@ -65,6 +65,21 @@ public class AuthController {
 		}
 	}
 
+	@PostMapping("/logout")
+	@ApiOperation(value="로그아웃", notes="<strong>액세스 토큰</strong>을 통해 로그아웃한다.")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "Success", response = BaseResponseBody.class),
+		@ApiResponse(code = 401, message = "Access Denied", response = BaseResponseBody.class)
+	})
+	public ResponseEntity<? extends BaseResponseBody> logout(@RequestBody @ApiParam(value="액세스 토큰", required = true) String accessToken) {
+		try {
+			authService.logout(accessToken);
+			return ResponseEntity.status(200).body(BaseResponseBody.of(200, "Success"));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(401).body(BaseResponseBody.of(401, "Access Denied"));
+		}
+	}
+
 	/*
 	refresh token reissue는 추후 개발
 	 */
