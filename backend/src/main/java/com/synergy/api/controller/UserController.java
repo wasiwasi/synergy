@@ -94,20 +94,19 @@ public class UserController {
 		 * 액세스 토큰이 없이 요청하는 경우, 403 에러({"error": "Forbidden", "message": "Access Denied"}) 발생.
 		 */
 		UserDetails userDetails = (UserDetails)authentication.getDetails();
-		String userId = userDetails.getUsername();
+		String username = userDetails.getUserNickname();
 
-		if(userId==null){
+		if(username==null){
 			return ResponseEntity.status(404).body(MyPageRes.builder().build());
 		}
 		String userEmail = userDetails.getUserEmail();
-//		User user = userService.getUserByUserId(userId);
 
 		//내가 생성한 문제집 리스트
-		List<SubjectSetDto> list = subjectService.getSubjectSets(Arrays.asList(Long.valueOf(userId)));
+		List<SubjectSetDto> list = subjectService.getSubjectSets(Arrays.asList(Long.valueOf(userDetails.getUsername())));
 
 
 		return ResponseEntity.status(200).body(MyPageRes.builder()
-				.userId(userId).userEmail(userEmail).subjectList(list)
+				.userNickName(username).userEmail(userEmail).subjectList(list)
 				.build());
 
 	}

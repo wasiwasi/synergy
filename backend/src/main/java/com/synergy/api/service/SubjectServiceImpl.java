@@ -1,15 +1,15 @@
 package com.synergy.api.service;
 
-import com.synergy.db.entity.Bodytalk;
-import com.synergy.db.entity.SubjectSet;
-import com.synergy.db.entity.SubjectSetDto;
-import com.synergy.db.entity.User;
+import com.synergy.db.entity.*;
+import com.synergy.db.repository.BodytalkRepository;
 import com.synergy.db.repository.SubjectSetRepository;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.Subject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -17,6 +17,8 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     SubjectSetRepository subjectSetRepository;
+    @Autowired
+    BodytalkRepository bodytalkRepository;
 
     @Override
     public List<SubjectSetDto> getSubjectSets(List<Long> ids) {
@@ -35,27 +37,39 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public void createSubjectSet(String subjectName, List<Bodytalk> list, User user,String gameTitle) {
-        SubjectSet subjectSet = new SubjectSet();
-        List<Bodytalk> bodytalk = new ArrayList<>();
+    public void createSubjectSet(String subjectName, User user,String gameTitle,List<String> wordList) {
+        SubjectSet initSet = new SubjectSet();
+        List<Bodytalk> bodytalkList = new ArrayList<>();
+        initSet.setGameTitle(gameTitle);
+        initSet.setSubjectName(subjectName);
+        initSet.setUser(user);
+        SubjectSet subjectSet =subjectSetRepository.save(initSet);
 
-        subjectSet.setSubjectName(subjectName);
-        //user 랑 서브젝트 네임 / 게임 제목
-//        subjectSet.setGameTitle();
-//        subjectSet.setUser(user);
-        subjectSet.setBodytalks(bodytalk);
+        for (String word:wordList) {
+            Bodytalk bodytalk = new Bodytalk();
+            bodytalk.setSubjectSet(subjectSet);
+            bodytalk.setWord(word);
+            Bodytalk savedBodytalk= bodytalkRepository.save(bodytalk);
+            bodytalkList.add(savedBodytalk);
+        }
+
+        subjectSet.setBodytalks(bodytalkList);
+
         subjectSetRepository.save(subjectSet);
     }
 
     @Override
     public void deleteSubjectSet( Long subjectId) {
         subjectSetRepository.deleteById(subjectId);
-        //궁금한점 -> subjectSetid만 삭제하면 속해있는 bodytalk도 삭제가 되나??
+
     }
 
     @Override
     public void deleteAllSubjectSet(Long userId) {
-        subjectSetRepository.deleteByuser_id(userId);
+        List<SubjectSetDto> list = subjectSetRepository.findByuser_idIn(Collections.singletonList(userId));
+        for (SubjectSetDto s: list) {
+            subjectSetRepository.deleteById(s.getId());
+        }
     }
 
 

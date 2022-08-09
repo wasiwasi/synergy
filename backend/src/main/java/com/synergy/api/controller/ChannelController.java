@@ -2,7 +2,9 @@ package com.synergy.api.controller;
 
 import com.synergy.api.request.channel.ParticipantPostReq;
 import com.synergy.api.response.channel.ChannelInfoReq;
+import com.synergy.api.service.UserService;
 import com.synergy.api.service.channel.ChannelService;
+import com.synergy.common.auth.UserDetails;
 import com.synergy.db.entity.Participant;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -10,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.openvidu.java.client.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,6 +31,9 @@ public class ChannelController {
 
     @Autowired
     ChannelService channelService;
+
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "채널의 존재 유무")
     @ApiResponses(
@@ -53,9 +60,13 @@ public class ChannelController {
 
             }
     )
-    @PutMapping("/{channelId}")
-    public ResponseEntity createChannel(@ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
+    @PutMapping("/generate/{channelId}")
+    public ResponseEntity createChannel(@ApiIgnore Authentication authentication,
+                                        @ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
                                         @ApiParam(value = "channel host 정보")@RequestBody ParticipantPostReq participantPostReq){
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+
         channelId = channelId.trim();
         if(!channelService.channelExistenceOnOV(channelId)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,7 +76,8 @@ public class ChannelController {
         Participant participant = new Participant();
         participant.setChannelId(channelId);
         participant.setConnectionId(participantPostReq.getConnectionId());
-        participant.setNickName(participantPostReq.getNickName());
+        participant.setNickName(userDetails.getUserNickname());
+
         if(channelService.joinChannel(participant)){
             channelService.getChannelByChannelId(channelId).setHost(participant);
             return new ResponseEntity(HttpStatus.OK);

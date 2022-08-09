@@ -12,7 +12,8 @@ public interface SubjectService {
 
     public List<Bodytalk> getBodytalk(Long subjectId);
     public SubjectSet getSubjectSet(Long subjectId);
-    public void createSubjectSet(String subjectName, List<Bodytalk> list, User user, String gameTitle);
-    public void deleteSubjectSet( Long subjectId);
+    public void createSubjectSet(String subjectName, User user, String gameTitle,List<String> word);
+//    public void createGameList(List<String> word);
+    public void deleteSubjectSet(Long subjectId);
     public void deleteAllSubjectSet(Long userId);
 }

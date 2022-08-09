@@ -38,6 +38,10 @@ public class UserDetails implements org.springframework.security.core.userdetail
 		return this.user.getId().toString();
 	}
 
+	public String getUserNickname(){
+		return this.user.getNickname().toString();
+	}
+
 	public String getUserEmail(){
 		return this.user.getEmail().toString();
 	}

@@ -16,4 +16,6 @@ public interface UserService {
 	boolean authorizeUser(EmailAuthPostReq emailAuthPostReq);
 
 	void deleteUserByUserId (String userId);
+
+	String getUserNickName(String userId);
 }
