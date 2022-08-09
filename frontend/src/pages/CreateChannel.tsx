@@ -32,7 +32,6 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
-const accessToken = localStorage.getItem("access-token");
 const steps = [
   {
     label: '게임을 선택해주세요',
@@ -77,6 +76,8 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+
+  const [accessToken, setAccessToken] = useState<string>("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -128,9 +129,14 @@ function SwipeableTextMobileStepper() {
   const didMount = useRef(false);
 
   useEffect(() => {
+    let token = localStorage.getItem("access-token");
+    //토큰이 없으면 api호출안함
+    if (!token) return;
+    setAccessToken(token as string);
+
     axios.get(`${BE_URL}/subjects`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${token}`
       }
     }).then((res) => {
       const copy = [...selectData]
@@ -141,19 +147,6 @@ function SwipeableTextMobileStepper() {
       setSelectData(copy)
     })
   }, [])
-
-  useEffect(() => {
-    //호스트 닉네임 받아오기
-    axios
-      .get(`${BE_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }).then((res) => {
-        // setMyUserName(res.data.nickname);
-        setMyUserName(res.data.userId);
-      });
-  }, [, nickName]);
 
   useEffect(() => {
       // --- 2) Init a session ---
@@ -415,8 +408,9 @@ function SwipeableTextMobileStepper() {
     });
     console.log("put session id " + mySessionId);
     axios
-      .put(`${BE_URL}/api/channels/${mySessionId}`, requestBody, {
+      .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
         headers: {
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       })
