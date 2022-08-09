@@ -1,6 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
 import { bgcolor, Box, display, height, width } from '@mui/system';
-import { Paper } from '@mui/material';
+import { Paper, Button } from '@mui/material';
 
 const GameChannel = () => {
   return (
