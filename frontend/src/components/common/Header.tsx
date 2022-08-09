@@ -31,7 +31,8 @@ const Header = () => {
     if (isLogin) {
       if (window.location.pathname === '/login' || window.location.pathname === '/signup') navigate("/");
     } else {
-      if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage' || window.location.pathname === '/channel/gamechannel') navigate("/");
+      if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage'
+          || window.location.pathname === '/channel/gamechannel' || window.location.pathname === '/channel/createchannel') navigate("/");
     }
     //로그인 상태 체크
     if (localStorage.getItem("access-token")) {
