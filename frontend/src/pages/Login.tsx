@@ -85,7 +85,7 @@ const Login = () => {
         navigate("/");
       })
       .catch((error) => {
-        if (error.status === 412) {
+        if (error.response.status === 412) {
           alert("이메일 인증 후 이용해주세요.");
         } else {
           alert("다시 시도해 주세요.");
