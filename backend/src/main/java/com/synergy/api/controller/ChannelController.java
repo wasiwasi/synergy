@@ -2,7 +2,9 @@ package com.synergy.api.controller;
 
 import com.synergy.api.request.channel.ParticipantPostReq;
 import com.synergy.api.response.channel.ChannelInfoReq;
+import com.synergy.api.service.UserService;
 import com.synergy.api.service.channel.ChannelService;
+import com.synergy.common.auth.UserDetails;
 import com.synergy.db.entity.Participant;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -10,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.openvidu.java.client.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,6 +31,9 @@ public class ChannelController {
 
     @Autowired
     ChannelService channelService;
+
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "채널의 존재 유무")
     @ApiResponses(
@@ -53,28 +60,50 @@ public class ChannelController {
 
             }
     )
-    @PutMapping("/{channelId}")
-    public ResponseEntity createChannel(@ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
+    @PutMapping("/generate/{channelId}")
+    public ResponseEntity createChannel(@ApiIgnore Authentication authentication,
+                                        @ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
                                         @ApiParam(value = "channel host 정보")@RequestBody ParticipantPostReq participantPostReq){
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+
         channelId = channelId.trim();
         if(!channelService.channelExistenceOnOV(channelId)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if(channelService.checkChannelNickNameDuplicate(channelId, participantPostReq.getNickName())){
-            return new ResponseEntity(HttpStatus.IM_USED); // 226 이미 사용중임
-        }
+        channelService.createAndPutRoom(channelId);
 
         Participant participant = new Participant();
-        participant.setChannelId(participantPostReq.getConnectionId());
-        participant.setNickName(participantPostReq.getNickName());
-        participant.setEmail(participantPostReq.getUserEmail());
+        participant.setChannelId(channelId);
+        participant.setConnectionId(participantPostReq.getConnectionId());
+        participant.setNickName(userDetails.getUserNickname());
+
         if(channelService.joinChannel(participant)){
+            channelService.getChannelByChannelId(channelId).setHost(participant);
             return new ResponseEntity(HttpStatus.OK);
         }else{
             return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
         }
 
     }
+
+    @ApiOperation(value = "방의 호스트 이름 반환하는 api ")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "방장 이름 전송 성공"),
+                    @ApiResponse(code = 404,message = "방이 존재 하지 않아 방장을 못 찾고 있음")
+            }
+    )
+    @GetMapping("/findHost/{channelId}")
+    public ResponseEntity getHostByChannelId(@PathVariable String channelId){
+        channelId = channelId.trim();
+        Participant Host = channelService.getChannelByChannelId(channelId).getHost();
+        String hostName = Host.getNickName();
+
+        if(Host!=null)return new ResponseEntity(hostName,HttpStatus.OK);
+        else return new ResponseEntity(HttpStatus.NOT_FOUND);
+    }
+
 
     @ApiOperation(value = "방생성 하기 위한 방코드")
     @ApiResponses(
@@ -88,6 +117,26 @@ public class ChannelController {
         return new ResponseEntity(channelId,HttpStatus.OK);
     }
 
+    @ApiOperation(value = "닉네임 중복 여부 확인")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "닉네임 중복 아님"),
+                    @ApiResponse(code = 226,message = "닉네임 중복")
+            }
+    )
+    @PostMapping("/duplicate/nickname/{channelId}")
+    public ResponseEntity nickNameDuplicateCheck(@PathVariable String channelId, @RequestBody ParticipantPostReq participantPostReq){
+        channelId = channelId.trim();
+        if(channelService.checkChannelNickNameDuplicate(channelId, participantPostReq.getNickName())){
+            return new ResponseEntity(HttpStatus.IM_USED);
+        }
+        else {
+            return new ResponseEntity(HttpStatus.OK);
+        }
+
+    }
+
+
     @ApiOperation(value = "원하는 방에 조인", notes = "방이 존재하는지, 닉네임은 중복되는 지 여부 체크")
     @ApiResponses(
             value = {
@@ -100,7 +149,6 @@ public class ChannelController {
     @PostMapping("/join/{channelId}")
     public ResponseEntity joinChannel(@PathVariable String channelId, @RequestBody ParticipantPostReq participantPostReq){
         channelId = channelId.trim();
-
         if(!channelService.channelExistenceOnOV(channelId)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
@@ -110,7 +158,6 @@ public class ChannelController {
 
         Participant participant = new Participant();
         participant.setChannelId(channelId);
-        participant.setEmail(participantPostReq.getUserEmail());
         participant.setNickName(participantPostReq.getNickName());
         participant.setConnectionId(participantPostReq.getConnectionId());
         if(channelService.joinChannel(participant)){
@@ -122,6 +169,7 @@ public class ChannelController {
 
 
     }
+
 
     @ApiOperation(value = "방 떠나기",notes = "뒤로가기를 눌러도, 나갈떄도 호출")
     @ApiResponses(
@@ -142,7 +190,7 @@ public class ChannelController {
                     @ApiResponse(code = 200,message = "방 떠나기 성공")
             }
     )
-    @PostMapping("/delete/{channelId}")
+    @DeleteMapping("/delete/{channelId}")
     public ResponseEntity deleteChannel(@PathVariable String channelId,@RequestBody ParticipantPostReq participantPostReq){
         channelId = channelId.trim();
         channelService.deleteChannel(channelId, participantPostReq.getNickName());
@@ -171,7 +219,7 @@ public class ChannelController {
                     @ApiResponse(code = 404,message = "방 존재하지 않음")
             }
     )
-    @PostMapping("/infoList")
+    @GetMapping("/infoList")
     public ResponseEntity getChannelInfoList(){
         ArrayList<ChannelInfoReq> channelList = channelService.getChannelList();
         return new ResponseEntity(channelList,HttpStatus.OK);

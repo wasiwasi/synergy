@@ -1,23 +1,17 @@
-/* eslint-disable */
-// import BasicSelect from '../components/common/Select';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'
+import React, { Component, useState, useCallback, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
+import axios from "axios";
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import MobileStepper from '@mui/material/MobileStepper';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import Header from "../components/common/Header";
+import { Link, Outlet, useNavigate, useLocation} from "react-router-dom";
 
-import Input from "@mui/material/Input";
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import styled from "@emotion/styled";
+
+import FormControl from "@mui/material/FormControl";
+// import FormHelperText from "@mui/material/FormHelperText";
+import Input from "@mui/material/Input";
+import InputLabel from "@mui/material/InputLabel";
+
 import Button from "@mui/material/Button";
 
 import "./Signup.css";
@@ -32,55 +26,62 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
-const steps = [
-  {
-    label: '게임을 선택해주세요',
-    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '준비 중']
+const themeA306 = createTheme({
+  palette: {
+    primary: {
+      // Purple and green play nicely together.
+      main: "#39A2DB",
+      contrastText: "#ffffff",
+    },
+    secondary: {
+      // This is green.A700 as hex.
+      main: "#769FCD",
+    },
   },
-  {
-    label: '개인전/팀전을 선택해주세요',
-    choice: ['개인전', '팀전']
-  },
-  {
-    label: '카테고리와 라운드를 선택해주세요',
-    choice: ['카테고리', '라운드'],
-  },
-];
+});
 
-// interface IState {
-//   OV: OpenVidu | null,
-//   mySessionId: string,
-//   myUserName: string,
-//   session: Session | undefined,
-//   mainStreamManager: Publisher | undefined,
-//   publisher: Publisher | undefined,
-//   subscribers: Subscriber[],
-//   myConnectionId: string,
-//   audiostate: boolean,
-//   audioallowed: boolean,
-//   videostate: boolean,
-//   videoallowed: boolean,
-//   messages: object[],
-//   message: string,
-// }
+interface IState {
+  OV: OpenVidu | null,
+  mySessionId: string,
+  myUserName: string,
+  session: Session | undefined,
+  mainStreamManager: Publisher | undefined,
+  publisher: Publisher | undefined,
+  subscribers: Subscriber[],
+  myConnectionId: string,
+  audiostate: boolean,
+  audioallowed: boolean,
+  videostate: boolean,
+  videoallowed: boolean,
+  messages: object[],
+  message: string,
+}
 
-function SwipeableTextMobileStepper() {
-  const [selectData, setSelectData] = useState([
-    [],
-    ['5', '10', '15', '20'],
-  ])
-  const [category, setCategory] = useState('')
-  const [round, setRound] = useState('')
-  
-  const [info, setInfo] = useState<string[]>([]);
-  const theme = useTheme();
-  const [activeStep, setActiveStep] = useState(0);
-  const maxSteps = steps.length;
-
-  const [accessToken, setAccessToken] = useState<string>("");
-
+const InvitePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // const [openviduState, setOpenviduState] = React.useState<IState>({
+  //     OV: null,
+  //     mySessionId: "",
+  //     myUserName: "",
+  //     session: undefined,
+  //     mainStreamManager: undefined,
+  //     publisher: undefined,
+  //     subscribers: [],
+  //     // user need to hold their own connection.id
+  //     myConnectionId: "",
+      
+  //     // audio, video
+  //     audiostate: true,
+  //     audioallowed: true,
+  //     videostate: true,
+  //     videoallowed: true,
+      
+  //     // chatting
+  //     messages: [],
+  //     message: "",
+  // });
 
   const [OV, setOV] = useState<OpenVidu | null>(null);
   const [mySessionId, setMySessionId] = useState<string | null>("");
@@ -89,8 +90,7 @@ function SwipeableTextMobileStepper() {
   const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
-  
+     
   const [myConnectionId, setMyConnectionId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
@@ -100,9 +100,6 @@ function SwipeableTextMobileStepper() {
      
   const [messages, setMessages] = useState<object[]>([]);
   const [message, setMessage] = useState<string>("");
-
-  const [joinLink, setJoinLink] = useState<string>("");
-
   const emptyAllOV = () => {
     setOV(null);
     setSession(undefined);
@@ -128,25 +125,23 @@ function SwipeableTextMobileStepper() {
 
   const didMount = useRef(false);
 
+  // URL에서 방 코드를 가져옴
   useEffect(() => {
-    let token = localStorage.getItem("access-token");
-    //토큰이 없으면 api호출안함
-    if (!token) return;
-    setAccessToken(token as string);
-
-    axios.get(`${BE_URL}/subjects`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => {
-      const copy = [...selectData]
-      res.data.data.map((d: any, i: any) => (
-        copy[0].push(d.subject_name)
-      ))
-      console.log(copy[0])
-      setSelectData(copy)
-    })
-  }, [])
+    const sch = location.search;
+    const params = new URLSearchParams(sch);
+    const channelId = params.get("channelid");
+    setMySessionId(channelId);
+    //호스트 닉네임을 가져옴
+    axios
+      .get(`${BE_URL}/api/channels/findHost/${channelId}`)
+      .then((res) => {
+        console.log(res);
+        sethostName(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   useEffect(() => {
       // --- 2) Init a session ---
@@ -172,10 +167,11 @@ function SwipeableTextMobileStepper() {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      subscribers.push(subscriber as Subscriber);
+      var varSubscribers = subscribers;
+      varSubscribers.push(subscriber as Subscriber);
 
       // Update the state with the new subscribers
-      setSubscribers(subscribers);
+      setSubscribers(varSubscribers);
     });
 
     // On every Stream destroyed...
@@ -208,15 +204,9 @@ function SwipeableTextMobileStepper() {
 
           // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
           // element: we will manage it on our own) and with the desired properties
-          let videoDevice = undefined;
-          if (videoDevices && videoDevices?.length > 1) {
-            videoDevice = videoDevices?.[0].deviceId;
-            setCurrentVideoDeviceId(videoDevice);
-          }
-
           let publisher = OV?.initPublisher("", {
             audioSource: undefined, // The source of audio. If undefined default microphone
-            videoSource: videoDevice, // The source of video. If undefined default webcam
+            videoSource: undefined, // The source of video. If undefined default webcam
             publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
             publishVideo: true, // Whether you want to start publishing with your video enabled or not
             resolution: "640x480", // The resolution of your video
@@ -241,7 +231,6 @@ function SwipeableTextMobileStepper() {
           );
         });
     });
-
   }, [session]);
 
   useEffect(() => {
@@ -273,27 +262,57 @@ function SwipeableTextMobileStepper() {
     });
   }, [session, messages]);
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const onEnter = async () => {
+    await joinSession();
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  // 닉네임
+  const onChangeNickName = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const nickNameRegex = /^[ㄱ-ㅎ|가-힣|a-z]+$/; // 한글, 영어소문자만
+      const nickNameCurrent = e.target.value;
+      setNickName(nickNameCurrent);
+      // 닉네임 변경시 중복체크 다시하도록 false로 상태 변경
+      setUsableNickName(false);
+
+      if (
+        nickNameCurrent.length < 6 ||
+        nickNameCurrent.length > 12 ||
+        !nickNameRegex.test(nickNameCurrent)
+      ) {
+        setNickNameError("공백 없이 6~12자 영소문자와 한글만 가능합니다.");
+        setIsNickName(false);
+      } else {
+        setNickNameError("올바른 이름 형식입니다!");
+        setIsNickName(true);
+      }
+    },
+    []
+  );
+
+  // 닉네임 중복확인
+  const nickNameCheck = (e: any) => {
+    e.preventDefault();
+    if (isNickName) {
+      axios
+        .post(`${BE_URL}/api/channels/duplicate/nickname/${mySessionId}`, {
+            connectionId : myConnectionId,
+            nickName: nickName,
+        })
+        .then((response) => {
+          {
+            alert("사용가능한 닉네임입니다.");
+            setUsableNickName(true);
+            setMyUserName(nickName);
+          }
+        })
+        .catch((error) => {
+          alert("중복된 닉네임입니다.");
+        });
+    } else {
+      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+    }
   };
-
-  const choice = (e: string) => {
-    let copy: string[] = [...info]
-    copy.push(e)
-    setInfo(copy)
-    handleNext()
-  }
-
-  const back = () => {
-    let copy: string[] = [...info]
-    copy.pop()
-    setInfo(copy)
-    handleBack()
-  }
 
   const sendMessageByClick = () => {
     if (message !== "") {
@@ -400,17 +419,16 @@ function SwipeableTextMobileStepper() {
       setSubscribers(varSubscribers);
     }
   }
-  // 호스트 백엔드에 등록
-  const recordParticipant = (conId : string) => {
+  // 참가자 백엔드에 등록
+  const recordParticipant = () => {
     const requestBody = JSON.stringify({
-      connectionId: conId,
+      connectionId: myConnectionId,
       nickName: myUserName,
     });
     console.log("put session id " + mySessionId);
     axios
-      .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
+      .post(BE_URL + "/api/channels/join/" + mySessionId, requestBody, {
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       })
@@ -456,24 +474,23 @@ function SwipeableTextMobileStepper() {
       var videoDevices = devices?.filter(
         (device) => device.kind === "videoinput"
       );
-      console.log((publisher));
-      console.log(videoDevices);
+
       if (videoDevices && videoDevices.length > 1) {
         var newVideoDevice = videoDevices.filter(
-          (device) => device.deviceId !== currentVideoDeviceId
+          // (device) => device.deviceId !== currentVideoDevice.deviceId
+          (device) => device.deviceId
         );
 
         if (newVideoDevice.length > 0) {
           // Creating a new publisher with specific videoSource
           // In mobile devices the default and first camera is the front one
-          setCurrentVideoDeviceId(newVideoDevice[0].deviceId);
           var newPublisher = OV?.initPublisher("", {
             videoSource: newVideoDevice[0].deviceId,
             publishAudio: true,
             publishVideo: true,
             mirror: true,
           });
-          console.log((newPublisher));
+
           //newPublisher.once("accessAllowed", () => {
           await session?.unpublish(mainStreamManager as Publisher);
 
@@ -501,8 +518,8 @@ function SwipeableTextMobileStepper() {
    */
 
    const getToken = () => {
-     return createSession(mySessionId as string).then((sessionId) => 
-      createToken(sessionId as string)     
+    return createSession(mySessionId as string).then((sessionId) =>
+      createToken(sessionId as string)
     );
   }
 
@@ -520,7 +537,15 @@ function SwipeableTextMobileStepper() {
         })
         .then((response) => {
           console.log("CREATE SESSION", response);
-          resolve(response.data.id);
+          axios.delete(OPENVIDU_SERVER_URL + "/sessions/" + response.data.id, {
+            headers: {
+              Authorization:
+                "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+              "Content-Type": "application/json",
+            },
+          })
+          alert(`참가하려는 ${sessionId}방이 존재하지 않습니다.`);
+          reject(response);
         })
         .catch((response) => {
           var error = Object.assign({}, response);
@@ -551,8 +576,7 @@ function SwipeableTextMobileStepper() {
     });
   }
 
-  const createToken = (sessionId: string) => {
-    generateJoinLink(sessionId as string);
+  const createToken = (sessionId : string) => {
     return new Promise((resolve, reject) => {
       var data = {};
       axios
@@ -569,205 +593,69 @@ function SwipeableTextMobileStepper() {
         )
         .then((response) => {
           console.log("TOKEN", response);
+          resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
-          //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
-          //임시로 connectionId를 인자로 넘겨주어 해결
-          recordParticipant(response.data.id);
-          resolve(response.data.token);
+          recordParticipant();
         })
         .catch((error) => reject(error));
     });
   }
 
-  //방생성 요청
-  const handleCreateRoom = (event : any) => {
-    event.preventDefault();
-
-    createRandomSessionId().then(() => {
-      joinSession();
-    });
-  }
-
-  // SpringBoot Server로부터 무작위 세션 id 생성.
-  const createRandomSessionId = () => {
-    return new Promise<void>((resolve) => {
-      axios
-        .get(`${BE_URL}/api/channels/create`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          // setState 호출 시 render도 호출 (https://velog.io/@lllen/React-%EC%9D%B4%EB%B2%A4%ED%8A%B8)
-          console.log("created random sessionId");
-          // this.mySessionId = response.data;
-
-          console.log(response);
-          setMySessionId(response.data);
-          resolve();
-        });
-    });
-  }
-
-  const generateJoinLink = (sessionId: string) => {
-    const str = "https://i7a306.p.ssafy.io/join?channelid="+sessionId;
-    setJoinLink(str);
-  }
-
-  const handleCopyClipBoard = () => {
-    navigator.clipboard.writeText(joinLink);
-  }
-
-  //카메라, 마이크 온오프
-  const reverseAudioState = () => {
-    publisher?.publishAudio(!audiostate);
-    setAudiostate(!audiostate);
-  }
-
-  const reverseVideoState = () => {
-    publisher?.publishVideo(!videostate);
-    setVideostate(!videostate);
-  }
-
   return (
-  <Container>
-    {session === undefined ? (
-      <Box sx={{ flexGrow: 1, 
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                zIndex: 0}}>
-        <Paper
-          square
-          elevation={0}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: 50,
-            pl: 2,
-            bgcolor: 'background.default',
-          }}
-        >
-          <Typography
-          sx={{
-            typography: 'subtitle2',
-            fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
-          }}>{steps[activeStep].label}</Typography>
-        </Paper>
-        <div style={{ 
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 1100,
-          height: 700
-      }}>
-          {steps[activeStep].choice.map((step, index) => (
-            <div key={index}>
-              {activeStep < maxSteps - 1 ?
-                <Button
-                  onClick={()=>{
-                    activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
-                    }}
-                  sx={{
-                    bgcolor: 'info.main',
-                    color: 'white',
-                    height: 300,
-                    margin: 2,
-                    marginBottom: 0,
-                    fontSize: 25,
-                    width: 400,
-                    zIndex: 1,
-                  }}>
-                  {steps[activeStep].choice[index]}
-                </Button> : 
-                <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
-                setInfo = {setInfo}
-                selectData = {selectData}
-                setSelectData = {setSelectData}
-                category = {category}
-                round = {round}
-                setCategory = {setCategory}
-                setRound = {setRound}
-                />
-              }
-            </div>
-          ))}
-        </div>
-        <MobileStepper
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            maxWidth: 1000,
-            width: '100%'
-          }}
-          steps={maxSteps}
-          position="static"
-          activeStep={activeStep}
-          nextButton={
-            activeStep === maxSteps - 1 ? 
-            // <Link to="/channel/gamechannel" style={{ textDecoration: 'inherit'}}>
-            //   <Button
-            //     size="small"
-            //     // onClick={()=> {데이터 서버로 전송}}
-            //   >
-            //     게임 생성
-            //     {theme.direction === 'rtl' ? (
-            //       <KeyboardArrowLeft />
-            //     ) : (
-            //       <KeyboardArrowRight />
-            //     )}
-            //   </Button>
-            // </Link>
-            <Button
-                size="small"
-                onClick={handleCreateRoom}
-              >
-                게임 생성
-                {theme.direction === 'rtl' ? (
-                  <KeyboardArrowLeft />
-                ) : (
-                  <KeyboardArrowRight />
+    <Container>
+      <Wrapper>
+        <ThemeProvider theme={themeA306}>
+          {session === undefined ? (
+            <InvitePageForm>
+              <InvitePageHead>Brand</InvitePageHead>
+            
+              <InvitePageMsg>{hostName} 님의 방에 입장하시겠습니까? : </InvitePageMsg>
+
+              <InvitePageInput>
+                <FormControl variant="standard" fullWidth>
+                  <InputLabel htmlFor="component-helper" shrink>
+                    Nick Name
+                  </InputLabel>
+                  <Input
+                    id="component-helper-nickname"
+                    placeholder="닉네임을 입력해 주세요."
+                    // value={nickName}
+                    onChange={onChangeNickName}
+                    required
+                    aria-describedby="component-helper-text"
+                  />
+                </FormControl>
+                <NickNameButton onClick={nickNameCheck}>
+                  닉네임 중복체크
+                </NickNameButton>
+
+                {nickName.length > 0 && (
+                  <div className={`${isNickName ? "success" : "error"}`}>
+                    {nickNameError}
+                  </div>
                 )}
-              </Button>
-            : <Button
-            size="small"
-            disabled= {true}
-            >
-            게임 생성
-            {theme.direction === 'rtl' ? (
-              <KeyboardArrowLeft />
-            ) : (
-              <KeyboardArrowRight />
-            )}
-          </Button>
-          }
-          backButton={
-            <Button size="small" onClick={back} disabled={activeStep === 0}>
-              {theme.direction === 'rtl' ? (
-                <KeyboardArrowRight />
-              ) : (
-                <KeyboardArrowLeft />
-              )}
-              이전
-            </Button>
-          }
-        />
-        </Box>
-      ) : null}
-      {/* session이 있을 때 */}
-      {session !== undefined ? (
+              </InvitePageInput>
+
+              <InvitePageInput onClick={onEnter}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="medium"
+                  fullWidth
+                  disabled={!(isNickName && usableNickName)}
+                >
+                  채널 입장하기
+                </Button>
+                <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div>
+              </InvitePageInput>
+            </InvitePageForm>
+          ) : null}
+          {/* session이 있을 때 */}
+          {session !== undefined ? (
           <div id="session">
             <div id="session-header">
               <h1 id="session-title">{mySessionId}</h1>
-              <div>
-                <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
-              </div>
               <input
                 className="btn btn-large btn-danger"
                 type="button"
@@ -775,7 +663,7 @@ function SwipeableTextMobileStepper() {
                 onClick={leaveSession}
                 value="Leave session"
               />
-          </div>
+            </div>
             {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
                 <UserVideoComponent
@@ -810,98 +698,35 @@ function SwipeableTextMobileStepper() {
                   <UserVideoComponent streamManager={sub} />
                 </div>
               ))}
-          </div>
-          <div>
-            {audiostate ? (
-              <button 
-                onClick={reverseAudioState}
-              >
-                Audio Off
-              </button>
-            ) : (
+            </div>
+            <div className="chatbox__footer">
+              <input
+                id="chat_message"
+                type="text"
+                placeholder="Write a message..."
+                onChange={handleChatMessageChange}
+                onKeyPress={sendMessageByEnter}
+                value={message}
+              />
               <button
-                onClick={reverseAudioState}
+                className="chatbox__send--footer"
+                onClick={sendMessageByClick}
               >
-                Audio On
+                Enter
               </button>
-            )}
-          </div>
-          <div>
-          {videostate ? (
-              <button 
-                onClick={reverseVideoState}
-              >
-                Video Off
-              </button>
-            ) : (
-              <button
-                onClick={reverseVideoState}
-              >
-                Video On
-              </button>
-            )}
-          </div>
-          <div className="chatbox__footer">
-            <input
-              id="chat_message"
-              type="text"
-              placeholder="Write a message..."
-              onChange={handleChatMessageChange}
-              onKeyPress={sendMessageByEnter}
-              value={message}
-            />
-            <button
-              className="chatbox__send--footer"
-              onClick={sendMessageByClick}
-            >
-              Enter
-            </button>
-          </div>
-          <div className="chatbox__messages">
-            <Messages messages={messages} />
-            <div />
-          </div>
+            </div>
+            <div className="chatbox__messages">
+              <Messages messages={messages} />
+              <div />
+            </div>
           </div>
         ) : null}
-      </Container>
+        </ThemeProvider>
+      </Wrapper>
+    </Container>
   );
-}
+};
 
-export default SwipeableTextMobileStepper;
-
-function BasicSelect(props: any) {
-  const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setCategory(event.target.value as string);
-    if (props.index == 0) {
-      props.setCategory(category)
-    }
-    else {
-      props.setRound(category)
-    }
-  };
-
-  return (
-    <Box sx={{ minWidth: 120,
-    width: 560 }}>
-      <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={category}
-          label="Category"
-          onChange={handleChange}
-        >
-          {props.selectData[props.index].map((d: any, i: any)=> (
-            <MenuItem key={i} value={d}>{d}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
-  );
-}
 
 const Container = styled.div`
   // position: sticky;
@@ -913,3 +738,89 @@ const Container = styled.div`
   // // padding:150px 0;
   // background-color: #D7D7D7;
 `;
+
+const Wrapper = styled.div`
+  display: flex;
+  // align-items: center;
+  // text-align: center;
+  // background-color: #D7D7D7;
+  justify-content: center;
+  // z-index: 5;
+`;
+
+const InvitePageHead = styled.h1`
+  color: #000000;
+  margin: 40px;
+`;
+
+const InvitePageMsg = styled.h5`
+  color: #000000;
+  margin: 40px;
+  font-size: 16px;
+`;
+
+const InvitePageForm = styled.div`
+  // display: flex;
+  // flex-direction: column;
+  // align-items: right;
+  width: 500px;
+  display: inline-block;
+  // position: absolute;
+`;
+
+const InvitePageInput = styled.div`
+  // display: flex;
+  // flex-direction: column;
+  // width: 500px;
+  // text-align: center;
+  // align-items: center;
+  margin: 15px 0px;
+`;
+
+const InvitePageButton = styled.button`
+  height: 40px;
+  margin-bottom: 24px;
+  border: none;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  background-color: #3396f4;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.08s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: #2878c3;
+  }
+  @media (max-width: 575px) {
+    font-size: 15px;
+  }
+`;
+
+const NickNameButton = styled.button`
+  height: 40px;
+  margin-bottom: 24px;
+  border: none;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+  background-color: #39a2db;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.08s ease-in-out;
+  cursor: pointer;
+  &:hover {
+    background-color: #2878c3;
+  }
+  @media (max-width: 100px) {
+    font-size: 15px;
+  }
+`;
+
+// const InvitePageMsg = styled.div`
+//   text-decoration: none;
+//   font-size: 14px;
+//   font-weight: bold;
+// `;
+
+export default InvitePage;

@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Route, BrowserRouter } from "react-router-dom";
-
-
+import { Link, Route, BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
@@ -9,27 +7,42 @@ import styled from '@emotion/styled';
 
 
 import Button from '@mui/material/Button';
-
-
-
-
-
+import { useEffect } from 'react';
 
 interface MenuListProps {
   isExpanded: boolean;
 }
 
-
-
-
 const Header = () => {
 
+  const [isLogin, setIslogin] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleMenuClick = () => {
     setIsExpanded(!isExpanded);
     console.log(isExpanded)
   };
+
+  useEffect(() => {
+    //잘못된 접근 제한
+    if (isLogin) {
+      if (window.location.pathname === '/login' || window.location.pathname === '/signup') navigate("/");
+    } else {
+      if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage'
+          || window.location.pathname === '/channel/gamechannel' || window.location.pathname === '/channel/createchannel') navigate("/");
+    }
+    //로그인 상태 체크
+    if (localStorage.getItem("access-token")) {
+      setIslogin(true);
+    } else {
+      setIslogin(false);
+    }
+  }, [location]);
+
+  if (window.location.pathname === '/channel/gamechannel') return null;
 
   return ( 
     <>
@@ -50,15 +63,18 @@ const Header = () => {
           
 
           <Navigate>
-
-            <PageLink to="/login">로그인</PageLink>
-            <PageLink to="/signup">회원가입</PageLink>
-            <PageLink to="/users/mypage">마이페이지</PageLink>
-            <PageLink to="/channel/createchannel">채널생성</PageLink>
-            <PageLink to="/channel/gamechannel">게임채널</PageLink>
-            <Button variant="contained">문의하기</Button>
-
-
+            {!isLogin ? (
+              <>
+                <PageLink to="/login">로그인</PageLink>
+                <PageLink to="/signup">회원가입</PageLink>
+              </>
+            ) : (
+              <>
+                <PageLink to="/logout">로그아웃</PageLink>
+                <PageLink to="/users/mypage">마이페이지</PageLink>
+                  <PageLink to="/channel/createchannel">채널생성</PageLink>
+              </>
+            )}
           </Navigate>
           <MenuButton isExpanded={isExpanded} onClick={handleMenuClick} >
             <MenuIcon className="fa-solid fa-bars"></MenuIcon>
@@ -67,13 +83,19 @@ const Header = () => {
           
         </Wrapper>
 
-          <NavMobile isExpanded={isExpanded}>
-            <PageLinkMobile to="/login">로그인</PageLinkMobile>
-            <PageLinkMobile to="/signup">회원가입</PageLinkMobile>
-            <PageLinkMobile to="/users/mypage">마이페이지</PageLinkMobile>
-            <PageLinkMobile to="/channel/createchannel">채널생성</PageLinkMobile>
-            <PageLinkMobile to="/channel/gamechannel">게임채널</PageLinkMobile>
-            <Button variant="contained">문의하기</Button>
+        <NavMobile isExpanded={isExpanded}>
+          {!isLogin ? (
+            <>
+              <PageLinkMobile to="/login">로그인</PageLinkMobile>
+              <PageLinkMobile to="/signup">회원가입</PageLinkMobile>
+            </>
+          ) : (
+            <>
+              <PageLinkMobile to="/logout">로그아웃</PageLinkMobile>
+              <PageLinkMobile to="/users/mypage">마이페이지</PageLinkMobile>
+              <PageLinkMobile to="/channel/createchannel">채널생성</PageLinkMobile>
+            </>
+          )}
         </NavMobile>
       </Container>
     </>
