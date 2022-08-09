@@ -1,10 +1,15 @@
 package com.synergy.api.controller;
 
 import com.synergy.api.request.EmailAuthPostReq;
+import com.synergy.api.response.MyPageRes;
 import com.synergy.api.service.MailService;
+import com.synergy.api.service.SubjectService;
 import com.synergy.common.util.RedisUtil;
+import com.synergy.db.entity.Bodytalk;
+import com.synergy.db.entity.SubjectSetDto;
 import com.synergy.db.entity.UserEmailForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +26,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import retrofit2.http.Path;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -38,6 +46,9 @@ public class UserController {
 
 	@Autowired
 	MailService mailService;
+
+	@Autowired
+	SubjectService subjectService;
 
 	@Autowired
 	RedisUtil redisUtil;
@@ -77,16 +88,28 @@ public class UserController {
 			@ApiResponse(code = 404, message = "사용자 없음"),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
-	public ResponseEntity<UserRes> getUserInfo(@ApiIgnore Authentication authentication) {
+	public ResponseEntity<MyPageRes> getUserInfo(@ApiIgnore Authentication authentication) {
 		/**
 		 * 요청 헤더 액세스 토큰이 포함된 경우에만 실행되는 인증 처리이후, 리턴되는 인증 정보 객체(authentication) 통해서 요청한 유저 식별.
 		 * 액세스 토큰이 없이 요청하는 경우, 403 에러({"error": "Forbidden", "message": "Access Denied"}) 발생.
 		 */
 		UserDetails userDetails = (UserDetails)authentication.getDetails();
 		String userId = userDetails.getUsername();
-		User user = userService.getUserByUserId(userId);
 
-		return ResponseEntity.status(200).body(UserRes.of(user));
+		if(userId==null){
+			return ResponseEntity.status(404).body(MyPageRes.builder().build());
+		}
+		String userEmail = userDetails.getUserEmail();
+//		User user = userService.getUserByUserId(userId);
+
+		//내가 생성한 문제집 리스트
+		List<SubjectSetDto> list = subjectService.getSubjectSets(Arrays.asList(Long.valueOf(userId)));
+
+
+		return ResponseEntity.status(200).body(MyPageRes.builder()
+				.userId(userId).userEmail(userEmail).subjectList(list)
+				.build());
+
 	}
 
 	@PostMapping("/email")
@@ -139,6 +162,18 @@ public class UserController {
 			return ResponseEntity.status(404).body(BaseResponseBody.of(404, "만료된 요청입니다."));
 		}
 
+	}
+
+	@DeleteMapping("")
+	@ApiOperation(value = "회원 탈퇴", notes = "회원 탈퇴")
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "회원 탈퇴 성공")
+	})
+	public ResponseEntity deleteUser(@ApiIgnore Authentication authentication){
+		UserDetails userDetails = (UserDetails)authentication.getDetails();
+		String userId = userDetails.getUsername();
+		userService.deleteUserByUserId(userId);
+		return new ResponseEntity(HttpStatus.OK);
 	}
 
 }
