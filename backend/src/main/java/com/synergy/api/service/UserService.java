@@ -14,4 +14,8 @@ public interface UserService {
 	boolean isExistEmail(String email);
 	boolean isExistNickname(String nickname);
 	boolean authorizeUser(EmailAuthPostReq emailAuthPostReq);
+
+	void deleteUserByUserId (String userId);
+
+	String getUserNickName(String userId);
 }

@@ -1,5 +1,6 @@
 package com.synergy.api.controller;
 
+import com.synergy.api.request.UserSubjectCreatePostReq;
 import com.synergy.api.response.BodytalkRes;
 import com.synergy.api.response.SubjectSetRes;
 import com.synergy.api.service.SubjectService;
@@ -13,13 +14,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
@@ -30,6 +31,8 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/subjects")
 public class SubjectController {
+
+    private final Logger log = LoggerFactory.getLogger(ChannelController.class);
 
     @Autowired
     SubjectService subjectService;
@@ -81,5 +84,77 @@ public class SubjectController {
         return ResponseEntity.status(200).body(BodytalkRes.of(200, "문제집 조회 완료", list));
 
     }
+
+
+
+    @DeleteMapping("/{subjectId}")
+    @ApiOperation(value = "문제집 삭제", notes = "문제집 과 문제들 삭제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "문제집 & 문제 삭제 완료"),
+            @ApiResponse(code = 403, message = "본인의 문제집만 삭제 가능합니다."),
+            @ApiResponse(code = 404, message = "문제집이 존재하지 않습니다.")
+    })
+    public ResponseEntity<? extends BaseResponseBody> deleteOneSubject(@ApiIgnore Authentication authentication,
+                                                                  @PathVariable(value = "subjectId") Long subjectId){
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+        Long userId = Long.valueOf(userDetails.getUsername());
+
+        // 본인의 문제집이 맞는지 검증
+        try {
+            Long subjectOwner = subjectService.getSubjectSet(subjectId).getUser().getId();
+            if (subjectOwner != 1 && subjectOwner != userId) {
+                return ResponseEntity.status(403).body(BodytalkRes.of(403, "본인의 문제집만 조회 가능합니다."));
+            }
+        } catch(NoSuchElementException exception) {
+            return ResponseEntity.status(403).body(BodytalkRes.of(500, "문제집이 존재하지 않습니다."));
+        }
+
+        subjectService.deleteSubjectSet(subjectId);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("")
+    @ApiOperation(value = "문제집들 전부 삭제", notes = "내 문제집 과 문제들 전부 삭제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "문제집 & 문제 삭제 완료"),
+            @ApiResponse(code = 403, message = "본인의 문제집만 삭제 가능합니다."),
+    })
+    public ResponseEntity<? extends BaseResponseBody> deleteALLSubject(@ApiIgnore Authentication authentication){
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+        Long userId = Long.valueOf(userDetails.getUsername());
+
+        subjectService.deleteAllSubjectSet(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+
+
+    @PostMapping("/create")
+    @ApiOperation(value = "문제집 리스트 생성", notes = "기본 문제집과 유저가 만든 문제집에 대한 정보를 반환한다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "문제집 생성완료")
+    })
+    public ResponseEntity<? extends BaseResponseBody> createSubjects(@ApiIgnore Authentication authentication,
+                                                                     @RequestBody UserSubjectCreatePostReq userSubjectCreatePostReq) {
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+
+
+        subjectService.createSubjectSet(userSubjectCreatePostReq.getSubjectName()
+                ,userDetails.getUser(), userSubjectCreatePostReq.getGameTitle()
+                ,userSubjectCreatePostReq.getBodytalkList());
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+
+
+
 
 }
