@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.MalformedParametersException;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
@@ -35,10 +36,10 @@ public class AuthService {
         if(req.getEmail() == null || req.getPassword() == null)
             throw new IllegalArgumentException("please enter email and password");
 
-        // 이메일 형식(프론트 코드에서 가져옴)이 맞아야 하고, 비밀번호도 8자리 이상이어야 한다
-        String regex = "/([\\w-.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$/";
+        // 이메일 형식이 맞아야 하고, 비밀번호도 8자리 이상이어야 한다
+        String regex = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$";
         if(!Pattern.matches(regex, req.getEmail()) || req.getPassword().length() < 8)
-            throw new IllegalArgumentException("please check email or password");
+            throw new MalformedParametersException("please check email or password");
 
         log.debug("req email: "+req.getEmail()+" req password: "+req.getPassword());
 
