@@ -43,6 +43,7 @@ const themeA306 = createTheme({
 });
 
 const Signup = () => {
+  const BE_URL = process.env.REACT_APP_BACKEND_URL;
   //닉네임, 이메일, 비밀번호, 비밀번호 확인
   const [nickName, setNickName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -76,7 +77,7 @@ const Signup = () => {
   const onSignUp = () => {
     axios
       .post(
-        "https://i7a306.p.ssafy.io:8080/users/signup",
+        `${BE_URL}/users/signup`,
 
         {
           email: email,
@@ -222,7 +223,7 @@ const Signup = () => {
     e.preventDefault();
     if (isNickName) {
       axios
-        .post("https://i7a306.p.ssafy.io:8080/users/nickname", {
+        .post(`${BE_URL}/users/nickname`, {
           nickname: nickName,
         })
         .then((response) => {
@@ -244,7 +245,7 @@ const Signup = () => {
     e.preventDefault();
     if (isEmail) {
       axios
-        .post("https://i7a306.p.ssafy.io:8080/users/email", { email: email })
+        .post(`${BE_URL}/users/email`, { email: email })
         .then((response) => {
           {
             alert("사용가능한 이메일입니다.");
