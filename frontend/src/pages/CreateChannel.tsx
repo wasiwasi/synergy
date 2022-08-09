@@ -88,7 +88,8 @@ function SwipeableTextMobileStepper() {
   const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-     
+  const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
+  
   const [myConnectionId, setMyConnectionId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
@@ -215,9 +216,15 @@ function SwipeableTextMobileStepper() {
 
           // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
           // element: we will manage it on our own) and with the desired properties
+          let videoDevice = undefined;
+          if (videoDevices?.length != undefined) {
+            videoDevice = videoDevices?.[0].deviceId;
+            setCurrentVideoDeviceId(videoDevice);
+          }
+
           let publisher = OV?.initPublisher("", {
             audioSource: undefined, // The source of audio. If undefined default microphone
-            videoSource: undefined, // The source of video. If undefined default webcam
+            videoSource: videoDevice, // The source of video. If undefined default webcam
             publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
             publishVideo: true, // Whether you want to start publishing with your video enabled or not
             resolution: "640x480", // The resolution of your video
@@ -456,23 +463,24 @@ function SwipeableTextMobileStepper() {
       var videoDevices = devices?.filter(
         (device) => device.kind === "videoinput"
       );
-
+      console.log((publisher));
+      console.log(videoDevices);
       if (videoDevices && videoDevices.length > 1) {
         var newVideoDevice = videoDevices.filter(
-          // (device) => device.deviceId !== currentVideoDevice.deviceId
-          (device) => device.deviceId
+          (device) => device.deviceId !== currentVideoDeviceId
         );
 
         if (newVideoDevice.length > 0) {
           // Creating a new publisher with specific videoSource
           // In mobile devices the default and first camera is the front one
+          setCurrentVideoDeviceId(newVideoDevice[0].deviceId);
           var newPublisher = OV?.initPublisher("", {
             videoSource: newVideoDevice[0].deviceId,
             publishAudio: true,
             publishVideo: true,
             mirror: true,
           });
-
+          console.log((newPublisher));
           //newPublisher.once("accessAllowed", () => {
           await session?.unpublish(mainStreamManager as Publisher);
 
@@ -755,7 +763,7 @@ function SwipeableTextMobileStepper() {
               <h1 id="session-title">{mySessionId}</h1>
               <div>
                 <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
-               </div>
+              </div>
               <input
                 className="btn btn-large btn-danger"
                 type="button"
