@@ -15,8 +15,8 @@ import java.util.List;
 @Builder
 @ApiModel("Mypage only")
 public class MyPageRes {
-    @ApiModelProperty(name = "User Id")
-    String userId;
+    @ApiModelProperty(name = "User userNickName")
+    String userNickName;
 
     @ApiModelProperty(name = "User email")
     String userEmail;

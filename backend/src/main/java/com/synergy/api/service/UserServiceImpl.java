@@ -90,4 +90,9 @@ public class UserServiceImpl implements UserService {
 	public void deleteUserByUserId(String userId) {
 		userRepository.deleteById(Long.valueOf(userId));
 	}
+
+	@Override
+	public String getUserNickName(String userId) {
+		return userRepository.findById(Long.valueOf(userId)).get().getNickname();
+	}
 }
