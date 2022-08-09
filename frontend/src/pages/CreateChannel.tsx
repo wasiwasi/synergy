@@ -202,7 +202,6 @@ function SwipeableTextMobileStepper() {
     // 'getToken' method is simulating what your server-side should do.
     // 'token' parameter should be retrieved and returned by your own backend
     getToken().then((token) => {
-      console.log("getToken 들어옴=====", token);
       // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
       // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
       mySession?.connect(String(token), { clientData: myUserName })
@@ -217,7 +216,7 @@ function SwipeableTextMobileStepper() {
           // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
           // element: we will manage it on our own) and with the desired properties
           let videoDevice = undefined;
-          if (videoDevices?.length != undefined) {
+          if (videoDevices && videoDevices?.length > 1) {
             videoDevice = videoDevices?.[0].deviceId;
             setCurrentVideoDeviceId(videoDevice);
           }
