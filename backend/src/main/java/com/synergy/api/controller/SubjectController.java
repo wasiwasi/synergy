@@ -14,12 +14,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
@@ -81,5 +79,27 @@ public class SubjectController {
         return ResponseEntity.status(200).body(BodytalkRes.of(200, "문제집 조회 완료", list));
 
     }
+
+    @PostMapping("/create")
+    @ApiOperation(value = "문제집 리스트 생성", notes = "기본 문제집과 유저가 만든 문제집에 대한 정보를 반환한다.")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "문제집 생성완료")
+    })
+    public ResponseEntity<? extends BaseResponseBody> createSubjects(@ApiIgnore Authentication authentication,
+                                                                  @RequestBody ) {
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+        Long userId = Long.valueOf(userDetails.getUsername());
+
+        subjectService.createSubjectSet();
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+
+
+
 
 }

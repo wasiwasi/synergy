@@ -37,6 +37,10 @@ public class UserDetails implements org.springframework.security.core.userdetail
 	public String getUsername() {
 		return this.user.getId().toString();
 	}
+
+	public String getUserEmail(){
+		return this.user.getEmail().toString();
+	}
 	@Override
 	public boolean isAccountNonExpired() {
 		return this.accountNonExpired;
