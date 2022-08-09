@@ -64,6 +64,8 @@ public class AuthController {
 			return ResponseEntity.status(403).body(UserLoginPostRes.of(401, "Malformed Email or Password", null));
 		} catch(NoSuchElementException e) { // 사용자가 존재하지 않는 경우
 			return ResponseEntity.status(404).body(UserLoginPostRes.of(404, "No User Found", null));
+		} catch(IllegalStateException e){ // 이메일 인증이 안된경우
+			return ResponseEntity.status(412).body(UserLoginPostRes.of(412, "Need Email Auth", null));
 		} catch(RuntimeException e) {
 			return ResponseEntity.status(500).body(BaseResponseBody.of(500, "Internal Server Error"));
 		}
