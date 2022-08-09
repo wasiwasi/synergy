@@ -22,7 +22,7 @@ public class MyPageRes {
     String userEmail;
 
     @JsonProperty(value = "data")
-    List<SubjectSetDto> subjectList = new ArrayList<>();
+    List<SubjectSetDto> subjectList;
 
 
 }
