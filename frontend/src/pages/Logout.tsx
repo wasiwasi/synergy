@@ -8,17 +8,18 @@ const Logout = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log("Test");
-        axios
-        .post(`${BE_URL}/auth/logout`, JSON.stringify({
-            accessToken : localStorage.getItem("access-token")
-        }))
-            .then(() => {
-            console.log("로그아웃 성공");
-        })
+        if(localStorage.getItem("access-token")){
+            axios
+            .post(`${BE_URL}/auth/logout`, JSON.stringify({
+                accessToken : localStorage.getItem("access-token")
+            }))
+                .then(() => {
+                console.log("로그아웃 성공");
+            })
 
-        localStorage.removeItem("access-token");
-        navigate("/");
+            localStorage.removeItem("access-token");
+            navigate("/");
+        }
     }, []);
 
   return (
