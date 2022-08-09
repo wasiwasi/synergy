@@ -48,22 +48,22 @@ const steps = [
   },
 ];
 
-interface IState {
-  OV: OpenVidu | null,
-  mySessionId: string,
-  myUserName: string,
-  session: Session | undefined,
-  mainStreamManager: Publisher | undefined,
-  publisher: Publisher | undefined,
-  subscribers: Subscriber[],
-  myConnectionId: string,
-  audiostate: boolean,
-  audioallowed: boolean,
-  videostate: boolean,
-  videoallowed: boolean,
-  messages: object[],
-  message: string,
-}
+// interface IState {
+//   OV: OpenVidu | null,
+//   mySessionId: string,
+//   myUserName: string,
+//   session: Session | undefined,
+//   mainStreamManager: Publisher | undefined,
+//   publisher: Publisher | undefined,
+//   subscribers: Subscriber[],
+//   myConnectionId: string,
+//   audiostate: boolean,
+//   audioallowed: boolean,
+//   videostate: boolean,
+//   videoallowed: boolean,
+//   messages: object[],
+//   message: string,
+// }
 
 function SwipeableTextMobileStepper() {
   const [selectData, setSelectData] = useState([
@@ -626,6 +626,17 @@ function SwipeableTextMobileStepper() {
     navigator.clipboard.writeText(joinLink);
   }
 
+  //카메라, 마이크 온오프
+  const reverseAudioState = () => {
+    publisher?.publishAudio(!audiostate);
+    setAudiostate(!audiostate);
+  }
+
+  const reverseVideoState = () => {
+    publisher?.publishVideo(!videostate);
+    setVideostate(!videostate);
+  }
+
   return (
   <Container>
     {session === undefined ? (
@@ -806,27 +817,57 @@ function SwipeableTextMobileStepper() {
                   <UserVideoComponent streamManager={sub} />
                 </div>
               ))}
-            </div>
-            <div className="chatbox__footer">
-              <input
-                id="chat_message"
-                type="text"
-                placeholder="Write a message..."
-                onChange={handleChatMessageChange}
-                onKeyPress={sendMessageByEnter}
-                value={message}
-              />
-              <button
-                className="chatbox__send--footer"
-                onClick={sendMessageByClick}
+          </div>
+          <div>
+            {audiostate ? (
+              <button 
+                onClick={reverseAudioState}
               >
-                Enter
+                Audio Off
               </button>
-            </div>
-            <div className="chatbox__messages">
-              <Messages messages={messages} />
-              <div />
-            </div>
+            ) : (
+              <button
+                onClick={reverseAudioState}
+              >
+                Audio On
+              </button>
+            )}
+          </div>
+          <div>
+          {videostate ? (
+              <button 
+                onClick={reverseVideoState}
+              >
+                Video Off
+              </button>
+            ) : (
+              <button
+                onClick={reverseVideoState}
+              >
+                Video On
+              </button>
+            )}
+          </div>
+          <div className="chatbox__footer">
+            <input
+              id="chat_message"
+              type="text"
+              placeholder="Write a message..."
+              onChange={handleChatMessageChange}
+              onKeyPress={sendMessageByEnter}
+              value={message}
+            />
+            <button
+              className="chatbox__send--footer"
+              onClick={sendMessageByClick}
+            >
+              Enter
+            </button>
+          </div>
+          <div className="chatbox__messages">
+            <Messages messages={messages} />
+            <div />
+          </div>
           </div>
         ) : null}
       </Container>
