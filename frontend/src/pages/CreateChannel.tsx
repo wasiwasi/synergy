@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
-import Paper from '@mui/material/Paper';
+import {Paper, Modal} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -27,6 +27,11 @@ import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvid
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+
+import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -769,21 +774,100 @@ function SwipeableTextMobileStepper() {
       ) : null}
       {/* session이 있을 때 */}
       {session !== undefined ? (
-          <div id="session">
-            <div id="session-header">
+        <Box id='full'
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 0,
+            height: '100vh',
+            width: '100vw'
+          }}>
+         <Box id='header'
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '15%'
+          }}>
+          <Box id='logo'
+          sx={{
+            width: '20%',
+            height: '100%',
+            bgcolor: 'green'
+          }}>
+          {/* <div id="session">
+          <div id="session-header"> */}
               <h1 id="session-title">{mySessionId}</h1>
+              </Box>
+              <Box id='info'
+                sx={{
+                  // position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+
+                  width: '60%',
+                  height: '100%',
+                  bgcolor: 'orange',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
               <div>
                 <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
               </div>
-              <input
+              </Box>
+              <Box id='buttons'
+                sx={{
+                  width: '20%',
+                  height: '100%',
+                  bgcolor: 'inherit'
+              }}>
+              {/* <input
                 className="btn btn-large btn-danger"
                 type="button"
                 id="buttonLeaveSession"
                 onClick={leaveSession}
                 value="Leave session"
-              />
-          </div>
-            {mainStreamManager !== undefined ? (
+              /> */}
+          {/* </div> */}
+          {accessToken === localStorage.getItem("access-token")
+          ? <Button>게임 시작</Button>
+          : 'Nickname'}
+          <BasicModal/>        
+        </Box>
+      </Box>
+      <Box id='main'
+        sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '85%'
+      }}>
+
+           <Box id='conference'
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection:'column',
+            width: '75%',
+            height: '100%',
+            display: 'flex'
+            }}>
+          <div id='cam' 
+            style={{ 
+            display: 'flex',
+            backgroundColor: 'powderblue',
+            width: '100%',
+            height: '90%',
+            // margin: 10
+            }}>
+            {/* 큰 화면 카메라 */}
+            {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
                 <UserVideoComponent
                   streamManager={mainStreamManager}
@@ -796,8 +880,8 @@ function SwipeableTextMobileStepper() {
                   value="Switch Camera"
                 />
               </div>
-            ) : null}
-            <div id="video-container" className="col-md-6">
+            ) : null} */}
+            {/* <div id="video-container" className="col-md-6"> */}
               {publisher !== undefined ? (
                 <div
                   className="stream-container col-md-6 col-xs-6"
@@ -818,7 +902,45 @@ function SwipeableTextMobileStepper() {
                 </div>
               ))}
           </div>
+          <Box id='settings'
+            sx={{
+              backgroundColor: 'inherit',
+              width: '100%',
+              height: '10%',
+            }}>
+           <div>
+            <div id="settings">
+            <SettingsIcon />
+            
+            {audiostate ? (
+            <MicOutlinedIcon
+                color='error'
+                onClick={reverseAudioState}
+              />
+            
+            ) : (
+              <MicOutlinedIcon 
+              onClick={reverseAudioState} />
+            )}
+          </div>
           <div>
+          {videostate ? (
+              <VideocamIcon 
+              color='error'
+              onClick={reverseVideoState}
+              />                    
+            ) : (
+              <VideocamIcon onClick={reverseVideoState}/>
+                             
+            )}<ExitToAppIcon
+             color='error' 
+             onClick={leaveSession}/>
+
+          </div></div>
+          </Box>
+        </Box>
+          
+          {/* <div>
             {audiostate ? (
               <button 
                 onClick={reverseAudioState}
@@ -847,8 +969,15 @@ function SwipeableTextMobileStepper() {
                 Video On
               </button>
             )}
-          </div>
-          <div className="chatbox__footer">
+          </div> */}
+          <div id='chat' 
+          style={{
+          backgroundColor: 'grey',
+          width: '25%',
+          height: '100%'
+          // margin: 10
+        }}>
+          {/* <div className="chatbox__footer"> */}
             <input
               id="chat_message"
               type="text"
@@ -867,8 +996,8 @@ function SwipeableTextMobileStepper() {
           <div className="chatbox__messages">
             <Messages messages={messages} />
             <div />
-          </div>
-          </div>
+          {/* </div> */}
+          </div></Box></Box>
         ) : null}
       </Container>
   );
@@ -920,3 +1049,48 @@ const Container = styled.div`
   // // padding:150px 0;
   // background-color: #D7D7D7;
 `;
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '40%',
+  height: '75%',
+  bgcolor: 'white',
+  border: '2px solid #000',
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 4,
+};
+
+
+function BasicModal() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <Button onClick={handleOpen}>게임 방법</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            몸으로 말해요
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
+            3. 참여자는 채팅으로 정답을 맞춥니다.
+          </Typography>
+          <Button onClick={handleClose}>닫기</Button>
+        </Box>
+      </Modal>
+    </div>
+  );
+}
