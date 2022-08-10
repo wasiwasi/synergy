@@ -602,6 +602,17 @@ const InvitePage = () => {
     });
   }
 
+  //카메라, 마이크 온오프
+  const reverseAudioState = () => {
+    publisher?.publishAudio(!audiostate);
+    setAudiostate(!audiostate);
+  }
+
+  const reverseVideoState = () => {
+    publisher?.publishVideo(!videostate);
+    setVideostate(!videostate);
+  }
+
   return (
     <Container>
       <Wrapper>
@@ -698,6 +709,36 @@ const InvitePage = () => {
                   <UserVideoComponent streamManager={sub} />
                 </div>
               ))}
+            </div>
+            <div>
+              {audiostate ? (
+                <button 
+                  onClick={reverseAudioState}
+                >
+                  Audio Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseAudioState}
+                >
+                  Audio On
+                </button>
+              )}
+            </div>
+            <div>
+              {videostate ? (
+                <button 
+                  onClick={reverseVideoState}
+                >
+                  Video Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseVideoState}
+                >
+                  Video On
+                </button>
+              )}
             </div>
             <div className="chatbox__footer">
               <input
