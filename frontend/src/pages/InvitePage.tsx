@@ -298,14 +298,16 @@ const InvitePage = () => {
             nickName: nickName,
         })
         .then((response) => {
-          {
+          if (response.status == 226) {
+            alert("중복된 닉네임입니다.");
+          } else {
             alert("사용가능한 닉네임입니다.");
             setUsableNickName(true);
             setMyUserName(nickName);
           }
         })
         .catch((error) => {
-          alert("중복된 닉네임입니다.");
+          alert("서버 오류");
         });
     } else {
       alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
