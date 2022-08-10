@@ -180,10 +180,9 @@ function SwipeableTextMobileStepper() {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      subscribers.push(subscriber as Subscriber);
-
       // Update the state with the new subscribers
-      setSubscribers(subscribers);
+      subscribers.push(subscriber);
+      setSubscribers([...subscribers]);
     });
 
     // On every Stream destroyed...
