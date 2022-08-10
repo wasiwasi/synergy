@@ -418,9 +418,9 @@ const InvitePage = () => {
     }
   }
   // 참가자 백엔드에 등록
-  const recordParticipant = () => {
+  const recordParticipant = (conId : string) => {
     const requestBody = JSON.stringify({
-      connectionId: myConnectionId,
+      connectionId: conId,
       nickName: myUserName,
     });
     console.log("put session id " + mySessionId);
@@ -594,7 +594,9 @@ const InvitePage = () => {
           resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
-          recordParticipant();
+          //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
+          //임시로 connectionId를 인자로 넘겨주어 해결
+          recordParticipant(response.data.id);
         })
         .catch((error) => reject(error));
     });
