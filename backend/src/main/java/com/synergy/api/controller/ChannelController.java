@@ -87,10 +87,10 @@ public class ChannelController {
 
     }
 
-    @ApiOperation(value = "방의 호스트 이름 반환하는 api ")
+    @ApiOperation(value = "방의 호스트 정보를 반환하는 api ")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200,message = "방장 이름 전송 성공"),
+                    @ApiResponse(code = 200,message = "방장 정보 전송 성공"),
                     @ApiResponse(code = 404,message = "방이 존재 하지 않아 방장을 못 찾고 있음")
             }
     )
@@ -98,9 +98,8 @@ public class ChannelController {
     public ResponseEntity getHostByChannelId(@PathVariable String channelId){
         channelId = channelId.trim();
         Participant Host = channelService.getChannelByChannelId(channelId).getHost();
-        String hostName = Host.getNickName();
 
-        if(Host!=null)return new ResponseEntity(hostName,HttpStatus.OK);
+        if(Host!=null)return new ResponseEntity(Host,HttpStatus.OK);
         else return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
