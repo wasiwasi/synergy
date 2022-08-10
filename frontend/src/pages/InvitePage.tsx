@@ -167,11 +167,9 @@ const InvitePage = () => {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      var varSubscribers = subscribers;
-      varSubscribers.push(subscriber as Subscriber);
-
       // Update the state with the new subscribers
-      setSubscribers(varSubscribers);
+      subscribers.push(subscriber);
+      setSubscribers([...subscribers]);
     });
 
     // On every Stream destroyed...
@@ -420,9 +418,9 @@ const InvitePage = () => {
     }
   }
   // 참가자 백엔드에 등록
-  const recordParticipant = () => {
+  const recordParticipant = (conId : string) => {
     const requestBody = JSON.stringify({
-      connectionId: myConnectionId,
+      connectionId: conId,
       nickName: myUserName,
     });
     console.log("put session id " + mySessionId);
@@ -596,10 +594,23 @@ const InvitePage = () => {
           resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
-          recordParticipant();
+          //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
+          //임시로 connectionId를 인자로 넘겨주어 해결
+          recordParticipant(response.data.id);
         })
         .catch((error) => reject(error));
     });
+  }
+
+  //카메라, 마이크 온오프
+  const reverseAudioState = () => {
+    publisher?.publishAudio(!audiostate);
+    setAudiostate(!audiostate);
+  }
+
+  const reverseVideoState = () => {
+    publisher?.publishVideo(!videostate);
+    setVideostate(!videostate);
   }
 
   return (
@@ -698,6 +709,36 @@ const InvitePage = () => {
                   <UserVideoComponent streamManager={sub} />
                 </div>
               ))}
+            </div>
+            <div>
+              {audiostate ? (
+                <button 
+                  onClick={reverseAudioState}
+                >
+                  Audio Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseAudioState}
+                >
+                  Audio On
+                </button>
+              )}
+            </div>
+            <div>
+              {videostate ? (
+                <button 
+                  onClick={reverseVideoState}
+                >
+                  Video Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseVideoState}
+                >
+                  Video On
+                </button>
+              )}
             </div>
             <div className="chatbox__footer">
               <input
