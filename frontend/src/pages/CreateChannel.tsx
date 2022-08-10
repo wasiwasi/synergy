@@ -33,6 +33,8 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
+import Grid from '@mui/material/Unstable_Grid2';
+
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -263,6 +265,7 @@ function SwipeableTextMobileStepper() {
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
         console.log("messages: "+messages);
+  
 
         // messages.push({
         //   userName: chatdata[0],
@@ -337,7 +340,6 @@ function SwipeableTextMobileStepper() {
       });
     }
   }
-
 
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
@@ -796,7 +798,7 @@ function SwipeableTextMobileStepper() {
           sx={{
             width: '20%',
             height: '100%',
-            bgcolor: 'green'
+            // bgcolor: 'green'
           }}>
           {/* <div id="session">
           <div id="session-header"> */}
@@ -811,7 +813,12 @@ function SwipeableTextMobileStepper() {
 
                   width: '60%',
                   height: '100%',
-                  bgcolor: 'orange',
+                  // bgcolor: 'orange',
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomLeftRadius: 20,
+                  borderBottomRightRadius: 20,
+                  boxShadow: 4,
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -848,7 +855,7 @@ function SwipeableTextMobileStepper() {
         width: '100%',
         height: '85%'
       }}>
-
+        
            <Box id='conference'
           sx={{
             justifyContent: 'center',
@@ -858,6 +865,7 @@ function SwipeableTextMobileStepper() {
             height: '100%',
             display: 'flex'
             }}>
+            
           <div id='cam' 
             style={{ 
             display: 'flex',
@@ -882,17 +890,17 @@ function SwipeableTextMobileStepper() {
               </div>
             ) : null} */}
             {/* <div id="video-container" className="col-md-6"> */}
-              {publisher !== undefined ? (
+          {publisher !== undefined ? (
                 <div
                   className="stream-container col-md-6 col-xs-6"
                   onClick={() =>
                     handleMainVideoStream(publisher)
                   }
                 >
-                  <UserVideoComponent streamManager={publisher} />
+                   <UserVideoComponent streamManager={publisher} />
                 </div>
               ) : null}
-              {subscribers.map((sub, i) => (
+             {subscribers.map((sub, i) => (
                 <div
                   key={i}
                   className="stream-container col-md-6 col-xs-6"
@@ -907,36 +915,51 @@ function SwipeableTextMobileStepper() {
               backgroundColor: 'inherit',
               width: '100%',
               height: '10%',
+              display: 'flex',
+              justifyContent: 'space-evenly',
+              alignItems: 'center'
             }}>
-           <div>
-            <div id="settings">
-            <SettingsIcon />
+           <Button><SettingsIcon /></Button>
             
-            {audiostate ? (
-            <MicOutlinedIcon
-                color='error'
-                onClick={reverseAudioState}
-              />
-            
-            ) : (
-              <MicOutlinedIcon 
-              onClick={reverseAudioState} />
-            )}
-          </div>
-          <div>
-          {videostate ? (
-              <VideocamIcon 
-              color='error'
-              onClick={reverseVideoState}
-              />                    
-            ) : (
-              <VideocamIcon onClick={reverseVideoState}/>
+           {audiostate ? (
+                <Button
+                onClick={reverseAudioState}>
+                  <MicOutlinedIcon
+                  color='success'
+                />
+                </Button>
+              ) : (
+                <Button
+                onClick={reverseAudioState}>
+                  <MicOutlinedIcon
+                  color="disabled"
+                  />
+                </Button>
+              )}
+              {videostate ? (
+                <Button
+                onClick={reverseVideoState}>
+                  <VideocamIcon 
+                  color='success'
+                  />
+                </Button>                 
+              ) : (
+                <Button
+                onClick={reverseVideoState}>
+                  <VideocamIcon
+                  color="disabled"
+                  />
+                </Button>                   
+              )}
                              
-            )}<ExitToAppIcon
-             color='error' 
-             onClick={leaveSession}/>
+              <Button
+              onClick={leaveSession}>
+                <ExitToAppIcon
+                  color='error' 
+                />
+              </Button>
 
-          </div></div>
+          
           </Box>
         </Box>
           
@@ -978,6 +1001,13 @@ function SwipeableTextMobileStepper() {
           // margin: 10
         }}>
           {/* <div className="chatbox__footer"> */}
+          <div className="chatspace" style={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
+          <h3>채팅</h3>
+          <div className="chatbox__messages" style={{backgroundColor: 'white', width: '80%', height: '300px', overflow: 'auto'}}>
+            <Messages messages={messages} />
+            <div />
+          {/* </div> */}
+          </div>
             <input
               id="chat_message"
               type="text"
@@ -991,13 +1021,9 @@ function SwipeableTextMobileStepper() {
               onClick={sendMessageByClick}
             >
               Enter
-            </button>
+            </button></div>
           </div>
-          <div className="chatbox__messages">
-            <Messages messages={messages} />
-            <div />
-          {/* </div> */}
-          </div></Box></Box>
+          </Box></Box>
         ) : null}
       </Container>
   );
@@ -1038,6 +1064,7 @@ function BasicSelect(props: any) {
     </Box>
   );
 }
+
 
 const Container = styled.div`
   // position: sticky;
