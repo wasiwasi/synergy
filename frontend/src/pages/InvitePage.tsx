@@ -167,11 +167,9 @@ const InvitePage = () => {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      var varSubscribers = subscribers;
-      varSubscribers.push(subscriber as Subscriber);
-
       // Update the state with the new subscribers
-      setSubscribers(varSubscribers);
+      subscribers.push(subscriber);
+      setSubscribers([...subscribers]);
     });
 
     // On every Stream destroyed...
