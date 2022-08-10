@@ -122,6 +122,7 @@ const InvitePage = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
 
   const [hostName, sethostName] = useState<string>("");
+  const [hostConnectionId, setHostConnectionId] = useState<string>("");
 
   const didMount = useRef(false);
 
@@ -136,7 +137,8 @@ const InvitePage = () => {
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res) => {
         console.log(res);
-        sethostName(res.data);
+        sethostName(res.data.nickName);
+        setHostConnectionId(res.data.connectionId);
       })
       .catch((error) => {
         console.log(error);
@@ -174,15 +176,23 @@ const InvitePage = () => {
 
     // On every Stream destroyed...
     mySession?.on("streamDestroyed", (event : any) => {
-      // Remove the stream from 'subscribers' array
-      deleteSubscriber(event.stream.streamManager);
+      //호스트가 비정상 종료했다면
+      if (hostConnectionId === event.stream.connection.connectionId) {
+        deleteSession();
+      } else {
+        // Remove the stream from 'subscribers' array
+        deleteSubscriber(event.stream.streamManager);
+      }
     });
-
     // On every asynchronous exception...
     mySession?.on("exception", (exception) => {
       console.warn(exception);
     });
 
+    mySession?.on("sessionDisconnected", (event: any) => {
+      alert("서버와의 접속이 끊어졌습니다.");
+      navigate("/");
+    })
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -466,6 +476,31 @@ const InvitePage = () => {
     // Empty all properties...
     emptyAllOV();
 
+  }
+
+  const deleteSession = () => {
+    axios
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
+        {
+          data : {
+            nickName: hostName,
+            connectionId: hostConnectionId,
+          } 
+        })
+      .then((res) => {
+        console.log("방 삭제 성공");
+      })
+      .catch((e) => {
+        console.log("방 삭제 실패");
+      });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const switchCamera = async() => {
