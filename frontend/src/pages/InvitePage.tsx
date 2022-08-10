@@ -176,10 +176,14 @@ const InvitePage = () => {
 
     // On every Stream destroyed...
     mySession?.on("streamDestroyed", (event : any) => {
-      // Remove the stream from 'subscribers' array
-      deleteSubscriber(event.stream.streamManager);
+      //호스트가 비정상 종료했다면
+      if (hostConnectionId === event.stream.connection.connectionId) {
+        deleteSession();
+      } else {
+        // Remove the stream from 'subscribers' array
+        deleteSubscriber(event.stream.streamManager);
+      }
     });
-
     // On every asynchronous exception...
     mySession?.on("exception", (exception) => {
       console.warn(exception);
@@ -472,6 +476,31 @@ const InvitePage = () => {
     // Empty all properties...
     emptyAllOV();
 
+  }
+
+  const deleteSession = () => {
+    axios
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
+        {
+          data : {
+            nickName: hostName,
+            connectionId: hostConnectionId,
+          } 
+        })
+      .then((res) => {
+        console.log("방 삭제 성공");
+      })
+      .catch((e) => {
+        console.log("방 삭제 실패");
+      });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const switchCamera = async() => {
