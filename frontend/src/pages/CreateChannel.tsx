@@ -187,6 +187,8 @@ function SwipeableTextMobileStepper() {
 
     // On every Stream destroyed...
     mySession?.on("streamDestroyed", (event : any) => {
+      //연결끊긴 참가자 쫒아내기
+      kickParticipant(event.target.connection.connectionId);
       // Remove the stream from 'subscribers' array
       deleteSubscriber(event.stream.streamManager);
     });
