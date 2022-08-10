@@ -45,6 +45,9 @@ interface State {
 }
 
 const Login = () => {
+
+  const BE_URL = process.env.REACT_APP_BACKEND_URL;
+
   const [values, setValues] = React.useState<State>({
     email: "string",
     password: "",
@@ -65,10 +68,10 @@ const Login = () => {
   const [passwordError, setPasswordError] =
     useState<string>("비밀번호를 입력해 주세요.");
 
-  // 회원가입 버튼 클릭
+  // 로그인 버튼 클릭
   const onLogin = () => {
     axios
-      .post("https://i7a306.p.ssafy.io:8080/auth/login", {
+      .post(`${BE_URL}/auth/login`, {
         email: values.email,
         password: values.password,
       })
@@ -82,7 +85,11 @@ const Login = () => {
         navigate("/");
       })
       .catch((error) => {
-        alert("다시 시도해 주세요.");
+        if (error.response.status === 412) {
+          alert("이메일 인증 후 이용해주세요.");
+        } else {
+          alert("다시 시도해 주세요.");
+        }
         // console.log(error.message);
         // console.log(error.response.data.statusCode);
       });

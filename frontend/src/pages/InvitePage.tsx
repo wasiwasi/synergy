@@ -167,11 +167,9 @@ const InvitePage = () => {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      var varSubscribers = subscribers;
-      varSubscribers.push(subscriber as Subscriber);
-
       // Update the state with the new subscribers
-      setSubscribers(varSubscribers);
+      subscribers.push(subscriber);
+      setSubscribers([...subscribers]);
     });
 
     // On every Stream destroyed...
@@ -288,14 +286,16 @@ const InvitePage = () => {
             nickName: nickName,
         })
         .then((response) => {
-          {
+          if (response.status == 226) {
+            alert("중복된 닉네임입니다.");
+          } else {
             alert("사용가능한 닉네임입니다.");
             setUsableNickName(true);
             setMyUserName(nickName);
           }
         })
         .catch((error) => {
-          alert("중복된 닉네임입니다.");
+          alert("서버 오류");
         });
     } else {
       alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
@@ -390,9 +390,9 @@ const InvitePage = () => {
     }
   }
   // 참가자 백엔드에 등록
-  const recordParticipant = () => {
+  const recordParticipant = (conId : string) => {
     const requestBody = JSON.stringify({
-      connectionId: myConnectionId,
+      connectionId: conId,
       nickName: myUserName,
     });
     console.log("put session id " + mySessionId);
@@ -566,10 +566,23 @@ const InvitePage = () => {
           resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
-          recordParticipant();
+          //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
+          //임시로 connectionId를 인자로 넘겨주어 해결
+          recordParticipant(response.data.id);
         })
         .catch((error) => reject(error));
     });
+  }
+
+  //카메라, 마이크 온오프
+  const reverseAudioState = () => {
+    publisher?.publishAudio(!audiostate);
+    setAudiostate(!audiostate);
+  }
+
+  const reverseVideoState = () => {
+    publisher?.publishVideo(!videostate);
+    setVideostate(!videostate);
   }
 
   return (
@@ -668,6 +681,36 @@ const InvitePage = () => {
                   <UserVideoComponent streamManager={sub} />
                 </div>
               ))}
+            </div>
+            <div>
+              {audiostate ? (
+                <button 
+                  onClick={reverseAudioState}
+                >
+                  Audio Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseAudioState}
+                >
+                  Audio On
+                </button>
+              )}
+            </div>
+            <div>
+              {videostate ? (
+                <button 
+                  onClick={reverseVideoState}
+                >
+                  Video Off
+                </button>
+              ) : (
+                <button
+                  onClick={reverseVideoState}
+                >
+                  Video On
+                </button>
+              )}
             </div>
             <div className="chatbox__footer">
               <input

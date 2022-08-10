@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import axios from "axios";
 
 const EmailAuth = () => {
+  const BE_URL = process.env.REACT_APP_BACKEND_URL;
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,7 +15,7 @@ const EmailAuth = () => {
     const code = params.get("code");
     //axios
     axios
-      .post("https://i7a306.p.ssafy.io:8080/users/email-auth", {
+      .post(`${BE_URL}/users/email-auth`, {
         id: id,
         code: code,
       })
