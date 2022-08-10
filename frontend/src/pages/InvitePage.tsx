@@ -183,6 +183,10 @@ const InvitePage = () => {
       console.warn(exception);
     });
 
+    mySession?.on("sessionDisconnected", (event: any) => {
+      alert("서버와의 접속이 끊어졌습니다.");
+      navigate("/");
+    })
 
     // --- 4) Connect to the session with a valid user token ---
 
