@@ -15,7 +15,7 @@ import styled from "@emotion/styled";
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
 
-import { Button, Box, Input, InputLabel } from "@mui/material/";
+import { Button, Box, Input, InputLabel, Modal, Typography } from "@mui/material/";
 
 import "./Signup.css";
 
@@ -639,127 +639,250 @@ const InvitePage = () => {
           ) : null}
           {/* session이 있을 때 */}
           {session !== undefined ? (
-          <div id="session">
-            <div id="session-header">
-              <h1 id="session-title">{mySessionId}</h1>
-              <input
-                className="btn btn-large btn-danger"
-                type="button"
-                id="buttonLeaveSession"
-                onClick={leaveSession}
-                value="Leave session"
-              />
-            </div>
-            {mainStreamManager !== undefined ? (
-              <div id="main-video" className="col-md-6">
-                <UserVideoComponent
-                  streamManager={mainStreamManager}
-                />
-                <input
-                  className="btn btn-large btn-success"
-                  type="button"
-                  id="buttonSwitchCamera"
-                  onClick={switchCamera}
-                  value="Switch Camera"
-                />
-              </div>
-            ) : null}
-            <div id="video-container" className="col-md-6">
-              {publisher !== undefined ? (
-                <div
-                  className="stream-container col-md-6 col-xs-6"
-                  onClick={() =>
-                    handleMainVideoStream(publisher)
-                  }
-                >
-                  <UserVideoComponent streamManager={publisher} />
-                </div>
-              ) : null}
-              {subscribers.map((sub, i) => (
-                <div
-                  key={i}
-                  className="stream-container col-md-6 col-xs-6"
-                  onClick={() => handleMainVideoStream(sub)}
-                >
-                  <UserVideoComponent streamManager={sub} />
-                </div>
-              ))}
-            </div>
-            <Box id='settings'
+            <Box id='full'
               sx={{
-                backgroundColor: 'inherit',
-                width: '100%',
-                height: '10%',
                 display: 'flex',
-                justifyContent: 'space-evenly',
-                alignItems: 'center'
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 0,
+                height: '100vh',
+                width: '100vw'
               }}>
-              <Button><SettingsIcon /></Button>
-              
-              
-              {audiostate ? (
-                <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color='success'
-                />
+             <Box id='header'
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '15%'
+              }}>
+              <Box id='logo'
+              sx={{
+                width: '20%',
+                height: '100%',
+                bgcolor: 'green'
+              }}>
+              {/* <div id="session">
+              <div id="session-header"> */}
+                <h1 id="session-title">{mySessionId}</h1>
+                </Box>
+                <Box id='info'
+                  sx={{
+                    // position: 'sticky',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+  
+                    width: '60%',
+                    height: '100%',
+                    bgcolor: 'orange',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                </Box>
+                <Box id='buttons'
+                  sx={{
+                    width: '20%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                  }}>
+                  {/* <input
+                    className="btn btn-large btn-danger"
+                    type="button"
+                    id="buttonLeaveSession"
+                    onClick={leaveSession}
+                    value="Leave session"
+                  /> */}
+                  {/* </div> */}
+                  { nickName }
+                  <BasicModal/>        
+                </Box>
+          </Box>
+          <Box id='main'
+            sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '85%'
+          }}>
+            <Box id='conference'
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection:'column',
+                width: '75%',
+                height: '100%',
+                display: 'flex'
+                }}>
+              <div id='cam' 
+                style={{ 
+                display: 'flex',
+                backgroundColor: 'powderblue',
+                width: '100%',
+                height: '90%',
+                // margin: 10
+                }}>
+                {/* 큰 화면 카메라 */}
+                {/* {mainStreamManager !== undefined ? (
+                  <div id="main-video" className="col-md-6">
+                    <UserVideoComponent
+                      streamManager={mainStreamManager}
+                    />
+                    <input
+                      className="btn btn-large btn-success"
+                      type="button"
+                      id="buttonSwitchCamera"
+                      onClick={switchCamera}
+                      value="Switch Camera"
+                    />
+                  </div>
+                ) : null} */}
+                {/* <div id="video-container" className="col-md-6"> */}
+                  {publisher !== undefined ? (
+                    <div
+                      className="stream-container col-md-6 col-xs-6"
+                      onClick={() =>
+                        handleMainVideoStream(publisher)
+                      }
+                    >
+                      <UserVideoComponent streamManager={publisher} />
+                    </div>
+                  ) : null}
+                  {subscribers.map((sub, i) => (
+                    <div
+                      key={i}
+                      className="stream-container col-md-6 col-xs-6"
+                      onClick={() => handleMainVideoStream(sub)}
+                    >
+                      <UserVideoComponent streamManager={sub} />
+                    </div>
+                  ))}
+              </div>
+              <Box id='settings'
+                sx={{
+                  backgroundColor: 'inherit',
+                  width: '100%',
+                  height: '10%',
+                  display: 'flex',
+                  justifyContent: 'space-evenly',
+                  alignItems: 'center'
+                }}>
+                <Button>
+                  <SettingsIcon />
                 </Button>
-              ) : (
+
+                {audiostate ? (
+                  <Button
+                  onClick={reverseAudioState}>
+                    <MicOutlinedIcon
+                    color='success'
+                  />
+                  </Button>
+                ) : (
+                  <Button
+                  onClick={reverseAudioState}>
+                    <MicOutlinedIcon
+                    color="disabled"
+                    />
+                  </Button>
+                )}
+                {videostate ? (
+                  <Button
+                  onClick={reverseVideoState}>
+                    <VideocamIcon 
+                    color='success'
+                    />
+                  </Button>                 
+                ) : (
+                  <Button
+                  onClick={reverseVideoState}>
+                    <VideocamIcon
+                    color="disabled"
+                    />
+                  </Button>                   
+                )}
                 <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color="disabled"
+                onClick={leaveSession}>
+                  <ExitToAppIcon
+                    color='error' 
                   />
                 </Button>
-              )}
-              {videostate ? (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon 
-                  color='success'
-                  />
-                </Button>                 
-              ) : (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon
-                  color="disabled"
-                  />
-                </Button>                   
-              )}
-              <Button
-              onClick={leaveSession}>
-                <ExitToAppIcon
-                  color='error' 
+              </Box>
+              <div className="chatbox__footer">
+                <input
+                  id="chat_message"
+                  type="text"
+                  placeholder="Write a message..."
+                  onChange={handleChatMessageChange}
+                  onKeyPress={sendMessageByEnter}
+                  value={message}
                 />
-              </Button>
-            </Box>
-            <div className="chatbox__footer">
-              <input
-                id="chat_message"
-                type="text"
-                placeholder="Write a message..."
-                onChange={handleChatMessageChange}
-                onKeyPress={sendMessageByEnter}
-                value={message}
-              />
-              <button
-                className="chatbox__send--footer"
-                onClick={sendMessageByClick}
-              >
-                Enter
-              </button>
-            </div>
-            <div className="chatbox__messages">
-              <Messages messages={messages} />
-              <div />
-            </div>
-          </div>
-        ) : null}
+                <button
+                  className="chatbox__send--footer"
+                  onClick={sendMessageByClick}
+                >
+                  Enter
+                </button>
+              </div>
+              <div className="chatbox__messages">
+                <Messages messages={messages} />
+                <div />
+              </div>
+            </Box></Box></Box>
+          ) : null}
         </ThemeProvider>
       </Wrapper>
     </Container>
   );
+};
+
+function BasicModal() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <Button onClick={handleOpen}>게임 방법</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            몸으로 말해요
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
+            3. 참여자는 채팅으로 정답을 맞춥니다.
+          </Typography>
+          <Button onClick={handleClose}>닫기</Button>
+        </Box>
+      </Modal>
+    </div>
+  );
+}
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '40%',
+  height: '75%',
+  bgcolor: 'white',
+  border: '2px solid #000',
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 4,
 };
 
 
