@@ -42,7 +42,7 @@ const Header = () => {
     }
   }, [location]);
 
-  if (window.location.pathname === '/channel/createchannel') return null;
+  if (window.location.pathname === '/join') return null;
 
   return ( 
     <>
