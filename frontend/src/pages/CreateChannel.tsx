@@ -196,6 +196,10 @@ function SwipeableTextMobileStepper() {
       console.warn(exception);
     });
 
+    mySession?.on("sessionDisconnected", (event: any) => {
+      alert("서버와의 접속이 끊어졌습니다.");
+      navigate("/");
+    })
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -433,16 +437,26 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
         {
-          nickName: myUserName,
-          connectionId: myConnectionId,
+          data : {
+            nickName: myUserName,
+            connectionId: myConnectionId,
+          } 
         })
       .then((res) => {
         console.log("방 나가기 성공");
       })
       .catch((e) => {
         console.log("방 나가기 실패");
+      });
+    
+    axios
+      .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+        headers: {
+          Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+          "Content-Type": "application/json",
+        },
       });
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
 
@@ -455,6 +469,21 @@ function SwipeableTextMobileStepper() {
     // Empty all properties...
     emptyAllOV();
 
+  }
+
+  const kickParticipant = (conId : string) => {
+    axios
+      .post(`${BE_URL}/api/channels/kick/${mySessionId}`,
+        {
+          nickName: "",
+          connectionId: conId,
+        })
+      .then((res) => {
+        console.log("강제 퇴장 성공");
+      })
+      .catch((e) => {
+        console.log("강제 퇴장 실패");
+      });
   }
 
   const switchCamera = async() => {
