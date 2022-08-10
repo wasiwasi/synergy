@@ -163,7 +163,7 @@ public class UserController {
 
 	}
 
-	@PostMapping("/delete")
+	@DeleteMapping("")
 	@ApiOperation(value = "회원 탈퇴", notes = "회원 탈퇴")
 	@ApiResponses({
 			@ApiResponse(code = 200, message = "회원 탈퇴 성공")
