@@ -138,8 +138,9 @@ const InvitePage = () => {
     axios
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res) => {
-        console.log(res);
-        sethostName(res.data);
+        // console.log(res);
+        console.log(res.data)
+        sethostName(res.data.nickName);
       })
       .catch((error) => {
         console.log(error);
