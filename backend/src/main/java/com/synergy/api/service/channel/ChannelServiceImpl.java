@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -231,5 +232,15 @@ public class ChannelServiceImpl implements ChannelService{
             channelId=this.generateRandomChannelId();
         }
         return channelId;
+    }
+
+    @Override
+    public String getNicknameByConnectionId(String channelId, String connectionId) {
+        Channel channel = channelList.get(channelId);
+        ConcurrentMap<String, Participant> participantList = channel.getParticipantList();
+        return participantList.entrySet().stream()
+                .filter(e -> connectionId.equals(e.getValue().getConnectionId()))
+                .map(Map.Entry::getKey)
+                .findFirst().get();
     }
 }
