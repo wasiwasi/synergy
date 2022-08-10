@@ -186,9 +186,11 @@ function SwipeableTextMobileStepper() {
     });
 
     // On every Stream destroyed...
-    mySession?.on("streamDestroyed", (event : any) => {
-      //연결끊긴 참가자 쫒아내기
-      kickParticipant(event.target.connection.connectionId);
+    mySession?.on("streamDestroyed", (event: any) => {
+      if (event.reason !== "disconnect") {
+        //비정상적으로 연결끊긴 참가자 쫒아내기
+        kickParticipant(event.stream.connection.connectionId);
+      }
       // Remove the stream from 'subscribers' array
       deleteSubscriber(event.stream.streamManager);
     });
@@ -453,7 +455,7 @@ function SwipeableTextMobileStepper() {
         console.log("방 나가기 실패");
       })
       .finally(() => {
-        deleteSession(myUserName, myConnectionId);
+        deleteSession();
       });
     
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
@@ -469,13 +471,13 @@ function SwipeableTextMobileStepper() {
 
   }
 
-  const deleteSession = (username : string, conId : string) => {
+  const deleteSession = () => {
     axios
       .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
         {
           data : {
-            nickName: username,
-            connectionId: conId,
+            nickName: myUserName,
+            connectionId: myConnectionId,
           } 
         })
       .then((res) => {
