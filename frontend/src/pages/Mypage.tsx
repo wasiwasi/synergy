@@ -22,6 +22,8 @@ import Button from "@mui/material/Button";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+import { useNavigate } from "react-router";
+
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
 const themeA306 = createTheme({
@@ -40,6 +42,24 @@ const themeA306 = createTheme({
 
 const Mypage = () => {
   const [mypage, setMypage] = useState<any[]>([[], "", ""]);
+
+  const navigate = useNavigate();
+
+  const onDelete = () => {
+    let token = localStorage.getItem("access-token");
+    if (window.confirm("정말 탈퇴하시겠습니까?")) {
+      axios
+        .delete(`${BE_URL}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(() => {
+          localStorage.removeItem("access-token");
+          navigate("/");
+        });
+    }
+  };
 
   const getMypage = () => {
     let token = localStorage.getItem("access-token");
@@ -102,8 +122,68 @@ const Mypage = () => {
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
+            <ProfileInput>
+              <Button
+                variant="contained"
+                size="medium"
+                fullWidth
+                onClick={onDelete}
+              >
+                회원 탈퇴
+              </Button>
+            </ProfileInput>
           </ProfileForm>
         </ThemeProvider>
+      </Wrapper>
+      <Wrapper>
+        {/* <Box sx={{ width: "100%", maxWidth: 752, bgcolor: "background.paper" }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <nav aria-label="main mailbox folders">
+                <List>
+                  <ListItem disablePadding>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <InboxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Inbox" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <DraftsIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Drafts" />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </nav>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <nav aria-label="main mailbox folders">
+                <List>
+                  <ListItem disablePadding>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <InboxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Inbox" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <DraftsIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Drafts" />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </nav>
+            </Grid>
+          </Grid>
+        </Box> */}
       </Wrapper>
     </Container>
   );
