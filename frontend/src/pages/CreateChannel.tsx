@@ -439,7 +439,7 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
+      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
         {
           data : {
             nickName: myUserName,
@@ -451,15 +451,11 @@ function SwipeableTextMobileStepper() {
       })
       .catch((e) => {
         console.log("방 나가기 실패");
+      })
+      .finally(() => {
+        deleteSession(myUserName, myConnectionId);
       });
     
-    axios
-      .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
-        headers: {
-          Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
-          "Content-Type": "application/json",
-        },
-      });
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
 
     const mySession = session;
@@ -471,6 +467,31 @@ function SwipeableTextMobileStepper() {
     // Empty all properties...
     emptyAllOV();
 
+  }
+
+  const deleteSession = (username : string, conId : string) => {
+    axios
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
+        {
+          data : {
+            nickName: username,
+            connectionId: conId,
+          } 
+        })
+      .then((res) => {
+        console.log("방 삭제 성공");
+      })
+      .catch((e) => {
+        console.log("방 삭제 실패");
+      });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   const kickParticipant = (conId : string) => {
