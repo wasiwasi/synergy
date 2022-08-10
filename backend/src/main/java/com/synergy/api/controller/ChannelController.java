@@ -225,6 +225,18 @@ public class ChannelController {
         return new ResponseEntity(channelList,HttpStatus.OK);
     }
 
-
+    @ApiOperation(value = "추방하기",notes = "호스트가 요청해 참가자의 접속을 끊음")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "추방 성공")
+            }
+    )
+    @PostMapping("/kick/{channelId}")
+    public ResponseEntity kickFromChannel(@PathVariable String channelId,@RequestBody ParticipantPostReq participantPostReq){
+        channelId = channelId.trim();
+        String nickname = channelService.getNicknameByConnectionId(channelId, participantPostReq.getConnectionId());
+        channelService.leaveChannel(channelId, nickname);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 }
