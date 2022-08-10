@@ -122,6 +122,7 @@ const InvitePage = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
 
   const [hostName, sethostName] = useState<string>("");
+  const [hostConnectionId, setHostConnectionId] = useState<string>("");
 
   const didMount = useRef(false);
 
@@ -136,7 +137,8 @@ const InvitePage = () => {
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res) => {
         console.log(res);
-        sethostName(res.data);
+        sethostName(res.data.nickName);
+        setHostConnectionId(res.data.connectionId);
       })
       .catch((error) => {
         console.log(error);
