@@ -145,7 +145,15 @@ function SwipeableTextMobileStepper() {
       ))
       console.log(copy[0])
       setSelectData(copy)
-    })
+    });
+    //닉네임 가져와서 세팅
+    axios.get(`${BE_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => {
+      setMyUserName(res.data.userNickName);
+    });
   }, [])
 
   useEffect(() => {
