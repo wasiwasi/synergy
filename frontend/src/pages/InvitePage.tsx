@@ -5,14 +5,17 @@ import axios from "axios";
 import Header from "../components/common/Header";
 import { Link, Outlet, useNavigate, useLocation} from "react-router-dom";
 
+import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+
 import styled from "@emotion/styled";
 
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
-import Input from "@mui/material/Input";
-import InputLabel from "@mui/material/InputLabel";
 
-import Button from "@mui/material/Button";
+import { Button, Box, Input, InputLabel } from "@mui/material/";
 
 import "./Signup.css";
 
@@ -682,36 +685,55 @@ const InvitePage = () => {
                 </div>
               ))}
             </div>
-            <div>
+            <Box id='settings'
+              sx={{
+                backgroundColor: 'inherit',
+                width: '100%',
+                height: '10%',
+                display: 'flex',
+                justifyContent: 'space-evenly',
+                alignItems: 'center'
+              }}>
+              <Button><SettingsIcon /></Button>
+              
+              
               {audiostate ? (
-                <button 
-                  onClick={reverseAudioState}
-                >
-                  Audio Off
-                </button>
+                <Button
+                onClick={reverseAudioState}>
+                  <MicOutlinedIcon
+                  color='success'
+                />
+                </Button>
               ) : (
-                <button
-                  onClick={reverseAudioState}
-                >
-                  Audio On
-                </button>
+                <Button
+                onClick={reverseAudioState}>
+                  <MicOutlinedIcon
+                  color="disabled"
+                  />
+                </Button>
               )}
-            </div>
-            <div>
               {videostate ? (
-                <button 
-                  onClick={reverseVideoState}
-                >
-                  Video Off
-                </button>
+                <Button
+                onClick={reverseVideoState}>
+                  <VideocamIcon 
+                  color='success'
+                  />
+                </Button>                 
               ) : (
-                <button
-                  onClick={reverseVideoState}
-                >
-                  Video On
-                </button>
+                <Button
+                onClick={reverseVideoState}>
+                  <VideocamIcon
+                  color="disabled"
+                  />
+                </Button>                   
               )}
-            </div>
+              <Button
+              onClick={leaveSession}>
+                <ExitToAppIcon
+                  color='error' 
+                />
+              </Button>
+            </Box>
             <div className="chatbox__footer">
               <input
                 id="chat_message"
