@@ -28,7 +28,7 @@ public class User{
     String refresh_token;
 
     @Column(nullable = false, columnDefinition = "boolean default False")
-    boolean auth_status = false;
+    Boolean auth_status = false;
 
     @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
