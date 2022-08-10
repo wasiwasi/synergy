@@ -1,12 +1,12 @@
 import { Link, Outlet } from 'react-router-dom';
 import { bgcolor, Box, display, flexbox, height, width } from '@mui/system';
 import { Paper, Button, Modal, Typography } from '@mui/material';
-import { accessToken } from './CreateChannel';
+
 import { useState } from 'react';
 import{ Brand, Logo, LogoImg, LogoName, BrandWrapper } from '../components/common/Header';
 
 const GameChannel = () => {
-  console.log(accessToken === localStorage.getItem("access-token"))
+  
   return (
     <Box id='full'
     sx={{
@@ -78,9 +78,9 @@ const GameChannel = () => {
             justifyContent: 'space-evenly',
             alignItems: 'center',
         }}>
-          {accessToken === localStorage.getItem("access-token")
+          {/* {accessToken === localStorage.getItem("access-token")
           ? <Button>게임 시작</Button>
-          : 'Nickname'}
+          : 'Nickname'} */}
           <BasicModal/>
         </Box>
       </Box>
