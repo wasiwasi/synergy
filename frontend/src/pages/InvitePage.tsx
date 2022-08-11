@@ -14,8 +14,8 @@ import styled from "@emotion/styled";
 
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
-
-import { Button, Box, Input, InputLabel, Modal, Typography, Grid } from "@mui/material/";
+import{ Brand, Logo, LogoImg, LogoName, BrandWrapper } from '../components/common/Header';
+import { Button, Box, Input, InputLabel, Modal, Typography, Grid, Paper } from "@mui/material/";
 
 import "./Signup.css";
 
@@ -664,47 +664,66 @@ const InvitePage = () => {
               sx={{
                 width: '20%',
                 height: '100%',
-                bgcolor: 'green'
               }}>
-              {/* <div id="session">
-              <div id="session-header"> */}
-                <h1 id="session-title">{mySessionId}</h1>
-                </Box>
-                <Box id='info'
-                  sx={{
-                    // position: 'sticky',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-  
-                    width: '60%',
-                    height: '100%',
-                    bgcolor: 'orange',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                </Box>
-                <Box id='buttons'
-                  sx={{
-                    width: '20%',
-                    height: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-evenly',
-                    alignItems: 'center',
-                  }}>
-                  {/* <input
-                    className="btn btn-large btn-danger"
-                    type="button"
-                    id="buttonLeaveSession"
-                    onClick={leaveSession}
-                    value="Leave session"
-                  /> */}
-                  {/* </div> */}
-                  { nickName }
-                  <BasicModal/>        
-                </Box>
-          </Box>
+              <BrandWrapper
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%'
+                }}>
+                <Brand to="/">
+                  <Logo>
+                    <LogoImg
+                      style={{
+                        margin: 0
+                      }}
+                      src="/images/common/logo_A306.png"
+                      alt="A306 logo img"
+                    />
+                  <LogoName>A306</LogoName>
+                  </Logo>
+                </Brand>
+              </BrandWrapper>
+              </Box>
+              <Paper id='info'
+                sx={{
+                  // position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+
+                  width: '60%',
+                  height: '100%',
+                  bgcolor: 'orange',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <h1 style={{
+                    color: 'white'
+                  }}>게임 종류</h1>
+              </Paper>
+              <Box id='buttons'
+                sx={{
+                  width: '20%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-evenly',
+                  alignItems: 'center',
+                }}>
+                {/* <input
+                  className="btn btn-large btn-danger"
+                  type="button"
+                  id="buttonLeaveSession"
+                  onClick={leaveSession}
+                  value="Leave session"
+                /> */}
+                {/* </div> */}
+                { nickName }
+                <BasicModal/>        
+              </Box>
+            </Box>
           <Box id='main'
             sx={{
             display: 'flex',
@@ -722,11 +741,12 @@ const InvitePage = () => {
                 height: '100%',
                 display: 'flex'
                 }}>
-              <Grid container spacing={1}
+              <Box 
                 id='cam' 
-                style={{ 
+                sx={{ 
                 // display: 'flex',
                 // backgroundColor: 'powderblue',
+                flexGrow: 1,
                 width: '100%',
                 height: '90%',
                 // margin: 10
@@ -747,9 +767,10 @@ const InvitePage = () => {
                   </div>
                 ) : null} */}
                 {/* <div id="video-container" className="col-md-6"> */}
+                <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                   {publisher !== undefined ? (
                     <Grid
-                      item xs={4}
+                      item sm={4} md={4}
                       onClick={() =>
                         handleMainVideoStream(publisher)
                       }
@@ -759,7 +780,7 @@ const InvitePage = () => {
                   ) : null}
                   {subscribers.map((sub, i) => (
                     <Grid
-                      item xs={4}
+                      item sm={4} md={4}
                       key={i}
                       // className="stream-container col-md-6 col-xs-6"
                       onClick={() => handleMainVideoStream(sub)}
@@ -767,7 +788,8 @@ const InvitePage = () => {
                       <UserVideoComponent streamManager={sub} />
                     </Grid>
                   ))}
-                </Grid>
+                  </Grid>
+                </Box>
               <Box id='settings'
                 sx={{
                   backgroundColor: 'inherit',
