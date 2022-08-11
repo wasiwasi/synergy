@@ -8,7 +8,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef} from "react";
 
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -73,8 +73,12 @@ const Signup = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
   const [usableEmail, setUsableEmail] = useState<boolean>(false);
 
+  const signupRef = useRef<any>();
+
   // 회원가입 버튼 클릭
   const onSignUp = () => {
+    //여러번 요청보내는 것을 방지
+    signupRef.current.disabled = true;
     axios
       .post(
         `${BE_URL}/users/signup`,
@@ -101,8 +105,16 @@ const Signup = () => {
         }
       })
       .catch((error) => {
-        alert("다시 시도해 주세요.");
+        console.log(error);
+        if (error.response.status === 409) {
+          alert(error.response.data.message);
+        } else {
+          alert("다시 시도해 주세요.");
+        }
         console.log(error.message);
+      })
+      .finally(() => {
+        signupRef.current.disabled = false;
       });
   };
 
@@ -401,6 +413,7 @@ const Signup = () => {
                     usableEmail
                   )
                 }
+                ref={ signupRef }
                 onClick={onSignUp}
               >
                 회원 가입
