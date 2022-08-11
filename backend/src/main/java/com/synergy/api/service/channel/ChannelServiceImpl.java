@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 public class ChannelServiceImpl implements ChannelService{
 
-    private final Logger log = LoggerFactory.getLogger(ChannelController.class);
+    private final Logger log = LoggerFactory.getLogger(ChannelServiceImpl.class);
 
     @Value("${OPENVIDU_URL}")
     private String OPENVIDU_URL;
