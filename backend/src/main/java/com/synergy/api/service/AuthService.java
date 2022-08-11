@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.lang.reflect.MalformedParametersException;
 import java.util.NoSuchElementException;
@@ -48,6 +49,12 @@ public class AuthService {
 
         // 입력으로 들어온 비밀번호와 DB에 저장된 암호를 비교해 비밀번호가 맞는지 확인
         checkPassword(req.getPassword(), user.getPassword());
+
+        // 이메일 인증을 마친 사용자인지 확인
+        log.debug(user.getAuth_status() ? "true" : "false");
+        if(!user.getAuth_status()){
+            throw new IllegalStateException("Need Email Auth");
+        }
 
         String accessToken = JwtTokenUtil.getToken(String.valueOf(user.getId()));
         log.debug("created access token "+accessToken);

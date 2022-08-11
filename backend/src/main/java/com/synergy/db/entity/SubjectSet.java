@@ -28,7 +28,7 @@ public class SubjectSet {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "subjectSet")
+    @OneToMany(mappedBy = "subjectSet" ,cascade = {CascadeType.REMOVE})
     @JsonManagedReference
     List<Bodytalk> bodytalks = new ArrayList<>();
 

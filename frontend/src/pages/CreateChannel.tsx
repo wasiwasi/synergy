@@ -32,7 +32,6 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
-const accessToken = localStorage.getItem("access-token");
 const steps = [
   {
     label: '게임을 선택해주세요',
@@ -77,6 +76,8 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+
+  const [accessToken, setAccessToken] = useState<string>("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -128,9 +129,14 @@ function SwipeableTextMobileStepper() {
   const didMount = useRef(false);
 
   useEffect(() => {
+    let token = localStorage.getItem("access-token");
+    //토큰이 없으면 api호출안함
+    if (!token) return;
+    setAccessToken(token as string);
+
     axios.get(`${BE_URL}/subjects`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${token}`
       }
     }).then((res) => {
       const copy = [...selectData]
@@ -139,21 +145,16 @@ function SwipeableTextMobileStepper() {
       ))
       console.log(copy[0])
       setSelectData(copy)
-    })
+    });
+    //닉네임 가져와서 세팅
+    axios.get(`${BE_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((res) => {
+      setMyUserName(res.data.userNickName);
+    });
   }, [])
-
-  useEffect(() => {
-    //호스트 닉네임 받아오기
-    axios
-      .get(`${BE_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }).then((res) => {
-        // setMyUserName(res.data.nickname);
-        setMyUserName(res.data.userId);
-      });
-  }, [, nickName]);
 
   useEffect(() => {
       // --- 2) Init a session ---
@@ -179,14 +180,17 @@ function SwipeableTextMobileStepper() {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
-      subscribers.push(subscriber as Subscriber);
-
       // Update the state with the new subscribers
-      setSubscribers(subscribers);
+      subscribers.push(subscriber);
+      setSubscribers([...subscribers]);
     });
 
     // On every Stream destroyed...
-    mySession?.on("streamDestroyed", (event : any) => {
+    mySession?.on("streamDestroyed", (event: any) => {
+      if (event.reason !== "disconnect") {
+        //비정상적으로 연결끊긴 참가자 쫒아내기
+        kickParticipant(event.stream.connection.connectionId);
+      }
       // Remove the stream from 'subscribers' array
       deleteSubscriber(event.stream.streamManager);
     });
@@ -196,13 +200,16 @@ function SwipeableTextMobileStepper() {
       console.warn(exception);
     });
 
+    mySession?.on("sessionDisconnected", (event: any) => {
+      alert("서버와의 접속이 끊어졌습니다.");
+      navigate("/");
+    })
 
     // --- 4) Connect to the session with a valid user token ---
 
     // 'getToken' method is simulating what your server-side should do.
     // 'token' parameter should be retrieved and returned by your own backend
     getToken().then((token) => {
-      console.log("getToken 들어옴=====", token);
       // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
       // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
       mySession?.connect(String(token), { clientData: myUserName })
@@ -217,7 +224,7 @@ function SwipeableTextMobileStepper() {
           // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
           // element: we will manage it on our own) and with the desired properties
           let videoDevice = undefined;
-          if (videoDevices?.length != undefined) {
+          if (videoDevices && videoDevices?.length > 1) {
             videoDevice = videoDevices?.[0].deviceId;
             setCurrentVideoDeviceId(videoDevice);
           }
@@ -416,8 +423,9 @@ function SwipeableTextMobileStepper() {
     });
     console.log("put session id " + mySessionId);
     axios
-      .put(`${BE_URL}/api/channels/${mySessionId}`, requestBody, {
+      .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
         headers: {
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       })
@@ -433,17 +441,23 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
+      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
         {
-          nickName: myUserName,
-          connectionId: myConnectionId,
+          data : {
+            nickName: myUserName,
+            connectionId: myConnectionId,
+          } 
         })
       .then((res) => {
         console.log("방 나가기 성공");
       })
       .catch((e) => {
         console.log("방 나가기 실패");
+      })
+      .finally(() => {
+        deleteSession();
       });
+    
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
 
     const mySession = session;
@@ -455,6 +469,46 @@ function SwipeableTextMobileStepper() {
     // Empty all properties...
     emptyAllOV();
 
+  }
+
+  const deleteSession = () => {
+    axios
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
+        {
+          data : {
+            nickName: myUserName,
+            connectionId: myConnectionId,
+          } 
+        })
+      .then((res) => {
+        console.log("방 삭제 성공");
+      })
+      .catch((e) => {
+        console.log("방 삭제 실패");
+      });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  const kickParticipant = (conId : string) => {
+    axios
+      .post(`${BE_URL}/api/channels/kick/${mySessionId}`,
+        {
+          nickName: "",
+          connectionId: conId,
+        })
+      .then((res) => {
+        console.log("강제 퇴장 성공");
+      })
+      .catch((e) => {
+        console.log("강제 퇴장 실패");
+      });
   }
 
   const switchCamera = async() => {

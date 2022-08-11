@@ -14,4 +14,5 @@ public interface SubjectSetRepository extends JpaRepository<SubjectSet, Long> {
 
     List<SubjectSetDto> findByuser_idIn(List<Long> ids);
     Optional<SubjectSet> findById(Long id);
+//    void deleteByuser_id(Long id);
 }

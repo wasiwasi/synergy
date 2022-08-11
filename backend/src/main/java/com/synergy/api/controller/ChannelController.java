@@ -2,7 +2,9 @@ package com.synergy.api.controller;
 
 import com.synergy.api.request.channel.ParticipantPostReq;
 import com.synergy.api.response.channel.ChannelInfoReq;
+import com.synergy.api.service.UserService;
 import com.synergy.api.service.channel.ChannelService;
+import com.synergy.common.auth.UserDetails;
 import com.synergy.db.entity.Participant;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -10,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import io.openvidu.java.client.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -27,6 +31,9 @@ public class ChannelController {
 
     @Autowired
     ChannelService channelService;
+
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "채널의 존재 유무")
     @ApiResponses(
@@ -53,9 +60,13 @@ public class ChannelController {
 
             }
     )
-    @PutMapping("/{channelId}")
-    public ResponseEntity createChannel(@ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
+    @PutMapping("/generate/{channelId}")
+    public ResponseEntity createChannel(@ApiIgnore Authentication authentication,
+                                        @ApiParam(value = "openvidu 에서 생성한 channel code",required = true)@PathVariable String channelId,
                                         @ApiParam(value = "channel host 정보")@RequestBody ParticipantPostReq participantPostReq){
+
+        UserDetails userDetails = (UserDetails)authentication.getDetails();
+
         channelId = channelId.trim();
         if(!channelService.channelExistenceOnOV(channelId)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,7 +76,8 @@ public class ChannelController {
         Participant participant = new Participant();
         participant.setChannelId(channelId);
         participant.setConnectionId(participantPostReq.getConnectionId());
-        participant.setNickName(participantPostReq.getNickName());
+        participant.setNickName(userDetails.getUserNickname());
+
         if(channelService.joinChannel(participant)){
             channelService.getChannelByChannelId(channelId).setHost(participant);
             return new ResponseEntity(HttpStatus.OK);
@@ -75,10 +87,10 @@ public class ChannelController {
 
     }
 
-    @ApiOperation(value = "방의 호스트 이름 반환하는 api ")
+    @ApiOperation(value = "방의 호스트 정보를 반환하는 api ")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200,message = "방장 이름 전송 성공"),
+                    @ApiResponse(code = 200,message = "방장 정보 전송 성공"),
                     @ApiResponse(code = 404,message = "방이 존재 하지 않아 방장을 못 찾고 있음")
             }
     )
@@ -86,9 +98,8 @@ public class ChannelController {
     public ResponseEntity getHostByChannelId(@PathVariable String channelId){
         channelId = channelId.trim();
         Participant Host = channelService.getChannelByChannelId(channelId).getHost();
-        String hostName = Host.getNickName();
 
-        if(Host!=null)return new ResponseEntity(hostName,HttpStatus.OK);
+        if(Host!=null)return new ResponseEntity(Host,HttpStatus.OK);
         else return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
@@ -213,6 +224,18 @@ public class ChannelController {
         return new ResponseEntity(channelList,HttpStatus.OK);
     }
 
-
+    @ApiOperation(value = "추방하기",notes = "호스트가 요청해 참가자의 접속을 끊음")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "추방 성공")
+            }
+    )
+    @PostMapping("/kick/{channelId}")
+    public ResponseEntity kickFromChannel(@PathVariable String channelId,@RequestBody ParticipantPostReq participantPostReq){
+        channelId = channelId.trim();
+        String nickname = channelService.getNicknameByConnectionId(channelId, participantPostReq.getConnectionId());
+        channelService.leaveChannel(channelId, nickname);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 }
