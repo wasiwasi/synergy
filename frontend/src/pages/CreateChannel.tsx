@@ -18,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import styled from "@emotion/styled";
-import Button from "@mui/material/Button";
+import {Button, Grid} from "@mui/material/";
 
 import "./Signup.css";
 
@@ -33,7 +33,6 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-import Grid from '@mui/material/Unstable_Grid2';
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -831,7 +830,9 @@ function SwipeableTextMobileStepper() {
                 sx={{
                   width: '20%',
                   height: '100%',
-                  bgcolor: 'inherit'
+                  display: 'flex',
+                  justifyContent: 'space-evenly',
+                  alignItems: 'center',
               }}>
               {/* <input
                 className="btn btn-large btn-danger"
@@ -841,9 +842,7 @@ function SwipeableTextMobileStepper() {
                 value="Leave session"
               /> */}
           {/* </div> */}
-          {accessToken === localStorage.getItem("access-token")
-          ? <Button>게임 시작</Button>
-          : 'Nickname'}
+          <Button>게임 시작</Button>
           <BasicModal/>        
         </Box>
       </Box>
@@ -866,10 +865,10 @@ function SwipeableTextMobileStepper() {
             display: 'flex'
             }}>
             
-          <div id='cam' 
+          <Box id='cam' 
             style={{ 
-            display: 'flex',
-            backgroundColor: 'powderblue',
+            // display: 'flex',
+            // backgroundColor: 'powderblue',
             width: '100%',
             height: '90%',
             // margin: 10
@@ -890,26 +889,30 @@ function SwipeableTextMobileStepper() {
               </div>
             ) : null} */}
             {/* <div id="video-container" className="col-md-6"> */}
-          {publisher !== undefined ? (
-                <div
-                  className="stream-container col-md-6 col-xs-6"
-                  onClick={() =>
-                    handleMainVideoStream(publisher)
-                  }
-                >
-                   <UserVideoComponent streamManager={publisher} />
-                </div>
+          <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+            {publisher !== undefined ? (
+                <Grid
+                item sm={4} md={4}
+                onClick={() =>
+                  handleMainVideoStream(publisher)
+                }
+              >
+                <UserVideoComponent streamManager={publisher} />
+              </Grid>
               ) : null}
              {subscribers.map((sub, i) => (
-                <div
+                <Grid
+                  item sm={4} md={4}
                   key={i}
-                  className="stream-container col-md-6 col-xs-6"
+                  // className="stream-container col-md-6 col-xs-6"
                   onClick={() => handleMainVideoStream(sub)}
                 >
                   <UserVideoComponent streamManager={sub} />
-                </div>
+                </Grid>
               ))}
-          </div>
+                </Grid>
+                </Box>
+
           <Box id='settings'
             sx={{
               backgroundColor: 'inherit',
