@@ -14,8 +14,8 @@ import styled from "@emotion/styled";
 
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
-
-import { Button, Box, Input, InputLabel, Modal, Typography } from "@mui/material/";
+import{ Brand, Logo, LogoImg, LogoName, BrandWrapper } from '../components/common/Header';
+import { Button, Box, Input, InputLabel, Modal, Typography, Grid, Paper } from "@mui/material/";
 
 import "./Signup.css";
 
@@ -24,6 +24,8 @@ import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvid
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import { display } from "@mui/system";
+import { AddBox } from "@mui/icons-material";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -138,8 +140,9 @@ const InvitePage = () => {
     axios
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res) => {
-        console.log(res);
-        sethostName(res.data);
+        // console.log(res);
+        console.log(res.data)
+        sethostName(res.data.nickName);
       })
       .catch((error) => {
         console.log(error);
@@ -661,47 +664,66 @@ const InvitePage = () => {
               sx={{
                 width: '20%',
                 height: '100%',
-                bgcolor: 'green'
               }}>
-              {/* <div id="session">
-              <div id="session-header"> */}
-                <h1 id="session-title">{mySessionId}</h1>
-                </Box>
-                <Box id='info'
-                  sx={{
-                    // position: 'sticky',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-  
-                    width: '60%',
-                    height: '100%',
-                    bgcolor: 'orange',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                </Box>
-                <Box id='buttons'
-                  sx={{
-                    width: '20%',
-                    height: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-evenly',
-                    alignItems: 'center',
-                  }}>
-                  {/* <input
-                    className="btn btn-large btn-danger"
-                    type="button"
-                    id="buttonLeaveSession"
-                    onClick={leaveSession}
-                    value="Leave session"
-                  /> */}
-                  {/* </div> */}
-                  { nickName }
-                  <BasicModal/>        
-                </Box>
-          </Box>
+              <BrandWrapper
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%'
+                }}>
+                <Brand to="/">
+                  <Logo>
+                    <LogoImg
+                      style={{
+                        margin: 0
+                      }}
+                      src="/images/common/logo_A306.png"
+                      alt="A306 logo img"
+                    />
+                  <LogoName>A306</LogoName>
+                  </Logo>
+                </Brand>
+              </BrandWrapper>
+              </Box>
+              <Paper id='info'
+                sx={{
+                  // position: 'sticky',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+
+                  width: '60%',
+                  height: '100%',
+                  bgcolor: 'orange',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  <h1 style={{
+                    color: 'white'
+                  }}>게임 종류</h1>
+              </Paper>
+              <Box id='buttons'
+                sx={{
+                  width: '20%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-evenly',
+                  alignItems: 'center',
+                }}>
+                {/* <input
+                  className="btn btn-large btn-danger"
+                  type="button"
+                  id="buttonLeaveSession"
+                  onClick={leaveSession}
+                  value="Leave session"
+                /> */}
+                {/* </div> */}
+                { nickName }
+                <BasicModal/>        
+              </Box>
+            </Box>
           <Box id='main'
             sx={{
             display: 'flex',
@@ -719,10 +741,12 @@ const InvitePage = () => {
                 height: '100%',
                 display: 'flex'
                 }}>
-              <div id='cam' 
-                style={{ 
-                display: 'flex',
-                backgroundColor: 'powderblue',
+              <Box 
+                id='cam' 
+                sx={{ 
+                // display: 'flex',
+                // backgroundColor: 'powderblue',
+                flexGrow: 1,
                 width: '100%',
                 height: '90%',
                 // margin: 10
@@ -743,26 +767,29 @@ const InvitePage = () => {
                   </div>
                 ) : null} */}
                 {/* <div id="video-container" className="col-md-6"> */}
+                <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                   {publisher !== undefined ? (
-                    <div
-                      className="stream-container col-md-6 col-xs-6"
+                    <Grid
+                      item sm={4} md={4}
                       onClick={() =>
                         handleMainVideoStream(publisher)
                       }
                     >
                       <UserVideoComponent streamManager={publisher} />
-                    </div>
+                    </Grid>
                   ) : null}
                   {subscribers.map((sub, i) => (
-                    <div
+                    <Grid
+                      item sm={4} md={4}
                       key={i}
-                      className="stream-container col-md-6 col-xs-6"
+                      // className="stream-container col-md-6 col-xs-6"
                       onClick={() => handleMainVideoStream(sub)}
                     >
                       <UserVideoComponent streamManager={sub} />
-                    </div>
+                    </Grid>
                   ))}
-              </div>
+                  </Grid>
+                </Box>
               <Box id='settings'
                 sx={{
                   backgroundColor: 'inherit',
@@ -775,7 +802,6 @@ const InvitePage = () => {
                 <Button>
                   <SettingsIcon />
                 </Button>
-
                 {audiostate ? (
                   <Button
                   onClick={reverseAudioState}>
@@ -813,7 +839,25 @@ const InvitePage = () => {
                   />
                 </Button>
               </Box>
-              <div className="chatbox__footer">
+            </Box>
+            <Box id='chat' 
+              sx={{
+              width: '25%',
+              height: '100%',
+              display: 'flex',
+              direction: 'column'
+              // margin: 10
+            }}>
+              <Box className="chatbox__messages">
+                <Messages messages={messages} />
+              </Box>
+              <Box className="chatbox__footer"
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
                 <input
                   id="chat_message"
                   type="text"
@@ -828,12 +872,9 @@ const InvitePage = () => {
                 >
                   Enter
                 </button>
-              </div>
-              <div className="chatbox__messages">
-                <Messages messages={messages} />
-                <div />
-              </div>
-            </Box></Box></Box>
+              </Box>
+            </Box>
+          </Box></Box>
           ) : null}
         </ThemeProvider>
       </Wrapper>
