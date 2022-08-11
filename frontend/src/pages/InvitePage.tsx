@@ -695,13 +695,18 @@ const InvitePage = () => {
 
                   width: '60%',
                   height: '100%',
-                  bgcolor: 'orange',
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomLeftRadius: 20,
+                  borderBottomRightRadius: 20,
+                  boxShadow: 4,
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
                   <h1 style={{
-                    color: 'white'
+                    color: 'skyblue',
+                    fontWeight: 'bold'
                   }}>게임 종류</h1>
               </Paper>
               <Box id='buttons'
@@ -842,38 +847,36 @@ const InvitePage = () => {
             </Box>
             <Box id='chat' 
               sx={{
+              // backgroundColor: 'grey',
               width: '25%',
-              height: '100%',
-              display: 'flex',
-              direction: 'column'
+              height: '100%'
               // margin: 10
-            }}>
-              <Box className="chatbox__messages">
-                <Messages messages={messages} />
-              </Box>
-              <Box className="chatbox__footer"
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                <input
-                  id="chat_message"
-                  type="text"
-                  placeholder="Write a message..."
-                  onChange={handleChatMessageChange}
-                  onKeyPress={sendMessageByEnter}
-                  value={message}
-                />
-                <button
-                  className="chatbox__send--footer"
-                  onClick={sendMessageByClick}
-                >
-                  Enter
-                </button>
-              </Box>
+              }}>
+            {/* <div className="chatbox__footer"> */}
+              <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
+            <h3>채팅</h3>
+            <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
+              <Messages messages={messages} />
+              {/* <div />
+            </div> */}
             </Box>
+            <input
+              id="chat_message"
+              type="text"
+              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
+              placeholder="Write a message..."
+              onChange={handleChatMessageChange}
+              onKeyPress={sendMessageByEnter}
+              value={message}
+            />
+            <Button
+              className="chatbox__send--footer"
+              sx={{borderRadius: '20px', border: 'none'}}
+              onClick={sendMessageByClick}
+            >
+              Enter
+            </Button></Box>
+          </Box>
           </Box></Box>
           ) : null}
         </ThemeProvider>
