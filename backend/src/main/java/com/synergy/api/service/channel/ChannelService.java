@@ -30,4 +30,6 @@ public interface ChannelService {
 
 
     String getRandomChannelId();
+
+    String getNicknameByConnectionId(String channelId, String connectionId);
 }
