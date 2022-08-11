@@ -995,7 +995,7 @@ function SwipeableTextMobileStepper() {
           </div> */}
           <div id='chat' 
           style={{
-          backgroundColor: 'grey',
+          // backgroundColor: 'grey',
           width: '25%',
           height: '100%'
           // margin: 10
@@ -1003,7 +1003,7 @@ function SwipeableTextMobileStepper() {
           {/* <div className="chatbox__footer"> */}
           <div className="chatspace" style={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
           <h3>채팅</h3>
-          <div className="chatbox__messages" style={{backgroundColor: 'white', width: '80%', height: '300px', overflow: 'auto'}}>
+          <div className="chatbox__messages" style={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
             <Messages messages={messages} />
             <div />
           {/* </div> */}
@@ -1011,6 +1011,7 @@ function SwipeableTextMobileStepper() {
             <input
               id="chat_message"
               type="text"
+              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
               placeholder="Write a message..."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
@@ -1018,6 +1019,7 @@ function SwipeableTextMobileStepper() {
             />
             <button
               className="chatbox__send--footer"
+              style={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
               Enter
