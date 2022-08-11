@@ -998,7 +998,6 @@ function SwipeableTextMobileStepper() {
           </div> */}
           <div id='chat' 
           style={{
-          // backgroundColor: 'grey',
           width: '25%',
           height: '100%'
           // margin: 10
