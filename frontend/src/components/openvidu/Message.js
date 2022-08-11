@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components"; // npm i styled-components
 
 const Username = styled.p`
+  display: inline-flex;
   font-size: 0.8rem;
   font-weight: 700;
   padding: 5px;
@@ -12,6 +13,7 @@ const MessageContainer = styled.div`
 `;
 
 const Text = styled.p`
+  display: inline-flex;
   font-size: 0.8rem;
   padding: 5px;
 `;
