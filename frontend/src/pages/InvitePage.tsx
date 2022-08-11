@@ -15,7 +15,7 @@ import styled from "@emotion/styled";
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
 
-import { Button, Box, Input, InputLabel, Modal, Typography } from "@mui/material/";
+import { Button, Box, Input, InputLabel, Modal, Typography, Grid } from "@mui/material/";
 
 import "./Signup.css";
 
@@ -24,6 +24,8 @@ import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvid
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import { display } from "@mui/system";
+import { AddBox } from "@mui/icons-material";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -720,10 +722,11 @@ const InvitePage = () => {
                 height: '100%',
                 display: 'flex'
                 }}>
-              <div id='cam' 
+              <Grid container spacing={1}
+                id='cam' 
                 style={{ 
-                display: 'flex',
-                backgroundColor: 'powderblue',
+                // display: 'flex',
+                // backgroundColor: 'powderblue',
                 width: '100%',
                 height: '90%',
                 // margin: 10
@@ -745,25 +748,26 @@ const InvitePage = () => {
                 ) : null} */}
                 {/* <div id="video-container" className="col-md-6"> */}
                   {publisher !== undefined ? (
-                    <div
-                      className="stream-container col-md-6 col-xs-6"
+                    <Grid
+                      item xs={4}
                       onClick={() =>
                         handleMainVideoStream(publisher)
                       }
                     >
                       <UserVideoComponent streamManager={publisher} />
-                    </div>
+                    </Grid>
                   ) : null}
                   {subscribers.map((sub, i) => (
-                    <div
+                    <Grid
+                      item xs={4}
                       key={i}
-                      className="stream-container col-md-6 col-xs-6"
+                      // className="stream-container col-md-6 col-xs-6"
                       onClick={() => handleMainVideoStream(sub)}
                     >
                       <UserVideoComponent streamManager={sub} />
-                    </div>
+                    </Grid>
                   ))}
-              </div>
+                </Grid>
               <Box id='settings'
                 sx={{
                   backgroundColor: 'inherit',
@@ -776,7 +780,6 @@ const InvitePage = () => {
                 <Button>
                   <SettingsIcon />
                 </Button>
-
                 {audiostate ? (
                   <Button
                   onClick={reverseAudioState}>
@@ -814,7 +817,25 @@ const InvitePage = () => {
                   />
                 </Button>
               </Box>
-              <div className="chatbox__footer">
+            </Box>
+            <Box id='chat' 
+              sx={{
+              width: '25%',
+              height: '100%',
+              display: 'flex',
+              direction: 'column'
+              // margin: 10
+            }}>
+              <Box className="chatbox__messages">
+                <Messages messages={messages} />
+              </Box>
+              <Box className="chatbox__footer"
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
                 <input
                   id="chat_message"
                   type="text"
@@ -829,12 +850,9 @@ const InvitePage = () => {
                 >
                   Enter
                 </button>
-              </div>
-              <div className="chatbox__messages">
-                <Messages messages={messages} />
-                <div />
-              </div>
-            </Box></Box></Box>
+              </Box>
+            </Box>
+          </Box></Box>
           ) : null}
         </ThemeProvider>
       </Wrapper>
