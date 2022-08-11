@@ -802,8 +802,11 @@ function SwipeableTextMobileStepper() {
           {/* <div id="session">
           <div id="session-header"> */}
               <h1 id="session-title">{mySessionId}</h1>
+              <div>
+                <Button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</Button>
+              </div>
               </Box>
-              <Box id='info'
+              <Paper id='info'
                 sx={{
                   // position: 'sticky',
                   top: 0,
@@ -822,10 +825,12 @@ function SwipeableTextMobileStepper() {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-              <div>
-                <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
-              </div>
-              </Box>
+                  <h1 style={{
+                    color: 'skyblue',
+                    fontWeight: 'bold'
+                  }}>게임 종류</h1>
+
+              </Paper>
               <Box id='buttons'
                 sx={{
                   width: '20%',
@@ -866,7 +871,7 @@ function SwipeableTextMobileStepper() {
             }}>
             
           <Box id='cam' 
-            style={{ 
+            sx={{ 
             // display: 'flex',
             // backgroundColor: 'powderblue',
             width: '100%',
@@ -996,20 +1001,20 @@ function SwipeableTextMobileStepper() {
               </button>
             )}
           </div> */}
-          <div id='chat' 
-          style={{
+          <Box id='chat' 
+          sx={{
           width: '25%',
           height: '100%'
           // margin: 10
         }}>
           {/* <div className="chatbox__footer"> */}
-          <div className="chatspace" style={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
+          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
           <h3>채팅</h3>
-          <div className="chatbox__messages" style={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
+          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
             <Messages messages={messages} />
-            <div />
-          {/* </div> */}
-          </div>
+            {/*<div />
+           </div> */}
+          </Box>
             <input
               id="chat_message"
               type="text"
@@ -1019,14 +1024,14 @@ function SwipeableTextMobileStepper() {
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <button
+            <Button
               className="chatbox__send--footer"
-              style={{borderRadius: '20px', border: 'none'}}
+              sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
               Enter
-            </button></div>
-          </div>
+            </Button></Box>
+          </Box>
           </Box></Box>
         ) : null}
       </Container>
