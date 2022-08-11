@@ -385,13 +385,12 @@ const Signup = () => {
                 </div>
               )}
             </SignupInput>
-            <SignupInput onClick={onSignUp}>
+            <SignupInput>
               <Button
                 type="submit"
                 variant="contained"
                 size="medium"
                 fullWidth
-                // && usableNickName && usableEmail 추가하기
                 disabled={
                   !(
                     isNickName &&
@@ -402,6 +401,7 @@ const Signup = () => {
                     usableEmail
                   )
                 }
+                onClick={onSignUp}
               >
                 회원 가입
               </Button>
