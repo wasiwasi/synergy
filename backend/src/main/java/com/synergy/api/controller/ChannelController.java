@@ -112,6 +112,14 @@ public class ChannelController {
     )
     @GetMapping("/create")
     public ResponseEntity beforeCreateChannel(){
+        //방을 코드를 반환해주기 전에 OpenVidu서버의 채널상태와 동기화
+        ArrayList<ChannelInfoReq> channelList = channelService.getChannelList();
+        for(ChannelInfoReq channelInfoReq : channelList){
+            // TODO: new URL의 메모리 누수문제가 없을까?
+            String channelId = channelInfoReq.getChannelId();
+            channelService.findChannel(channelId);
+        }
+
         String channelId = channelService.getRandomChannelId();
         return new ResponseEntity(channelId,HttpStatus.OK);
     }
