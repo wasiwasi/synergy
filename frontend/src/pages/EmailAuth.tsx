@@ -2,9 +2,7 @@ import Header from "../components/common/Header";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2/dist/sweetalert2.js";
-
-import "sweetalert2/src/sweetalert2.scss";
+import Swal from "sweetalert2";
 
 const EmailAuth = () => {
   const BE_URL = process.env.REACT_APP_BACKEND_URL;
