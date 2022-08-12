@@ -1,38 +1,45 @@
 /* eslint-disable */
 // import BasicSelect from '../components/common/Select';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import MobileStepper from '@mui/material/MobileStepper';
-import {Paper, Modal} from '@mui/material';
-import Typography from '@mui/material/Typography';
-import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { useCallback, useEffect, useState, useRef } from "react";
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import MobileStepper from "@mui/material/MobileStepper";
+import { Paper, Modal } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 
 import Input from "@mui/material/Input";
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import styled from "@emotion/styled";
-import {Button, Grid} from "@mui/material/";
+import { Button, Grid } from "@mui/material/";
 
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
+import {
+  OpenVidu,
+  Publisher,
+  Session,
+  StreamManager,
+  Subscriber,
+} from "openvidu-browser";
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 
-import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
-import VideocamIcon from '@mui/icons-material/Videocam';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
+import Swal from "sweetalert2";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -40,16 +47,16 @@ const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
 const steps = [
   {
-    label: '게임을 선택해주세요',
-    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '준비 중']
+    label: "게임을 선택해주세요",
+    choice: ["몸으로 말해요", "골든벨", "고요 속의 외침", "준비 중"],
   },
   {
-    label: '개인전/팀전을 선택해주세요',
-    choice: ['개인전', '팀전']
+    label: "개인전/팀전을 선택해주세요",
+    choice: ["개인전", "팀전"],
   },
   {
-    label: '카테고리와 라운드를 선택해주세요',
-    choice: ['카테고리', '라운드'],
+    label: "카테고리와 라운드를 선택해주세요",
+    choice: ["카테고리", "라운드"],
   },
 ];
 
@@ -71,13 +78,10 @@ const steps = [
 // }
 
 function SwipeableTextMobileStepper() {
-  const [selectData, setSelectData] = useState([
-    [],
-    ['5', '10', '15', '20'],
-  ])
-  const [category, setCategory] = useState('')
-  const [round, setRound] = useState('')
-  
+  const [selectData, setSelectData] = useState([[], ["5", "10", "15", "20"]]);
+  const [category, setCategory] = useState("");
+  const [round, setRound] = useState("");
+
   const [info, setInfo] = useState<string[]>([]);
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
@@ -92,18 +96,22 @@ function SwipeableTextMobileStepper() {
   const [mySessionId, setMySessionId] = useState<string | null>("");
   const [myUserName, setMyUserName] = useState<string>("");
   const [session, setSession] = useState<Session | undefined>(undefined);
-  const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
+  const [mainStreamManager, setMainStreamManager] = useState<
+    Publisher | undefined
+  >(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
-  
+  const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<
+    string | undefined
+  >("");
+
   const [myConnectionId, setMyConnectionId] = useState<string>("");
-   
+
   const [audiostate, setAudiostate] = useState<boolean>(true);
   const [audioallowed, setAudioallowed] = useState<boolean>(true);
   const [videostate, setVideostate] = useState<boolean>(true);
   const [videoallowed, setVideoallowed] = useState<boolean>(true);
-     
+
   const [messages, setMessages] = useState<object[]>([]);
   const [message, setMessage] = useState<string>("");
 
@@ -117,7 +125,7 @@ function SwipeableTextMobileStepper() {
     setMyUserName("");
     setMainStreamManager(undefined);
     setPublisher(undefined);
-  }
+  };
   //닉네임 확인
   const [nickName, setNickName] = useState<string>("");
 
@@ -140,34 +148,36 @@ function SwipeableTextMobileStepper() {
     if (!token) return;
     setAccessToken(token as string);
 
-    axios.get(`${BE_URL}/subjects`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => {
-      const copy = [...selectData]
-      res.data.data.map((d: any, i: any) => (
-        copy[0].push(d.subject_name)
-      ))
-      console.log(copy[0])
-      setSelectData(copy)
-    });
+    axios
+      .get(`${BE_URL}/subjects`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        const copy = [...selectData];
+        res.data.data.map((d: any, i: any) => copy[0].push(d.subject_name));
+        console.log(copy[0]);
+        setSelectData(copy);
+      });
     //닉네임 가져와서 세팅
-    axios.get(`${BE_URL}/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).then((res) => {
-      setMyUserName(res.data.userNickName);
-    });
-  }, [])
+    axios
+      .get(`${BE_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setMyUserName(res.data.userNickName);
+      });
+  }, []);
 
   useEffect(() => {
-      // --- 2) Init a session ---
-      setSession(OV?.initSession());
-    }, [OV]);
-    
-    // 세션 받아오고 들어가는 로직
+    // --- 2) Init a session ---
+    setSession(OV?.initSession());
+  }, [OV]);
+
+  // 세션 받아오고 들어가는 로직
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -182,7 +192,7 @@ function SwipeableTextMobileStepper() {
     // --- 3) Specify the actions when events take place in the session ---
 
     // On every new Stream received...
-    mySession?.on("streamCreated", (event : any) => {
+    mySession?.on("streamCreated", (event: any) => {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
@@ -207,9 +217,12 @@ function SwipeableTextMobileStepper() {
     });
 
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
-      navigate("/");
-    })
+      Swal.fire({
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다",
+        icon: "error",
+      });
+    });
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -218,7 +231,8 @@ function SwipeableTextMobileStepper() {
     getToken().then((token) => {
       // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
       // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
-      mySession?.connect(String(token), { clientData: myUserName })
+      mySession
+        ?.connect(String(token), { clientData: myUserName })
         .then(async () => {
           var devices = await OV?.getDevices();
           var videoDevices = devices?.filter(
@@ -262,17 +276,15 @@ function SwipeableTextMobileStepper() {
           );
         });
     });
-
   }, [session]);
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event : any) => {
+    mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
-  
+        console.log("messages: " + messages);
 
         // messages.push({
         //   userName: chatdata[0],
@@ -283,14 +295,13 @@ function SwipeableTextMobileStepper() {
         // setMessages([...messages]);
 
         setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
+          ...messages,
+          {
+            userName: chatdata[0],
+            text: chatdata[1],
+            boxClass: "messages__box--visitor",
+          },
+        ]);
       }
     });
   }, [session, messages]);
@@ -304,18 +315,18 @@ function SwipeableTextMobileStepper() {
   };
 
   const choice = (e: string) => {
-    let copy: string[] = [...info]
-    copy.push(e)
-    setInfo(copy)
-    handleNext()
-  }
+    let copy: string[] = [...info];
+    copy.push(e);
+    setInfo(copy);
+    handleNext();
+  };
 
   const back = () => {
-    let copy: string[] = [...info]
-    copy.pop()
-    setInfo(copy)
-    handleBack()
-  }
+    let copy: string[] = [...info];
+    copy.pop();
+    setInfo(copy);
+    handleBack();
+  };
 
   const sendMessageByClick = () => {
     if (message !== "") {
@@ -327,16 +338,14 @@ function SwipeableTextMobileStepper() {
 
       // setMessages([...messages]);
 
-      setMessages(
-        [
-          ...messages,
-          {
-            userName: myUserName,
-            text: message,
-            boxClass: "messages__box--operator",
-          },
-        ],
-      );
+      setMessages([
+        ...messages,
+        {
+          userName: myUserName,
+          text: message,
+          boxClass: "messages__box--operator",
+        },
+      ]);
       setMessage("");
       const mySession = session;
 
@@ -346,9 +355,9 @@ function SwipeableTextMobileStepper() {
         type: "chat",
       });
     }
-  }
+  };
 
-  const sendMessageByEnter = (e : any) => {
+  const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
       if (message !== "") {
         // messages.push({
@@ -356,18 +365,17 @@ function SwipeableTextMobileStepper() {
         //   text: message,
         //   boxClass: "messages__box--operator",
         // });
-  
+
         // setMessages([...messages]);
 
         setMessages([
-            ...messages,
-            {
-              userName: myUserName,
-              text: message,
-              boxClass: "messages__box--operator",
-            },
-          ],
-        );
+          ...messages,
+          {
+            userName: myUserName,
+            text: message,
+            boxClass: "messages__box--operator",
+          },
+        ]);
         setMessage("");
         const mySession = session;
 
@@ -376,53 +384,52 @@ function SwipeableTextMobileStepper() {
           to: [],
           type: "chat",
         });
-
       }
     }
-  }
+  };
 
-  const handleChatMessageChange = (e : any) => {
+  const handleChatMessageChange = (e: any) => {
     console.log("message event occur");
     setMessage(e.target.value);
-  }
+  };
   // chatting
 
   const componentDidMount = () => {
     window.addEventListener("beforeunload", onbeforeunload);
-  }
+  };
 
   const componentWillUnmount = () => {
     window.removeEventListener("beforeunload", onbeforeunload);
-  }
+  };
 
-  const onbeforeunload = (event : any) => {
+  const onbeforeunload = (event: any) => {
     leaveSession();
-  }
+  };
 
   const handleChangeSessionId = (e: any) => {
     setMySessionId(e.target.value);
-  }
+  };
 
-  const handleChangeUserName = (e : any) => {
+  const handleChangeUserName = (e: any) => {
     setMyUserName(e.target.value);
-  }
+  };
 
-  const handleMainVideoStream = (stream : any) => {
+  const handleMainVideoStream = (stream: any) => {
     if (mainStreamManager !== stream) {
       setMainStreamManager(stream);
     }
-  }
+  };
 
-  const deleteSubscriber = (streamManager : any) => {
+  const deleteSubscriber = (streamManager: any) => {
     let varSubscribers = subscribers;
     let index = varSubscribers.indexOf(streamManager, 0);
     if (index > -1) {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
     }
-  }
+  };
   // 호스트 백엔드에 등록
-  const recordParticipant = (conId : string) => {
+  const recordParticipant = (conId: string) => {
     const requestBody = JSON.stringify({
       connectionId: conId,
       nickName: myUserName,
@@ -431,29 +438,28 @@ function SwipeableTextMobileStepper() {
     axios
       .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       })
       .then((response) => {
         console.log(response);
       });
-  }
+  };
 
   const joinSession = () => {
     // --- 1) Get an OpenVidu object ---
     setOV(new OpenVidu());
-  }
+  };
 
   const leaveSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
-        {
-          data : {
-            nickName: myUserName,
-            connectionId: myConnectionId,
-          } 
-        })
+      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`, {
+        data: {
+          nickName: myUserName,
+          connectionId: myConnectionId,
+        },
+      })
       .then((res) => {
         console.log("방 나가기 성공");
       })
@@ -463,7 +469,7 @@ function SwipeableTextMobileStepper() {
       .finally(() => {
         deleteSession();
       });
-    
+
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
 
     const mySession = session;
@@ -474,56 +480,52 @@ function SwipeableTextMobileStepper() {
 
     // Empty all properties...
     emptyAllOV();
-
-  }
+  };
 
   const deleteSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
-        {
-          data : {
-            nickName: myUserName,
-            connectionId: myConnectionId,
-          } 
-        })
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`, {
+        data: {
+          nickName: myUserName,
+          connectionId: myConnectionId,
+        },
+      })
       .then((res) => {
         console.log("방 삭제 성공");
       })
       .catch((e) => {
         console.log("방 삭제 실패");
       });
-    
-    axios
-    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+
+    axios.delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
       headers: {
         Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
         "Content-Type": "application/json",
       },
     });
-  }
+  };
 
-  const kickParticipant = (conId : string) => {
+  const kickParticipant = (conId: string) => {
     axios
-      .post(`${BE_URL}/api/channels/kick/${mySessionId}`,
-        {
-          nickName: "",
-          connectionId: conId,
-        })
+      .post(`${BE_URL}/api/channels/kick/${mySessionId}`, {
+        nickName: "",
+        connectionId: conId,
+      })
       .then((res) => {
         console.log("강제 퇴장 성공");
       })
       .catch((e) => {
         console.log("강제 퇴장 실패");
       });
-  }
+  };
 
-  const switchCamera = async() => {
+  const switchCamera = async () => {
     try {
       const devices = await OV?.getDevices();
       var videoDevices = devices?.filter(
         (device) => device.kind === "videoinput"
       );
-      console.log((publisher));
+      console.log(publisher);
       console.log(videoDevices);
       if (videoDevices && videoDevices.length > 1) {
         var newVideoDevice = videoDevices.filter(
@@ -540,7 +542,7 @@ function SwipeableTextMobileStepper() {
             publishVideo: true,
             mirror: true,
           });
-          console.log((newPublisher));
+          console.log(newPublisher);
           //newPublisher.once("accessAllowed", () => {
           await session?.unpublish(mainStreamManager as Publisher);
 
@@ -550,10 +552,10 @@ function SwipeableTextMobileStepper() {
           setPublisher(newPublisher);
         }
       }
-    } catch (e : any) {
+    } catch (e: any) {
       console.error(e);
     }
-  }
+  };
 
   /**
    * --------------------------
@@ -567,13 +569,13 @@ function SwipeableTextMobileStepper() {
    *   3) The Connection.token must be consumed in Session.connect() method
    */
 
-   const getToken = () => {
-     return createSession(mySessionId as string).then((sessionId) => 
-      createToken(sessionId as string)     
+  const getToken = () => {
+    return createSession(mySessionId as string).then((sessionId) =>
+      createToken(sessionId as string)
     );
-  }
+  };
 
-  const createSession = (sessionId : string) => {
+  const createSession = (sessionId: string) => {
     console.log("created session " + sessionId);
     return new Promise((resolve, reject) => {
       var data = JSON.stringify({ customSessionId: sessionId });
@@ -616,7 +618,7 @@ function SwipeableTextMobileStepper() {
           }
         });
     });
-  }
+  };
 
   const createToken = (sessionId: string) => {
     generateJoinLink(sessionId as string);
@@ -645,16 +647,16 @@ function SwipeableTextMobileStepper() {
         })
         .catch((error) => reject(error));
     });
-  }
+  };
 
   //방생성 요청
-  const handleCreateRoom = (event : any) => {
+  const handleCreateRoom = (event: any) => {
     event.preventDefault();
 
     createRandomSessionId().then(() => {
       joinSession();
     });
-  }
+  };
 
   // SpringBoot Server로부터 무작위 세션 id 생성.
   const createRandomSessionId = () => {
@@ -675,224 +677,251 @@ function SwipeableTextMobileStepper() {
           resolve();
         });
     });
-  }
+  };
 
   const generateJoinLink = (sessionId: string) => {
-    const str = "https://i7a306.p.ssafy.io/join?channelid="+sessionId;
+    const str = "https://i7a306.p.ssafy.io/join?channelid=" + sessionId;
     setJoinLink(str);
-  }
+  };
 
   const handleCopyClipBoard = () => {
     navigator.clipboard.writeText(joinLink);
-  }
+  };
 
   //카메라, 마이크 온오프
   const reverseAudioState = () => {
     publisher?.publishAudio(!audiostate);
     setAudiostate(!audiostate);
-  }
+  };
 
   const reverseVideoState = () => {
     publisher?.publishVideo(!videostate);
     setVideostate(!videostate);
-  }
+  };
 
   return (
-  <Container>
-    {session === undefined ? (
-      <Box sx={{ flexGrow: 1, 
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                zIndex: 0}}>
-        <Paper
-          square
-          elevation={0}
+    <Container>
+      {session === undefined ? (
+        <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: 50,
-            pl: 2,
-            bgcolor: 'background.default',
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            zIndex: 0,
           }}
         >
-          <Typography
-          sx={{
-            typography: 'subtitle2',
-            fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
-          }}>{steps[activeStep].label}</Typography>
-        </Paper>
-        <div style={{ 
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 1100,
-          height: 700
-      }}>
-          {steps[activeStep].choice.map((step, index) => (
-            <div key={index}>
-              {activeStep < maxSteps - 1 ?
-                <Button
-                  onClick={()=>{
-                    activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
-                    }}
-                  sx={{
-                    bgcolor: 'info.main',
-                    color: 'white',
-                    height: 300,
-                    margin: 2,
-                    marginBottom: 0,
-                    fontSize: 25,
-                    width: 400,
-                    zIndex: 1,
-                  }}>
-                  {steps[activeStep].choice[index]}
-                </Button> : 
-                <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
-                setInfo = {setInfo}
-                selectData = {selectData}
-                setSelectData = {setSelectData}
-                category = {category}
-                round = {round}
-                setCategory = {setCategory}
-                setRound = {setRound}
-                />
-              }
-            </div>
-          ))}
-        </div>
-        <MobileStepper
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            maxWidth: 1000,
-            width: '100%'
-          }}
-          steps={maxSteps}
-          position="static"
-          activeStep={activeStep}
-          nextButton={
-            activeStep === maxSteps - 1 ? 
-            // <Link to="/channel/gamechannel" style={{ textDecoration: 'inherit'}}>
-            //   <Button
-            //     size="small"
-            //     // onClick={()=> {데이터 서버로 전송}}
-            //   >
-            //     게임 생성
-            //     {theme.direction === 'rtl' ? (
-            //       <KeyboardArrowLeft />
-            //     ) : (
-            //       <KeyboardArrowRight />
-            //     )}
-            //   </Button>
-            // </Link>
-            <Button
-                size="small"
-                onClick={handleCreateRoom}
-              >
-                게임 생성
-                {theme.direction === 'rtl' ? (
-                  <KeyboardArrowLeft />
-                ) : (
-                  <KeyboardArrowRight />
-                )}
-              </Button>
-            : <Button
-            size="small"
-            disabled= {true}
+          <Paper
+            square
+            elevation={0}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: 50,
+              pl: 2,
+              bgcolor: "background.default",
+            }}
+          >
+            <Typography
+              sx={{
+                typography: "subtitle2",
+                fontSize: "h4.fontSize",
+                fontWeight: "bold",
+              }}
             >
-            게임 생성
-            {theme.direction === 'rtl' ? (
-              <KeyboardArrowLeft />
-            ) : (
-              <KeyboardArrowRight />
-            )}
-          </Button>
-          }
-          backButton={
-            <Button size="small" onClick={back} disabled={activeStep === 0}>
-              {theme.direction === 'rtl' ? (
-                <KeyboardArrowRight />
+              {steps[activeStep].label}
+            </Typography>
+          </Paper>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 1100,
+              height: 700,
+            }}
+          >
+            {steps[activeStep].choice.map((step, index) => (
+              <div key={index}>
+                {activeStep < maxSteps - 1 ? (
+                  <Button
+                    onClick={() => {
+                      activeStep < maxSteps - 1
+                        ? choice(steps[activeStep].choice[index])
+                        : undefined;
+                    }}
+                    sx={{
+                      bgcolor: "info.main",
+                      color: "white",
+                      height: 300,
+                      margin: 2,
+                      marginBottom: 0,
+                      fontSize: 25,
+                      width: 400,
+                      zIndex: 1,
+                    }}
+                  >
+                    {steps[activeStep].choice[index]}
+                  </Button>
+                ) : (
+                  <BasicSelect
+                    index={index}
+                    steps={steps}
+                    activeStep={activeStep}
+                    setInfo={setInfo}
+                    selectData={selectData}
+                    setSelectData={setSelectData}
+                    category={category}
+                    round={round}
+                    setCategory={setCategory}
+                    setRound={setRound}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <MobileStepper
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              maxWidth: 1000,
+              width: "100%",
+            }}
+            steps={maxSteps}
+            position="static"
+            activeStep={activeStep}
+            nextButton={
+              activeStep === maxSteps - 1 ? (
+                // <Link to="/channel/gamechannel" style={{ textDecoration: 'inherit'}}>
+                //   <Button
+                //     size="small"
+                //     // onClick={()=> {데이터 서버로 전송}}
+                //   >
+                //     게임 생성
+                //     {theme.direction === 'rtl' ? (
+                //       <KeyboardArrowLeft />
+                //     ) : (
+                //       <KeyboardArrowRight />
+                //     )}
+                //   </Button>
+                // </Link>
+                <Button size="small" onClick={handleCreateRoom}>
+                  게임 생성
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowLeft />
+                  ) : (
+                    <KeyboardArrowRight />
+                  )}
+                </Button>
               ) : (
-                <KeyboardArrowLeft />
-              )}
-              이전
-            </Button>
-          }
-        />
+                <Button size="small" disabled={true}>
+                  게임 생성
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowLeft />
+                  ) : (
+                    <KeyboardArrowRight />
+                  )}
+                </Button>
+              )
+            }
+            backButton={
+              <Button size="small" onClick={back} disabled={activeStep === 0}>
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowRight />
+                ) : (
+                  <KeyboardArrowLeft />
+                )}
+                이전
+              </Button>
+            }
+          />
         </Box>
       ) : null}
       {/* session이 있을 때 */}
       {session !== undefined ? (
-        <Box id='full'
+        <Box
+          id="full"
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
             padding: 0,
-            height: '100vh',
-            width: '100vw'
-          }}>
-         <Box id='header'
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '15%'
-          }}>
-          <Box id='logo'
-          sx={{
-            width: '20%',
-            height: '100%',
-            // bgcolor: 'green'
-          }}>
-          {/* <div id="session">
+            height: "100vh",
+            width: "100vw",
+          }}
+        >
+          <Box
+            id="header"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "15%",
+            }}
+          >
+            <Box
+              id="logo"
+              sx={{
+                width: "20%",
+                height: "100%",
+                // bgcolor: 'green'
+              }}
+            >
+              {/* <div id="session">
           <div id="session-header"> */}
               <h1 id="session-title">{mySessionId}</h1>
               <div>
-                <Button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</Button>
+                <Button onClick={handleCopyClipBoard}>
+                  초대 링크 복사하기 📋
+                </Button>
               </div>
-              </Box>
-              <Paper id='info'
-                sx={{
-                  // position: 'sticky',
-                  top: 0,
-                  left: 0,
-                  right: 0,
+            </Box>
+            <Paper
+              id="info"
+              sx={{
+                // position: 'sticky',
+                top: 0,
+                left: 0,
+                right: 0,
 
-                  width: '60%',
-                  height: '100%',
-                  // bgcolor: 'orange',
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: 0,
-                  borderBottomLeftRadius: 20,
-                  borderBottomRightRadius: 20,
-                  boxShadow: 4,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                  <h1 style={{
-                    color: 'skyblue',
-                    fontWeight: 'bold'
-                  }}>게임 종류</h1>
-
-              </Paper>
-              <Box id='buttons'
-                sx={{
-                  width: '20%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'space-evenly',
-                  alignItems: 'center',
-              }}>
+                width: "60%",
+                height: "100%",
+                // bgcolor: 'orange',
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20,
+                boxShadow: 4,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <h1
+                style={{
+                  color: "skyblue",
+                  fontWeight: "bold",
+                }}
+              >
+                게임 종류
+              </h1>
+            </Paper>
+            <Box
+              id="buttons"
+              sx={{
+                width: "20%",
+                height: "100%",
+                display: "flex",
+                justifyContent: "space-evenly",
+                alignItems: "center",
+              }}
+            >
               {/* <input
                 className="btn btn-large btn-danger"
                 type="button"
@@ -900,40 +929,44 @@ function SwipeableTextMobileStepper() {
                 onClick={leaveSession}
                 value="Leave session"
               /> */}
-          {/* </div> */}
-          <Button>게임 시작</Button>
-          <BasicModal/>        
-        </Box>
-      </Box>
-      <Box id='main'
-        sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '85%'
-      }}>
-        
-           <Box id='conference'
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection:'column',
-            width: '75%',
-            height: '100%',
-            display: 'flex'
-            }}>
-            
-          <Box id='cam' 
-            sx={{ 
-            // display: 'flex',
-            // backgroundColor: 'powderblue',
-            width: '100%',
-            height: '90%',
-            // margin: 10
-            }}>
-            {/* 큰 화면 카메라 */}
-            {/* {mainStreamManager !== undefined ? (
+              {/* </div> */}
+              <Button>게임 시작</Button>
+              <BasicModal />
+            </Box>
+          </Box>
+          <Box
+            id="main"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "85%",
+            }}
+          >
+            <Box
+              id="conference"
+              sx={{
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "column",
+                width: "75%",
+                height: "100%",
+                display: "flex",
+              }}
+            >
+              <Box
+                id="cam"
+                sx={{
+                  // display: 'flex',
+                  // backgroundColor: 'powderblue',
+                  width: "100%",
+                  height: "90%",
+                  // margin: 10
+                }}
+              >
+                {/* 큰 화면 카메라 */}
+                {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
                 <UserVideoComponent
                   streamManager={mainStreamManager}
@@ -947,85 +980,78 @@ function SwipeableTextMobileStepper() {
                 />
               </div>
             ) : null} */}
-            {/* <div id="video-container" className="col-md-6"> */}
-          <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-            {publisher !== undefined ? (
+                {/* <div id="video-container" className="col-md-6"> */}
                 <Grid
-                item sm={4} md={4}
-                onClick={() =>
-                  handleMainVideoStream(publisher)
-                }
-              >
-                <UserVideoComponent streamManager={publisher} />
-              </Grid>
-              ) : null}
-             {subscribers.map((sub, i) => (
-                <Grid
-                  item sm={4} md={4}
-                  key={i}
-                  // className="stream-container col-md-6 col-xs-6"
-                  onClick={() => handleMainVideoStream(sub)}
+                  container
+                  spacing={{ xs: 1, md: 1 }}
+                  columns={{ xs: 4, sm: 8, md: 12 }}
                 >
-                  <UserVideoComponent streamManager={sub} />
+                  {publisher !== undefined ? (
+                    <Grid
+                      item
+                      sm={4}
+                      md={4}
+                      onClick={() => handleMainVideoStream(publisher)}
+                    >
+                      <UserVideoComponent streamManager={publisher} />
+                    </Grid>
+                  ) : null}
+                  {subscribers.map((sub, i) => (
+                    <Grid
+                      item
+                      sm={4}
+                      md={4}
+                      key={i}
+                      // className="stream-container col-md-6 col-xs-6"
+                      onClick={() => handleMainVideoStream(sub)}
+                    >
+                      <UserVideoComponent streamManager={sub} />
+                    </Grid>
+                  ))}
                 </Grid>
-              ))}
-                </Grid>
-                </Box>
+              </Box>
 
-          <Box id='settings'
-            sx={{
-              backgroundColor: 'inherit',
-              width: '100%',
-              height: '10%',
-              display: 'flex',
-              justifyContent: 'space-evenly',
-              alignItems: 'center'
-            }}>
-           <Button><SettingsIcon /></Button>
-            
-           {audiostate ? (
-                <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color='success'
-                />
+              <Box
+                id="settings"
+                sx={{
+                  backgroundColor: "inherit",
+                  width: "100%",
+                  height: "10%",
+                  display: "flex",
+                  justifyContent: "space-evenly",
+                  alignItems: "center",
+                }}
+              >
+                <Button>
+                  <SettingsIcon />
                 </Button>
-              ) : (
-                <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color="disabled"
-                  />
-                </Button>
-              )}
-              {videostate ? (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon 
-                  color='success'
-                  />
-                </Button>                 
-              ) : (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon
-                  color="disabled"
-                  />
-                </Button>                   
-              )}
-                             
-              <Button
-              onClick={leaveSession}>
-                <ExitToAppIcon
-                  color='error' 
-                />
-              </Button>
 
-          
-          </Box>
-        </Box>
-          
-          {/* <div>
+                {audiostate ? (
+                  <Button onClick={reverseAudioState}>
+                    <MicOutlinedIcon color="success" />
+                  </Button>
+                ) : (
+                  <Button onClick={reverseAudioState}>
+                    <MicOutlinedIcon color="disabled" />
+                  </Button>
+                )}
+                {videostate ? (
+                  <Button onClick={reverseVideoState}>
+                    <VideocamIcon color="success" />
+                  </Button>
+                ) : (
+                  <Button onClick={reverseVideoState}>
+                    <VideocamIcon color="disabled" />
+                  </Button>
+                )}
+
+                <Button onClick={leaveSession}>
+                  <ExitToAppIcon color="error" />
+                </Button>
+              </Box>
+            </Box>
+
+            {/* <div>
             {audiostate ? (
               <button 
                 onClick={reverseAudioState}
@@ -1055,63 +1081,92 @@ function SwipeableTextMobileStepper() {
               </button>
             )}
           </div> */}
-          <Box id='chat' 
-          sx={{
-          width: '25%',
-          height: '100%'
-          // margin: 10
-        }}>
-          {/* <div className="chatbox__footer"> */}
-          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
-          <h3>채팅</h3>
-          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
-            <Messages messages={messages} />
-            {/*<div />
-           </div> */}
-          </Box>
-            <input
-              id="chat_message"
-              type="text"
-              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
-              placeholder="Write a message..."
-              onChange={handleChatMessageChange}
-              onKeyPress={sendMessageByEnter}
-              value={message}
-            />
-            <Button
-              className="chatbox__send--footer"
-              sx={{borderRadius: '20px', border: 'none'}}
-              onClick={sendMessageByClick}
+            <Box
+              id="chat"
+              sx={{
+                width: "25%",
+                height: "100%",
+                // margin: 10
+              }}
             >
-              Enter
-            </Button></Box>
+              {/* <div className="chatbox__footer"> */}
+              <Box
+                className="chatspace"
+                sx={{
+                  backgroundColor: "#85B6FF",
+                  width: "100%",
+                  height: "400px",
+                  borderRadius: "20px",
+                }}
+              >
+                <h3>채팅</h3>
+                <Box
+                  className="chatbox__messages"
+                  sx={{
+                    backgroundColor: "white",
+                    margin: "10px",
+                    width: "80%",
+                    height: "300px",
+                    borderRadius: "20px",
+                    overflow: "auto",
+                  }}
+                >
+                  <Messages messages={messages} />
+                  {/*<div />
+           </div> */}
+                </Box>
+                <input
+                  id="chat_message"
+                  type="text"
+                  style={{
+                    margin: "10px",
+                    width: "70%",
+                    borderRadius: "20px",
+                    border: "none",
+                  }}
+                  placeholder="Write a message..."
+                  onChange={handleChatMessageChange}
+                  onKeyPress={sendMessageByEnter}
+                  value={message}
+                />
+                <Button
+                  className="chatbox__send--footer"
+                  sx={{ borderRadius: "20px", border: "none" }}
+                  onClick={sendMessageByClick}
+                >
+                  Enter
+                </Button>
+              </Box>
+            </Box>
           </Box>
-          </Box></Box>
-        ) : null}
-      </Container>
+        </Box>
+      ) : null}
+    </Container>
   );
 }
 
 export default SwipeableTextMobileStepper;
 
 function BasicSelect(props: any) {
-  const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
+  const [category, setCategory] = useState(
+    `${props.selectData[props.index][0]}`
+  );
 
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
     if (props.index == 0) {
-      props.setCategory(category)
-    }
-    else {
-      props.setRound(category)
+      props.setCategory(category);
+    } else {
+      props.setRound(category);
     }
   };
 
   return (
-    <Box sx={{ minWidth: 120,
-    width: 560 }}>
+    <Box sx={{ minWidth: 120, width: 560 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
+        <InputLabel id="demo-simple-select-label">
+          {steps[2].choice[props.index]}
+        </InputLabel>
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
@@ -1119,15 +1174,16 @@ function BasicSelect(props: any) {
           label="Category"
           onChange={handleChange}
         >
-          {props.selectData[props.index].map((d: any, i: any)=> (
-            <MenuItem key={i} value={d}>{d}</MenuItem>
+          {props.selectData[props.index].map((d: any, i: any) => (
+            <MenuItem key={i} value={d}>
+              {d}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
     </Box>
   );
 }
-
 
 const Container = styled.div`
   // position: sticky;
@@ -1141,19 +1197,18 @@ const Container = styled.div`
 `;
 
 const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '40%',
-  height: '75%',
-  bgcolor: 'white',
-  border: '2px solid #000',
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "40%",
+  height: "75%",
+  bgcolor: "white",
+  border: "2px solid #000",
   borderRadius: 3,
   boxShadow: 24,
   p: 4,
 };
-
 
 function BasicModal() {
   const [open, setOpen] = useState(false);
@@ -1175,7 +1230,7 @@ function BasicModal() {
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
-            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
             3. 참여자는 채팅으로 정답을 맞춥니다.
           </Typography>
           <Button onClick={handleClose}>닫기</Button>
