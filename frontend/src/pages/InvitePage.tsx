@@ -171,14 +171,9 @@ const InvitePage = () => {
     axios
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
       .then((res: any) => {
-        // console.log(res);
-        console.log(res.data);
-        sethostName(res.data.nickName);
-=======
         console.log(res);
         sethostName(res.data.nickName);
         setHostConnectionId(res.data.connectionId);
->>>>>>> develop
       })
       .catch((error: any) => {
         console.log(error);
@@ -233,7 +228,6 @@ const InvitePage = () => {
       navigate("/");
     });
 
-<<<<<<< HEAD
     // chatting
     mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
@@ -250,12 +244,10 @@ const InvitePage = () => {
         ]);
       }
     });
-=======
     mySession?.on("sessionDisconnected", (event: any) => {
       alert("서버와의 접속이 끊어졌습니다.");
       navigate("/");
-    })
->>>>>>> develop
+    });
 
     // --- 4) Connect to the session with a valid user token ---
 
