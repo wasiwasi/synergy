@@ -51,8 +51,6 @@ import {
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
-import { display } from "@mui/system";
-import { AddBox } from "@mui/icons-material";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -156,7 +154,6 @@ const InvitePage = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
 
   const [hostName, sethostName] = useState<string>("");
-  const [hostConnectionId, setHostConnectionId] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
 
   const didMount = useRef(false);
@@ -324,6 +321,35 @@ const InvitePage = () => {
     });
   }, [session, messages]);
 
+  useEffect(() => {
+    const mySession = session;
+    mySession?.on("signal:chat", (event : any) => {
+      let chatdata = event.data.split(",");
+      // let chatdata = event.;
+      if (chatdata[0] !== myUserName) {
+        console.log("messages: "+messages);
+
+        // messages.push({
+        //   userName: chatdata[0],
+        //   text: chatdata[1],
+        //   boxClass: "messages__box--visitor",
+        // });
+
+        // setMessages([...messages]);
+
+        setMessages([
+            ...messages,
+            {
+              userName: chatdata[0],
+              text: chatdata[1],
+              boxClass: "messages__box--visitor",
+            },
+          ],
+        );
+      }
+    });
+  }, [session, messages]);
+
   const onEnter = async () => {
     await joinSession();
   };
@@ -388,6 +414,7 @@ const InvitePage = () => {
           boxClass: "messages__box--operator",
         },
       ]);
+
       setMessage("");
       const mySession = session;
 
@@ -399,7 +426,7 @@ const InvitePage = () => {
     }
   };
 
-  const sendMessageByEnter = (e: any) => {
+  const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
       if (message !== "") {
         setMessages([
@@ -422,7 +449,8 @@ const InvitePage = () => {
     }
   };
 
-  const handleChatMessageChange = (e: any) => {
+  const handleChatMessageChange = (e : any) => {
+    console.log("message event occur");
     setMessage(e.target.value);
   };
   // chatting
