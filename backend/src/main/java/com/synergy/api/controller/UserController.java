@@ -5,9 +5,7 @@ import com.synergy.api.response.MyPageRes;
 import com.synergy.api.service.MailService;
 import com.synergy.api.service.SubjectService;
 import com.synergy.common.util.RedisUtil;
-import com.synergy.db.entity.Bodytalk;
-import com.synergy.db.entity.SubjectSetDto;
-import com.synergy.db.entity.UserEmailForm;
+import com.synergy.db.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,6 @@ import com.synergy.api.response.UserRes;
 import com.synergy.api.service.UserService;
 import com.synergy.common.auth.UserDetails;
 import com.synergy.common.model.response.BaseResponseBody;
-import com.synergy.db.entity.User;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -118,7 +115,7 @@ public class UserController {
 			@ApiResponse(code = 409, message = "중복된 이메일"),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
-	public ResponseEntity<? extends BaseResponseBody> isEmailExist(@RequestBody User user){
+	public ResponseEntity<? extends BaseResponseBody> isEmailExist(@RequestBody UserDto user){
 		if(userService.isExistEmail(user.getEmail())){
 			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 이메일"));
 		}
@@ -132,7 +129,7 @@ public class UserController {
 			@ApiResponse(code = 409, message = "중복된 닉네임"),
 			@ApiResponse(code = 500, message = "서버 오류")
 	})
-	public ResponseEntity<? extends BaseResponseBody> isNicknameExist(@RequestBody User user){
+	public ResponseEntity<? extends BaseResponseBody> isNicknameExist(@RequestBody UserDto user){
 		if(userService.isExistNickname(user.getNickname())){
 			return ResponseEntity.status(409).body(BaseResponseBody.of(409, "중복된 닉네임"));
 		}
