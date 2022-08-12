@@ -24,6 +24,8 @@ import Button from "@mui/material/Button";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+import Swal from "sweetalert2";
+
 const themeA306 = createTheme({
   palette: {
     primary: {
@@ -45,7 +47,6 @@ interface State {
 }
 
 const Login = () => {
-
   const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
   const [values, setValues] = React.useState<State>({
@@ -67,7 +68,7 @@ const Login = () => {
     useState<string>("이메일을 입력해 주세요.");
   const [passwordError, setPasswordError] =
     useState<string>("비밀번호를 입력해 주세요.");
-  
+
   // 로그인 버튼 클릭
   const onLogin = () => {
     axios
@@ -79,19 +80,29 @@ const Login = () => {
         if (res.data.accessToken) {
           localStorage.setItem("access-token", res.data.accessToken);
         }
-
-        alert("로그인 되었습니다. :)");
+        Swal.fire({
+          icon: "success",
+          title: "로그인 되었습니다. :)",
+          showConfirmButton: false,
+          timer: 1500,
+        });
 
         navigate("/");
       })
       .catch((error) => {
         if (error.response.status === 412) {
-          alert("이메일 인증 후 이용해주세요.");
+          Swal.fire({
+            icon: "question",
+            title: "이메일 인증 후 이용해주세요.",
+          });
         } else {
-          alert("다시 시도해 주세요.");
+          Swal.fire({
+            icon: "error",
+            title: "로그인 다시 시도해 주세요.",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         }
-        // console.log(error.message);
-        // console.log(error.response.data.statusCode);
       });
   };
 
@@ -167,7 +178,7 @@ const Login = () => {
 
             <LoginInput>
               <FormControl
-                error={ (!isEmail && !isEmpty) }
+                error={!isEmail && !isEmpty}
                 variant="standard"
                 fullWidth
               >
@@ -189,7 +200,7 @@ const Login = () => {
 
             <LoginInput>
               <FormControl
-                error={ (!isPassword && !isEmpty) }
+                error={!isPassword && !isEmpty}
                 variant="standard"
                 fullWidth
               >
@@ -227,7 +238,7 @@ const Login = () => {
 
             <LoginInput>
               <Button
-                disabled={ !(isEmail && isPassword && !isEmpty) }
+                disabled={!(isEmail && isPassword && !isEmpty)}
                 variant="contained"
                 size="medium"
                 fullWidth

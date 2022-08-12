@@ -8,7 +8,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
-import { useState, useCallback, useRef} from "react";
+import { useState, useCallback, useRef } from "react";
 
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -27,6 +27,7 @@ import TextField from "@mui/material/TextField";
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Swal from "sweetalert2";
 
 const themeA306 = createTheme({
   palette: {
@@ -77,23 +78,41 @@ const Signup = () => {
 
   // 회원가입 버튼 클릭
   const onSignUp = () => {
-    //여러번 요청보내는 것을 방지
-    signupRef.current.disabled = true;
-    axios
-      .post(
-        `${BE_URL}/users/signup`,
+    if (!usableEmail) {
+      Swal.fire({
+        icon: "error",
+        title: "닉네임 중복을 확인해주세요!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else if (!usableNickName) {
+      Swal.fire({
+        icon: "error",
+        title: "이메일 중복을 확인해주세요!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else if (usableEmail && usableNickName) {
+      //여러번 요청보내는 것을 방지
+      signupRef.current.disabled = true;
+      axios
+        .post(
+          `${BE_URL}/users/signup`,
 
-        {
-          email: email,
-          nickname: nickName,
-          password: password,
-        }
-      )
-      .then((res) => {
-        console.log("response:", res);
-        {
-          console.log(res.status);
-          alert("이메일 인증 완료 후 로그인 해주세요 :)");
+          {
+            email: email,
+            nickname: nickName,
+            password: password,
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "회원 가입 성공하였습니다",
+            text: "이메일인증 후 로그인하여 주세요",
+            showConfirmButton: false,
+            timer: 1500,
+          });
 
           // 입력된 내용 다 지우는 코드
           setNickName("");
@@ -102,20 +121,30 @@ const Signup = () => {
           setPasswordConfirm("");
 
           navigate("/Login");
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        if (error.response.status === 409) {
-          alert(error.response.data.message);
-        } else {
-          alert("다시 시도해 주세요.");
-        }
-        console.log(error.message);
-      })
-      .finally(() => {
-        signupRef.current.disabled = false;
-      });
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status === 409) {
+            Swal.fire({
+              icon: "warning",
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "아이디와 비밀 번호를 확인해주세요",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
+          // console.log(error.message);
+        })
+        .finally(() => {
+          signupRef.current.disabled = false;
+        });
+    }
   };
 
   // 닉네임
@@ -239,16 +268,25 @@ const Signup = () => {
           nickname: nickName,
         })
         .then((response) => {
-          {
-            alert("사용가능한 닉네임입니다.");
-            setUsableNickName(true);
-          }
+          Swal.fire({
+            icon: "success",
+            title: "사용가능한 닉네임입니다.",
+          });
+          setUsableNickName(true);
         })
         .catch((error) => {
-          alert("중복된 닉네임입니다.");
+          Swal.fire({
+            icon: "error",
+            title: "중복된 닉네임입니다.",
+            timer: 1500,
+          });
         });
     } else {
-      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "닉네임을 다시 한번 확인해주세요",
+        text: "6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.",
+      });
     }
   };
 
@@ -259,16 +297,29 @@ const Signup = () => {
       axios
         .post(`${BE_URL}/users/email`, { email: email })
         .then((response) => {
-          {
-            alert("사용가능한 이메일입니다.");
-            setUsableEmail(true);
-          }
+          Swal.fire({
+            icon: "success",
+            title: "이메일 사용 가능합니다",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          setUsableEmail(true);
         })
         .catch((error) => {
-          alert("중복된 이메일입니다.");
+          Swal.fire({
+            icon: "warning",
+            title: "중복된 이메일입니다",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         });
     } else {
-      alert("이메일 형식을 확인해주세요");
+      Swal.fire({
+        icon: "error",
+        title: "이메일 형식을 확인해주세요",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
 
@@ -413,13 +464,13 @@ const Signup = () => {
                     usableEmail
                   )
                 }
-                ref={ signupRef }
+                ref={signupRef}
                 onClick={onSignUp}
               >
                 회원 가입
               </Button>
-              <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div>
-              <div>{!usableEmail ? "이메일 중복체크를 해주세요" : ""}</div>
+              {/* <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div> */}
+              {/* <div>{!usableEmail ? "이메일 중복체크를 해주세요" : ""}</div> */}
             </SignupInput>
           </SignupForm>
         </ThemeProvider>

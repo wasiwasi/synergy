@@ -51,6 +51,7 @@ import {
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import Swal from "sweetalert2";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -221,7 +222,12 @@ const InvitePage = () => {
       console.warn(exception);
     });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
@@ -242,7 +248,12 @@ const InvitePage = () => {
       }
     });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
@@ -323,11 +334,11 @@ const InvitePage = () => {
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event : any) => {
+    mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
+        console.log("messages: " + messages);
 
         // messages.push({
         //   userName: chatdata[0],
@@ -338,14 +349,13 @@ const InvitePage = () => {
         // setMessages([...messages]);
 
         setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
+          ...messages,
+          {
+            userName: chatdata[0],
+            text: chatdata[1],
+            boxClass: "messages__box--visitor",
+          },
+        ]);
       }
     });
   }, [session, messages]);
@@ -389,18 +399,37 @@ const InvitePage = () => {
         })
         .then((response: any) => {
           if (response.status == 226) {
-            alert("중복된 닉네임입니다.");
+            Swal.fire({
+              icon: "question",
+              title: "Oops...",
+              text: "중복된 닉네임입니다",
+              timer: 1000,
+            });
           } else {
-            alert("사용가능한 닉네임입니다.");
+            Swal.fire({
+              icon: "success",
+              title: "사용가능한 닉네임입니다.",
+              timer: 1000,
+            });
             setUsableNickName(true);
             setMyUserName(nickName);
           }
         })
         .catch((error: any) => {
-          alert("서버 오류");
+          Swal.fire({
+            icon: "warning",
+            title: "Sorry...",
+            text: "서버 오류입니다.",
+            timer: 1000,
+          });
         });
     } else {
-      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+      Swal.fire({
+        icon: "error",
+        title: "닉네임을 다시 입력해주세요",
+        text: "6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.",
+        timer: 1000,
+      });
     }
   };
 
@@ -426,7 +455,7 @@ const InvitePage = () => {
     }
   };
 
-  const sendMessageByEnter = (e : any) => {
+  const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
       if (message !== "") {
         setMessages([
@@ -449,7 +478,7 @@ const InvitePage = () => {
     }
   };
 
-  const handleChatMessageChange = (e : any) => {
+  const handleChatMessageChange = (e: any) => {
     console.log("message event occur");
     setMessage(e.target.value);
   };
@@ -628,7 +657,13 @@ const InvitePage = () => {
               "Content-Type": "application/json",
             },
           });
-          alert(`참가하려는 ${sessionId}방이 존재하지 않습니다.`);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `참가하려는 ${sessionId}방이 존재하지 않습니다.`,
+            showConfirmButton: false,
+            timer: 1500,
+          });
           reject(response);
         })
         .catch((response: any) => {
