@@ -1,23 +1,53 @@
-import React, { Component, useState, useCallback, useEffect, useRef } from "react";
+import React, {
+  Component,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 
 import Header from "../components/common/Header";
-import { Link, Outlet, useNavigate, useLocation} from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+
+import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 import styled from "@emotion/styled";
 
 import FormControl from "@mui/material/FormControl";
 // import FormHelperText from "@mui/material/FormHelperText";
-import Input from "@mui/material/Input";
-import InputLabel from "@mui/material/InputLabel";
-
-import Button from "@mui/material/Button";
+import {
+  Brand,
+  Logo,
+  LogoImg,
+  LogoName,
+  BrandWrapper,
+} from "../components/common/Header";
+import {
+  Button,
+  Box,
+  Input,
+  InputLabel,
+  Modal,
+  Typography,
+  Grid,
+  Paper,
+} from "@mui/material/";
 
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
+import {
+  OpenVidu,
+  Publisher,
+  Session,
+  StreamManager,
+  Subscriber,
+} from "openvidu-browser";
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
@@ -41,20 +71,20 @@ const themeA306 = createTheme({
 });
 
 interface IState {
-  OV: OpenVidu | null,
-  mySessionId: string,
-  myUserName: string,
-  session: Session | undefined,
-  mainStreamManager: Publisher | undefined,
-  publisher: Publisher | undefined,
-  subscribers: Subscriber[],
-  myConnectionId: string,
-  audiostate: boolean,
-  audioallowed: boolean,
-  videostate: boolean,
-  videoallowed: boolean,
-  messages: object[],
-  message: string,
+  OV: OpenVidu | null;
+  mySessionId: string;
+  myUserName: string;
+  session: Session | undefined;
+  mainStreamManager: Publisher | undefined;
+  publisher: Publisher | undefined;
+  subscribers: Subscriber[];
+  myConnectionId: string;
+  audiostate: boolean;
+  audioallowed: boolean;
+  videostate: boolean;
+  videoallowed: boolean;
+  messages: object[];
+  message: string;
 }
 
 const InvitePage = () => {
@@ -71,13 +101,13 @@ const InvitePage = () => {
   //     subscribers: [],
   //     // user need to hold their own connection.id
   //     myConnectionId: "",
-      
+
   //     // audio, video
   //     audiostate: true,
   //     audioallowed: true,
   //     videostate: true,
   //     videoallowed: true,
-      
+
   //     // chatting
   //     messages: [],
   //     message: "",
@@ -87,17 +117,19 @@ const InvitePage = () => {
   const [mySessionId, setMySessionId] = useState<string | null>("");
   const [myUserName, setMyUserName] = useState<string>("");
   const [session, setSession] = useState<Session | undefined>(undefined);
-  const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
+  const [mainStreamManager, setMainStreamManager] = useState<
+    Publisher | undefined
+  >(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-     
+
   const [myConnectionId, setMyConnectionId] = useState<string>("");
-   
+
   const [audiostate, setAudiostate] = useState<boolean>(true);
   const [audioallowed, setAudioallowed] = useState<boolean>(true);
   const [videostate, setVideostate] = useState<boolean>(true);
   const [videoallowed, setVideoallowed] = useState<boolean>(true);
-     
+
   const [messages, setMessages] = useState<object[]>([]);
   const [message, setMessage] = useState<string>("");
   const emptyAllOV = () => {
@@ -108,7 +140,7 @@ const InvitePage = () => {
     setMyUserName("");
     setMainStreamManager(undefined);
     setPublisher(undefined);
-  }
+  };
   //닉네임 확인
   const [nickName, setNickName] = useState<string>("");
 
@@ -135,22 +167,22 @@ const InvitePage = () => {
     //호스트 닉네임을 가져옴
     axios
       .get(`${BE_URL}/api/channels/findHost/${channelId}`)
-      .then((res) => {
+      .then((res: any) => {
         console.log(res);
         sethostName(res.data.nickName);
         setHostConnectionId(res.data.connectionId);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.log(error);
       });
   }, []);
 
   useEffect(() => {
-      // --- 2) Init a session ---
-      setSession(OV?.initSession());
-    }, [OV]);
-    
-    // 세션 받아오고 들어가는 로직
+    // --- 2) Init a session ---
+    setSession(OV?.initSession());
+  }, [OV]);
+
+  // 세션 받아오고 들어가는 로직
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -165,7 +197,7 @@ const InvitePage = () => {
     // --- 3) Specify the actions when events take place in the session ---
 
     // On every new Stream received...
-    mySession?.on("streamCreated", (event : any) => {
+    mySession?.on("streamCreated", (event: any) => {
       // Subscribe to the Stream to receive it. Second parameter is undefined
       // so OpenVidu doesn't create an HTML video by its own
       var subscriber = mySession?.subscribe(event.stream, "undefined");
@@ -175,7 +207,7 @@ const InvitePage = () => {
     });
 
     // On every Stream destroyed...
-    mySession?.on("streamDestroyed", (event : any) => {
+    mySession?.on("streamDestroyed", (event: any) => {
       //호스트가 비정상 종료했다면
       if (hostConnectionId === event.stream.connection.connectionId) {
         deleteSession();
@@ -188,11 +220,31 @@ const InvitePage = () => {
     mySession?.on("exception", (exception) => {
       console.warn(exception);
     });
-
     mySession?.on("sessionDisconnected", (event: any) => {
       alert("서버와의 접속이 끊어졌습니다.");
       navigate("/");
-    })
+    });
+
+    // chatting
+    mySession?.on("signal:chat", (event: any) => {
+      let chatdata = event.data.split(",");
+      // let chatdata = event.;
+      console.log(chatdata);
+      if (chatdata[0] !== myUserName) {
+        setMessages([
+          ...messages,
+          {
+            userName: chatdata[0],
+            text: chatdata[1],
+            boxClass: "messages__box--visitor",
+          },
+        ]);
+      }
+    });
+    mySession?.on("sessionDisconnected", (event: any) => {
+      alert("서버와의 접속이 끊어졌습니다.");
+      navigate("/");
+    });
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -201,7 +253,8 @@ const InvitePage = () => {
     getToken().then((token) => {
       // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
       // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
-      mySession?.connect(String(token), { clientData: myUserName })
+      mySession
+        ?.connect(String(token), { clientData: myUserName })
         .then(async () => {
           var devices = await OV?.getDevices();
           var videoDevices = devices?.filter(
@@ -240,6 +293,33 @@ const InvitePage = () => {
         });
     });
   }, [session]);
+  useEffect(() => {
+    const mySession = session;
+    mySession?.on("signal:chat", (event: any) => {
+      let chatdata = event.data.split(",");
+      // let chatdata = event.;
+      if (chatdata[0] !== myUserName) {
+        console.log("messages: " + messages);
+
+        // messages.push({
+        //   userName: chatdata[0],
+        //   text: chatdata[1],
+        //   boxClass: "messages__box--visitor",
+        // });
+
+        // setMessages([...messages]);
+
+        setMessages([
+          ...messages,
+          {
+            userName: chatdata[0],
+            text: chatdata[1],
+            boxClass: "messages__box--visitor",
+          },
+        ]);
+      }
+    });
+  }, [session, messages]);
 
   useEffect(() => {
     const mySession = session;
@@ -304,10 +384,10 @@ const InvitePage = () => {
     if (isNickName) {
       axios
         .post(`${BE_URL}/api/channels/duplicate/nickname/${mySessionId}`, {
-            connectionId : myConnectionId,
-            nickName: nickName,
+          connectionId: myConnectionId,
+          nickName: nickName,
         })
-        .then((response) => {
+        .then((response: any) => {
           if (response.status == 226) {
             alert("중복된 닉네임입니다.");
           } else {
@@ -316,7 +396,7 @@ const InvitePage = () => {
             setMyUserName(nickName);
           }
         })
-        .catch((error) => {
+        .catch((error: any) => {
           alert("서버 오류");
         });
     } else {
@@ -326,24 +406,15 @@ const InvitePage = () => {
 
   const sendMessageByClick = () => {
     if (message !== "") {
-      // messages.push({
-      //   userName: myUserName,
-      //   text: message,
-      //   boxClass: "messages__box--operator",
-      // });
+      setMessages([
+        ...messages,
+        {
+          userName: myUserName,
+          text: message,
+          boxClass: "messages__box--operator",
+        },
+      ]);
 
-      // setMessages([...messages]);
-
-      setMessages(
-        [
-          ...messages,
-          {
-            userName: myUserName,
-            text: message,
-            boxClass: "messages__box--operator",
-          },
-        ],
-      );
       setMessage("");
       const mySession = session;
 
@@ -353,29 +424,19 @@ const InvitePage = () => {
         type: "chat",
       });
     }
-  }
-
+  };
 
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
       if (message !== "") {
-        // messages.push({
-        //   userName: myUserName,
-        //   text: message,
-        //   boxClass: "messages__box--operator",
-        // });
-  
-        // setMessages([...messages]);
-
         setMessages([
-            ...messages,
-            {
-              userName: myUserName,
-              text: message,
-              boxClass: "messages__box--operator",
-            },
-          ],
-        );
+          ...messages,
+          {
+            userName: myUserName,
+            text: message,
+            boxClass: "messages__box--operator",
+          },
+        ]);
         setMessage("");
         const mySession = session;
 
@@ -384,53 +445,52 @@ const InvitePage = () => {
           to: [],
           type: "chat",
         });
-
       }
     }
-  }
+  };
 
   const handleChatMessageChange = (e : any) => {
     console.log("message event occur");
     setMessage(e.target.value);
-  }
+  };
   // chatting
 
   const componentDidMount = () => {
     window.addEventListener("beforeunload", onbeforeunload);
-  }
+  };
 
   const componentWillUnmount = () => {
     window.removeEventListener("beforeunload", onbeforeunload);
-  }
+  };
 
-  const onbeforeunload = (event : any) => {
+  const onbeforeunload = (event: any) => {
     leaveSession();
-  }
+  };
 
   const handleChangeSessionId = (e: any) => {
     setMySessionId(e.target.value);
-  }
+  };
 
-  const handleChangeUserName = (e : any) => {
+  const handleChangeUserName = (e: any) => {
     setMyUserName(e.target.value);
-  }
+  };
 
-  const handleMainVideoStream = (stream : any) => {
+  const handleMainVideoStream = (stream: any) => {
     if (mainStreamManager !== stream) {
       setMainStreamManager(stream);
     }
-  }
+  };
 
-  const deleteSubscriber = (streamManager : any) => {
+  const deleteSubscriber = (streamManager: any) => {
     let varSubscribers = subscribers;
     let index = varSubscribers.indexOf(streamManager, 0);
     if (index > -1) {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
     }
-  }
+  };
   // 참가자 백엔드에 등록
-  const recordParticipant = (conId : string) => {
+  const recordParticipant = (conId: string) => {
     const requestBody = JSON.stringify({
       connectionId: conId,
       nickName: myUserName,
@@ -442,27 +502,26 @@ const InvitePage = () => {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => {
+      .then((response: any) => {
         console.log(response);
       });
-  }
+  };
 
   const joinSession = () => {
     // --- 1) Get an OpenVidu object ---
     setOV(new OpenVidu());
-  }
+  };
 
   const leaveSession = () => {
     axios
-      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
-        {
-          nickName: myUserName,
-          connectionId: myConnectionId,
-        })
-      .then((res) => {
+      .post(`${BE_URL}/api/channels/leave/${mySessionId}`, {
+        nickName: myUserName,
+        connectionId: myConnectionId,
+      })
+      .then((res: any) => {
         console.log("방 나가기 성공");
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.log("방 나가기 실패");
       });
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
@@ -475,35 +534,25 @@ const InvitePage = () => {
 
     // Empty all properties...
     emptyAllOV();
-
-  }
+  };
 
   const deleteSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`,
-        {
-          data : {
-            nickName: hostName,
-            connectionId: hostConnectionId,
-          } 
-        })
-      .then((res) => {
+      .delete(`${BE_URL}/api/channels/delete/${mySessionId}`, {
+        data: {
+          nickName: hostName,
+          connectionId: hostConnectionId,
+        },
+      })
+      .then((res: any) => {
         console.log("방 삭제 성공");
       })
-      .catch((e) => {
+      .catch((e: any) => {
         console.log("방 삭제 실패");
       });
-    
-    axios
-    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
-      headers: {
-        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
-        "Content-Type": "application/json",
-      },
-    });
-  }
+  };
 
-  const switchCamera = async() => {
+  const switchCamera = async () => {
     try {
       const devices = await OV?.getDevices();
       var videoDevices = devices?.filter(
@@ -535,10 +584,10 @@ const InvitePage = () => {
           setPublisher(newPublisher);
         }
       }
-    } catch (e : any) {
+    } catch (e: any) {
       console.error(e);
     }
-  }
+  };
 
   /**
    * --------------------------
@@ -552,13 +601,13 @@ const InvitePage = () => {
    *   3) The Connection.token must be consumed in Session.connect() method
    */
 
-   const getToken = () => {
+  const getToken = () => {
     return createSession(mySessionId as string).then((sessionId) =>
       createToken(sessionId as string)
     );
-  }
+  };
 
-  const createSession = (sessionId : string) => {
+  const createSession = (sessionId: string) => {
     console.log("created session " + sessionId);
     return new Promise((resolve, reject) => {
       var data = JSON.stringify({ customSessionId: sessionId });
@@ -570,7 +619,7 @@ const InvitePage = () => {
             "Content-Type": "application/json",
           },
         })
-        .then((response) => {
+        .then((response: any) => {
           console.log("CREATE SESSION", response);
           axios.delete(OPENVIDU_SERVER_URL + "/sessions/" + response.data.id, {
             headers: {
@@ -578,11 +627,11 @@ const InvitePage = () => {
                 "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
               "Content-Type": "application/json",
             },
-          })
+          });
           alert(`참가하려는 ${sessionId}방이 존재하지 않습니다.`);
           reject(response);
         })
-        .catch((response) => {
+        .catch((response: any) => {
           var error = Object.assign({}, response);
           if (error?.response?.status === 409) {
             resolve(sessionId);
@@ -609,9 +658,9 @@ const InvitePage = () => {
           }
         });
     });
-  }
+  };
 
-  const createToken = (sessionId : string) => {
+  const createToken = (sessionId: string) => {
     return new Promise((resolve, reject) => {
       var data = {};
       axios
@@ -626,7 +675,7 @@ const InvitePage = () => {
             },
           }
         )
-        .then((response) => {
+        .then((response: any) => {
           console.log("TOKEN", response);
           resolve(response.data.token);
           console.log("connection id : " + response.data.id);
@@ -635,20 +684,20 @@ const InvitePage = () => {
           //임시로 connectionId를 인자로 넘겨주어 해결
           recordParticipant(response.data.id);
         })
-        .catch((error) => reject(error));
+        .catch((error: any) => reject(error));
     });
-  }
+  };
 
   //카메라, 마이크 온오프
   const reverseAudioState = () => {
     publisher?.publishAudio(!audiostate);
     setAudiostate(!audiostate);
-  }
+  };
 
   const reverseVideoState = () => {
     publisher?.publishVideo(!videostate);
     setVideostate(!videostate);
-  }
+  };
 
   return (
     <Container>
@@ -657,8 +706,10 @@ const InvitePage = () => {
           {session === undefined ? (
             <InvitePageForm>
               <InvitePageHead>Brand</InvitePageHead>
-            
-              <InvitePageMsg>{hostName} 님의 방에 입장하시겠습니까? : </InvitePageMsg>
+
+              <InvitePageMsg>
+                {hostName} 님의 방에 입장하시겠습니까?
+              </InvitePageMsg>
 
               <InvitePageInput>
                 <FormControl variant="standard" fullWidth>
@@ -701,110 +752,332 @@ const InvitePage = () => {
           ) : null}
           {/* session이 있을 때 */}
           {session !== undefined ? (
-          <div id="session">
-            <div id="session-header">
-              <h1 id="session-title">{mySessionId}</h1>
-              <input
-                className="btn btn-large btn-danger"
-                type="button"
-                id="buttonLeaveSession"
-                onClick={leaveSession}
-                value="Leave session"
-              />
-            </div>
-            {mainStreamManager !== undefined ? (
-              <div id="main-video" className="col-md-6">
-                <UserVideoComponent
-                  streamManager={mainStreamManager}
-                />
-                <input
-                  className="btn btn-large btn-success"
-                  type="button"
-                  id="buttonSwitchCamera"
-                  onClick={switchCamera}
-                  value="Switch Camera"
-                />
-              </div>
-            ) : null}
-            <div id="video-container" className="col-md-6">
-              {publisher !== undefined ? (
-                <div
-                  className="stream-container col-md-6 col-xs-6"
-                  onClick={() =>
-                    handleMainVideoStream(publisher)
-                  }
-                >
-                  <UserVideoComponent streamManager={publisher} />
-                </div>
-              ) : null}
-              {subscribers.map((sub, i) => (
-                <div
-                  key={i}
-                  className="stream-container col-md-6 col-xs-6"
-                  onClick={() => handleMainVideoStream(sub)}
-                >
-                  <UserVideoComponent streamManager={sub} />
-                </div>
-              ))}
-            </div>
-            <div>
-              {audiostate ? (
-                <button 
-                  onClick={reverseAudioState}
-                >
-                  Audio Off
-                </button>
-              ) : (
-                <button
-                  onClick={reverseAudioState}
-                >
-                  Audio On
-                </button>
-              )}
-            </div>
-            <div>
-              {videostate ? (
-                <button 
-                  onClick={reverseVideoState}
-                >
-                  Video Off
-                </button>
-              ) : (
-                <button
-                  onClick={reverseVideoState}
-                >
-                  Video On
-                </button>
-              )}
-            </div>
-            <div className="chatbox__footer">
-              <input
-                id="chat_message"
-                type="text"
-                placeholder="Write a message..."
-                onChange={handleChatMessageChange}
-                onKeyPress={sendMessageByEnter}
-                value={message}
-              />
-              <button
-                className="chatbox__send--footer"
-                onClick={sendMessageByClick}
+            <Box
+              id="full"
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 0,
+                height: "100vh",
+                width: "100vw",
+              }}
+            >
+              <Box
+                id="header"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  height: "15%",
+                }}
               >
-                Enter
-              </button>
-            </div>
-            <div className="chatbox__messages">
-              <Messages messages={messages} />
-              <div />
-            </div>
-          </div>
-        ) : null}
+                <Box
+                  id="logo"
+                  sx={{
+                    width: "20%",
+                    height: "100%",
+                  }}
+                >
+                  <BrandWrapper
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Brand to="/">
+                      <Logo>
+                        <LogoImg
+                          style={{
+                            margin: 0,
+                          }}
+                          src="/images/common/logo_A306.png"
+                          alt="A306 logo img"
+                        />
+                        <LogoName>A306</LogoName>
+                      </Logo>
+                    </Brand>
+                  </BrandWrapper>
+                </Box>
+                <Paper
+                  id="info"
+                  sx={{
+                    // position: 'sticky',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+
+                    width: "60%",
+                    height: "100%",
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                    borderBottomLeftRadius: 20,
+                    borderBottomRightRadius: 20,
+                    boxShadow: 4,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <h1
+                    style={{
+                      color: "skyblue",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    게임 종류
+                  </h1>
+                </Paper>
+                <Box
+                  id="buttons"
+                  sx={{
+                    width: "20%",
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "space-evenly",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* <input
+                  className="btn btn-large btn-danger"
+                  type="button"
+                  id="buttonLeaveSession"
+                  onClick={leaveSession}
+                  value="Leave session"
+                /> */}
+                  {/* </div> */}
+                  {nickName}
+                  <BasicModal />
+                </Box>
+              </Box>
+              <Box
+                id="main"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  height: "85%",
+                }}
+              >
+                <Box
+                  id="conference"
+                  sx={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "column",
+                    width: "75%",
+                    height: "100%",
+                    display: "flex",
+                  }}
+                >
+                  <Box
+                    id="cam"
+                    sx={{
+                      // display: 'flex',
+                      // backgroundColor: 'powderblue',
+                      flexGrow: 1,
+                      width: "100%",
+                      height: "90%",
+                      // margin: 10
+                    }}
+                  >
+                    {/* 큰 화면 카메라 */}
+                    {/* {mainStreamManager !== undefined ? (
+                  <div id="main-video" className="col-md-6">
+                    <UserVideoComponent
+                      streamManager={mainStreamManager}
+                    />
+                    <input
+                      className="btn btn-large btn-success"
+                      type="button"
+                      id="buttonSwitchCamera"
+                      onClick={switchCamera}
+                      value="Switch Camera"
+                    />
+                  </div>
+                ) : null} */}
+                    {/* <div id="video-container" className="col-md-6"> */}
+                    <Grid
+                      container
+                      spacing={{ xs: 1, md: 1 }}
+                      columns={{ xs: 4, sm: 8, md: 12 }}
+                    >
+                      {publisher !== undefined ? (
+                        <Grid
+                          item
+                          sm={4}
+                          md={4}
+                          onClick={() => handleMainVideoStream(publisher)}
+                        >
+                          <UserVideoComponent streamManager={publisher} />
+                        </Grid>
+                      ) : null}
+                      {subscribers.map((sub, i) => (
+                        <Grid
+                          item
+                          sm={4}
+                          md={4}
+                          key={i}
+                          // className="stream-container col-md-6 col-xs-6"
+                          onClick={() => handleMainVideoStream(sub)}
+                        >
+                          <UserVideoComponent streamManager={sub} />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                  <Box
+                    id="settings"
+                    sx={{
+                      backgroundColor: "inherit",
+                      width: "100%",
+                      height: "10%",
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Button>
+                      <SettingsIcon />
+                    </Button>
+                    {audiostate ? (
+                      <Button onClick={reverseAudioState}>
+                        <MicOutlinedIcon color="success" />
+                      </Button>
+                    ) : (
+                      <Button onClick={reverseAudioState}>
+                        <MicOutlinedIcon color="disabled" />
+                      </Button>
+                    )}
+                    {videostate ? (
+                      <Button onClick={reverseVideoState}>
+                        <VideocamIcon color="success" />
+                      </Button>
+                    ) : (
+                      <Button onClick={reverseVideoState}>
+                        <VideocamIcon color="disabled" />
+                      </Button>
+                    )}
+                    <Button onClick={leaveSession}>
+                      <ExitToAppIcon color="error" />
+                    </Button>
+                  </Box>
+                </Box>
+                <Box
+                  id="chat"
+                  sx={{
+                    // backgroundColor: 'grey',
+                    width: "25%",
+                    height: "100%",
+                    // margin: 10
+                  }}
+                >
+                  {/* <div className="chatbox__footer"> */}
+                  <Box
+                    className="chatspace"
+                    sx={{
+                      backgroundColor: "#85B6FF",
+                      width: "100%",
+                      height: "400px",
+                      borderRadius: "20px",
+                    }}
+                  >
+                    <h3>채팅</h3>
+                    <Box
+                      className="chatbox__messages"
+                      sx={{
+                        backgroundColor: "white",
+                        margin: "10px",
+                        width: "80%",
+                        height: "300px",
+                        borderRadius: "20px",
+                        overflow: "auto",
+                      }}
+                    >
+                      <Messages messages={messages} />
+                      {/* <div />
+            </div> */}
+                    </Box>
+                    <input
+                      id="chat_message"
+                      type="text"
+                      style={{
+                        margin: "10px",
+                        width: "70%",
+                        borderRadius: "20px",
+                        border: "none",
+                      }}
+                      placeholder="Write a message..."
+                      onChange={handleChatMessageChange}
+                      onKeyPress={sendMessageByEnter}
+                      value={message}
+                    />
+                    <Button
+                      className="chatbox__send--footer"
+                      sx={{ borderRadius: "20px", border: "none" }}
+                      onClick={sendMessageByClick}
+                    >
+                      Enter
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          ) : null}
         </ThemeProvider>
       </Wrapper>
     </Container>
   );
 };
 
+function BasicModal() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <Button onClick={handleOpen}>게임 방법</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            몸으로 말해요
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
+            3. 참여자는 채팅으로 정답을 맞춥니다.
+          </Typography>
+          <Button onClick={handleClose}>닫기</Button>
+        </Box>
+      </Modal>
+    </div>
+  );
+}
+
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "40%",
+  height: "75%",
+  bgcolor: "white",
+  border: "2px solid #000",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 4,
+};
 
 const Container = styled.div`
   // position: sticky;
