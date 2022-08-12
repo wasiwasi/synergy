@@ -7,16 +7,8 @@ import React, { useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
-// import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
 import Input from "@mui/material/Input";
 import InputLabel from "@mui/material/InputLabel";
-
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
-
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import Button from "@mui/material/Button";
 
@@ -32,6 +24,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { constants } from "buffer";
+
+import Grid from "@mui/material/Grid"; // Grid version 1
+import Grid2 from "@mui/material/Unstable_Grid2"; // Grid version 2
 
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -229,6 +224,7 @@ const Mypage = () => {
   };
 
   const handleClose = () => {
+    setWordList([{ id: 1, word: "" }]);
     setDialogOpen(false);
   };
 
@@ -280,90 +276,104 @@ const Mypage = () => {
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
-            <Button
-              variant="contained"
-              size="medium"
-              fullWidth
-              onClick={onUserDelete}
+            <br />
+            <Grid container spacing={3}>
+              <Grid xs={4}>
+                <Button
+                  variant="contained"
+                  size="medium"
+                  fullWidth
+                  onClick={onUserDelete}
+                >
+                  회원 탈퇴
+                </Button>
+              </Grid>
+
+              <Grid xs={4}>
+                <Button
+                  variant="contained"
+                  size="medium"
+                  fullWidth
+                  onClick={handleClickOpen}
+                >
+                  문제집 생성하기
+                </Button>
+              </Grid>
+              <Grid xs={4}>
+                <Button
+                  variant="contained"
+                  size="medium"
+                  fullWidth
+                  onClick={handelDelteAllSubject}
+                >
+                  문제집 전부 삭제하기
+                </Button>
+              </Grid>
+            </Grid>
+            <br />
+            <Box
+              sx={{ width: "100%", height: 400, bgcolor: "background.paper" }}
             >
-              회원 탈퇴
-            </Button>
+              <Dialog open={dialogOpen} onClose={handleClose}>
+                <DialogTitle>문제집 작성하기</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    원하는 문제를 작성하세요.
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="subjectTitle"
+                    label="subjectTitle"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                    onChange={handleSubjectName}
+                  />
+                  {wordList.map((singleWord, idx) => (
+                    <div key={singleWord.id}>
+                      <input
+                        name="word"
+                        id="word"
+                        required
+                        onChange={(e) => handleWordChange(singleWord.id, e)}
+                      />
+
+                      {wordList.length > 1 && (
+                        <Button onClick={() => handleWordRemove(singleWord.id)}>
+                          delete
+                        </Button>
+                      )}
+                      <br />
+                      {wordList.length - 1 === idx && wordList.length < 30 && (
+                        <Button onClick={handletWordAdd}>add word</Button>
+                      )}
+                    </div>
+                  ))}
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleClose}>취소하기</Button>
+                  <Button onClick={createSubject}>생성하기</Button>
+                </DialogActions>
+              </Dialog>
+              {mypage[0].length === 0 ? (
+                <Input
+                  value="내가 만든 문제집이없습니다! 생성해주세요!"
+                  readOnly
+                  fullWidth
+                />
+              ) : (
+                <DataGrid
+                  rows={mypage[0]}
+                  columns={colums}
+                  pageSize={5}
+                  rowsPerPageOptions={[5]}
+                  disableSelectionOnClick
+                />
+              )}
+            </Box>
           </ProfileForm>
         </ThemeProvider>
-      </Wrapper>
-      <Wrapper>
-        <ProfileForm>
-          <Box sx={{ width: "100%", height: 400, bgcolor: "background.paper" }}>
-            <Button
-              variant="contained"
-              size="medium"
-              fullWidth
-              onClick={handleClickOpen}
-            >
-              문제집 생성하기
-            </Button>
-            <Button
-              variant="contained"
-              size="medium"
-              fullWidth
-              onClick={handelDelteAllSubject}
-            >
-              문제집 전부 삭제하기
-            </Button>
-
-            <Dialog open={dialogOpen} onClose={handleClose}>
-              <DialogTitle>문제집 작성하기</DialogTitle>
-              <DialogContent>
-                <DialogContentText>원하는 문제를 작성하세요.</DialogContentText>
-                <TextField
-                  autoFocus
-                  margin="dense"
-                  id="subjectTitle"
-                  label="subjectTitle"
-                  type="text"
-                  fullWidth
-                  variant="standard"
-                  onChange={handleSubjectName}
-                />
-                {wordList.map((singleWord, idx) => (
-                  <div key={singleWord.id}>
-                    <input
-                      name="word"
-                      id="word"
-                      required
-                      onChange={(e) => handleWordChange(singleWord.id, e)}
-                    />
-
-                    {wordList.length > 1 && (
-                      <Button onClick={() => handleWordRemove(singleWord.id)}>
-                        delete
-                      </Button>
-                    )}
-                    <br />
-                    {wordList.length - 1 === idx && wordList.length < 30 && (
-                      <Button onClick={handletWordAdd}>add word</Button>
-                    )}
-                  </div>
-                ))}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose}>Cancel</Button>
-                <Button onClick={createSubject}>Subscribe</Button>
-              </DialogActions>
-            </Dialog>
-            {mypage[0].length === 0 ? (
-              <Input value="내가 만든 문제집이없습니다! 생성해주세요!" />
-            ) : (
-              <DataGrid
-                rows={mypage[0]}
-                columns={colums}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-                disableSelectionOnClick
-              />
-            )}
-          </Box>
-        </ProfileForm>
       </Wrapper>
     </Container>
   );
