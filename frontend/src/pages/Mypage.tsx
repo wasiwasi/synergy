@@ -28,6 +28,8 @@ import { constants } from "buffer";
 import Grid from "@mui/material/Grid"; // Grid version 1
 import Grid2 from "@mui/material/Unstable_Grid2"; // Grid version 2
 
+import Swal from "sweetalert2";
+
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
 const themeA306 = createTheme({
@@ -116,18 +118,31 @@ const Mypage = () => {
 
   const onUserDelete = () => {
     let token = localStorage.getItem("access-token");
-    if (window.confirm("정말 탈퇴하시겠습니까?")) {
-      axios
-        .delete(`${BE_URL}/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(() => {
-          localStorage.removeItem("access-token");
-          navigate("/");
-        });
-    }
+
+    Swal.fire({
+      title: "정말 탈퇴하시겠습니까?",
+      text: "탈퇴하면 되돌릴 수 없습니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "취소하기",
+      confirmButtonText: "예, 탈퇴 하겠습니다",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/users`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            localStorage.removeItem("access-token");
+            Swal.fire("탈퇴성공!", "Your file has been deleted.", "success");
+            navigate("/");
+          });
+      }
+    });
   };
 
   const createSubject = () => {
@@ -199,18 +214,33 @@ const Mypage = () => {
   };
 
   const removeSubject = (id: number) => {
-    // console.log(id);
-
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+
+    Swal.fire({
+      title: `${id} 번 문제집을 정말 삭제하시겠습니까?`,
+      text: "문제집을 한번 삭제하면 취소 할 수 없습니다!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예 삭제하겠습니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "문제집이 삭제되었습니다.", "success");
+      }
+    });
+
+    //삭제 로직 추가하기 -- 0813 ming
   };
 
   useEffect(() => {
@@ -230,15 +260,29 @@ const Mypage = () => {
 
   const handelDelteAllSubject = () => {
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+    Swal.fire({
+      title: "모든 문제집을 삭제하시겠습니까?",
+      text: "한번 삭제한 문제집들은 복구가 불가능합니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예, 전부 삭제합니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "전부다 삭제하였습니다!", "success");
+      }
+    });
   };
 
   // constMypage HomePage: React.FC = () => {
