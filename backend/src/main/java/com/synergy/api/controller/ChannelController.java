@@ -87,10 +87,10 @@ public class ChannelController {
 
     }
 
-    @ApiOperation(value = "방의 호스트 이름 반환하는 api ")
+    @ApiOperation(value = "방의 호스트 정보를 반환하는 api ")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200,message = "방장 이름 전송 성공"),
+                    @ApiResponse(code = 200,message = "방장 정보 전송 성공"),
                     @ApiResponse(code = 404,message = "방이 존재 하지 않아 방장을 못 찾고 있음")
             }
     )
@@ -98,9 +98,8 @@ public class ChannelController {
     public ResponseEntity getHostByChannelId(@PathVariable String channelId){
         channelId = channelId.trim();
         Participant Host = channelService.getChannelByChannelId(channelId).getHost();
-        String hostName = Host.getNickName();
 
-        if(Host!=null)return new ResponseEntity(hostName,HttpStatus.OK);
+        if(Host!=null)return new ResponseEntity(Host,HttpStatus.OK);
         else return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
@@ -113,6 +112,14 @@ public class ChannelController {
     )
     @GetMapping("/create")
     public ResponseEntity beforeCreateChannel(){
+        //방을 코드를 반환해주기 전에 OpenVidu서버의 채널상태와 동기화
+        ArrayList<ChannelInfoReq> channelList = channelService.getChannelList();
+        for(ChannelInfoReq channelInfoReq : channelList){
+            // TODO: new URL의 메모리 누수문제가 없을까?
+            String channelId = channelInfoReq.getChannelId();
+            channelService.findChannel(channelId);
+        }
+
         String channelId = channelService.getRandomChannelId();
         return new ResponseEntity(channelId,HttpStatus.OK);
     }
@@ -225,6 +232,18 @@ public class ChannelController {
         return new ResponseEntity(channelList,HttpStatus.OK);
     }
 
-
+    @ApiOperation(value = "추방하기",notes = "호스트가 요청해 참가자의 접속을 끊음")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 200,message = "추방 성공")
+            }
+    )
+    @PostMapping("/kick/{channelId}")
+    public ResponseEntity kickFromChannel(@PathVariable String channelId,@RequestBody ParticipantPostReq participantPostReq){
+        channelId = channelId.trim();
+        String nickname = channelService.getNicknameByConnectionId(channelId, participantPostReq.getConnectionId());
+        channelService.leaveChannel(channelId, nickname);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 }
