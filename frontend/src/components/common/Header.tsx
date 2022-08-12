@@ -42,7 +42,7 @@ const Header = () => {
     }
   }, [location]);
 
-  if (window.location.pathname === '/join') return null;
+  if (window.location.pathname === '/channel/gamechannel') return null;
 
   return ( 
     <>
@@ -132,7 +132,7 @@ const Wrapper = styled.div`
   align-self: center;
 `;
 
-export const BrandWrapper = styled.div`
+const BrandWrapper = styled.div`
   // position: relative;
   // margin: 100px 100px
   align-items: center;
@@ -141,18 +141,18 @@ export const BrandWrapper = styled.div`
   align-self: center;
 `;
 
-export const Brand = styled(Link)`
+const Brand = styled(Link)`
   // position: absolute;
   // display: flex;
   text-decoration: none;
 `;
 
-export const Logo = styled.div`
+const Logo = styled.div`
   // position: absolute; 
   display: flex;
 `;
 
-export const LogoImg = styled.img`
+const LogoImg = styled.img`
   width: 30px;
   height: 30px;
   // margin: 0 auto;
@@ -160,7 +160,7 @@ export const LogoImg = styled.img`
   margin-right: 10px;
 `;
 
-export const LogoName = styled.span`
+const LogoName = styled.span`
   margin-left: 6px;
   // padding-top: 1px;
   font-size: 20px;
