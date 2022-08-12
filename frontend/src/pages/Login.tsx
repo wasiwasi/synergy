@@ -57,9 +57,9 @@ const Login = () => {
   const navigate = useNavigate();
 
   // 유효성 검사
-  const [isEmail, setIsEmail] = useState<boolean>(true);
-  const [isPassword, setIsPassword] = useState<boolean>(true);
-
+  const [isEmail, setIsEmail] = useState<boolean>(false);
+  const [isPassword, setIsPassword] = useState<boolean>(false);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
   // const router = useRouter();
 
   //에러메시지 저장
@@ -67,7 +67,7 @@ const Login = () => {
     useState<string>("이메일을 입력해 주세요.");
   const [passwordError, setPasswordError] =
     useState<string>("비밀번호를 입력해 주세요.");
-
+  
   // 로그인 버튼 클릭
   const onLogin = () => {
     axios
@@ -108,13 +108,16 @@ const Login = () => {
 
     if (event.target.value === "") {
       setEmailError("이메일을 입력해 주세요.");
-      setIsEmail(true);
+      setIsEmail(false);
+      setIsEmpty(true);
     } else if (!emailRegex.test(emailCurrent)) {
       setEmailError("이메일 형식에 맞게 입력해 주세요.");
       setIsEmail(false);
+      setIsEmpty(false);
     } else {
       setEmailError("올바른 이메일 형식입니다!");
       setIsEmail(true);
+      setIsEmpty(false);
     }
   };
 
@@ -127,13 +130,16 @@ const Login = () => {
 
     if (event.target.value === "") {
       setPasswordError("비밀번호를 입력해 주세요.");
-      setIsPassword(true);
+      setIsPassword(false);
+      setIsEmpty(true);
     } else if (event.target.value.length < 8) {
       setPasswordError("비밀번호는 8자리 이상 입니다.");
       setIsPassword(false);
+      setIsEmpty(false);
     } else {
       setPasswordError("8자리 이상 입니다!");
       setIsPassword(true);
+      setIsEmpty(false);
     }
   };
 
@@ -161,7 +167,7 @@ const Login = () => {
 
             <LoginInput>
               <FormControl
-                error={isEmail === true ? false : true}
+                error={ (!isEmail && !isEmpty) }
                 variant="standard"
                 fullWidth
               >
@@ -183,7 +189,7 @@ const Login = () => {
 
             <LoginInput>
               <FormControl
-                error={isPassword === true ? false : true}
+                error={ (!isPassword && !isEmpty) }
                 variant="standard"
                 fullWidth
               >
@@ -221,7 +227,7 @@ const Login = () => {
 
             <LoginInput>
               <Button
-                // disabled={ (isEmail === true ? false : true) || (isPassword === true ? false : true) }
+                disabled={ !(isEmail && isPassword && !isEmpty) }
                 variant="contained"
                 size="medium"
                 fullWidth
