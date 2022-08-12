@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
-import {Paper, Modal} from '@mui/material';
+import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -18,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import styled from "@emotion/styled";
-import {Button, Grid} from "@mui/material/";
+import Button from "@mui/material/Button";
 
 import "./Signup.css";
 
@@ -27,12 +27,6 @@ import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvid
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
-
-import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
-import VideocamIcon from '@mui/icons-material/Videocam';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -272,7 +266,6 @@ function SwipeableTextMobileStepper() {
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
         console.log("messages: "+messages);
-  
 
         // messages.push({
         //   userName: chatdata[0],
@@ -347,6 +340,7 @@ function SwipeableTextMobileStepper() {
       });
     }
   }
+
 
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
@@ -829,111 +823,21 @@ function SwipeableTextMobileStepper() {
       ) : null}
       {/* session이 있을 때 */}
       {session !== undefined ? (
-        <Box id='full'
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 0,
-            height: '100vh',
-            width: '100vw'
-          }}>
-         <Box id='header'
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '100%',
-            height: '15%'
-          }}>
-          <Box id='logo'
-          sx={{
-            width: '20%',
-            height: '100%',
-            // bgcolor: 'green'
-          }}>
-          {/* <div id="session">
-          <div id="session-header"> */}
+          <div id="session">
+            <div id="session-header">
               <h1 id="session-title">{mySessionId}</h1>
               <div>
-                <Button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</Button>
+                <button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</button>
               </div>
-              </Box>
-              <Paper id='info'
-                sx={{
-                  // position: 'sticky',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-
-                  width: '60%',
-                  height: '100%',
-                  // bgcolor: 'orange',
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: 0,
-                  borderBottomLeftRadius: 20,
-                  borderBottomRightRadius: 20,
-                  boxShadow: 4,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                  <h1 style={{
-                    color: 'skyblue',
-                    fontWeight: 'bold'
-                  }}>게임 종류</h1>
-
-              </Paper>
-              <Box id='buttons'
-                sx={{
-                  width: '20%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'space-evenly',
-                  alignItems: 'center',
-              }}>
-              {/* <input
+              <input
                 className="btn btn-large btn-danger"
                 type="button"
                 id="buttonLeaveSession"
                 onClick={leaveSession}
                 value="Leave session"
-              /> */}
-          {/* </div> */}
-          <Button>게임 시작</Button>
-          <BasicModal/>        
-        </Box>
-      </Box>
-      <Box id='main'
-        sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '85%'
-      }}>
-        
-           <Box id='conference'
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection:'column',
-            width: '75%',
-            height: '100%',
-            display: 'flex'
-            }}>
-            
-          <Box id='cam' 
-            sx={{ 
-            // display: 'flex',
-            // backgroundColor: 'powderblue',
-            width: '100%',
-            height: '90%',
-            // margin: 10
-            }}>
-            {/* 큰 화면 카메라 */}
-            {/* {mainStreamManager !== undefined ? (
+              />
+          </div>
+            {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
                 <UserVideoComponent
                   streamManager={mainStreamManager}
@@ -946,86 +850,29 @@ function SwipeableTextMobileStepper() {
                   value="Switch Camera"
                 />
               </div>
-            ) : null} */}
-            {/* <div id="video-container" className="col-md-6"> */}
-          <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-            {publisher !== undefined ? (
-                <Grid
-                item sm={4} md={4}
-                onClick={() =>
-                  handleMainVideoStream(publisher)
-                }
-              >
-                <UserVideoComponent streamManager={publisher} />
-              </Grid>
+            ) : null}
+            <div id="video-container" className="col-md-6">
+              {publisher !== undefined ? (
+                <div
+                  className="stream-container col-md-6 col-xs-6"
+                  onClick={() =>
+                    handleMainVideoStream(publisher)
+                  }
+                >
+                  <UserVideoComponent streamManager={publisher} />
+                </div>
               ) : null}
-             {subscribers.map((sub, i) => (
-                <Grid
-                  item sm={4} md={4}
+              {subscribers.map((sub, i) => (
+                <div
                   key={i}
-                  // className="stream-container col-md-6 col-xs-6"
+                  className="stream-container col-md-6 col-xs-6"
                   onClick={() => handleMainVideoStream(sub)}
                 >
                   <UserVideoComponent streamManager={sub} />
-                </Grid>
+                </div>
               ))}
-                </Grid>
-                </Box>
-
-          <Box id='settings'
-            sx={{
-              backgroundColor: 'inherit',
-              width: '100%',
-              height: '10%',
-              display: 'flex',
-              justifyContent: 'space-evenly',
-              alignItems: 'center'
-            }}>
-           <Button><SettingsIcon /></Button>
-            
-           {audiostate ? (
-                <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color='success'
-                />
-                </Button>
-              ) : (
-                <Button
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color="disabled"
-                  />
-                </Button>
-              )}
-              {videostate ? (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon 
-                  color='success'
-                  />
-                </Button>                 
-              ) : (
-                <Button
-                onClick={reverseVideoState}>
-                  <VideocamIcon
-                  color="disabled"
-                  />
-                </Button>                   
-              )}
-                             
-              <Button
-              onClick={leaveSession}>
-                <ExitToAppIcon
-                  color='error' 
-                />
-              </Button>
-
-          
-          </Box>
-        </Box>
-          
-          {/* <div>
+          </div>
+          <div>
             {audiostate ? (
               <button 
                 onClick={reverseAudioState}
@@ -1054,39 +901,28 @@ function SwipeableTextMobileStepper() {
                 Video On
               </button>
             )}
-          </div> */}
-          <Box id='chat' 
-          sx={{
-          width: '25%',
-          height: '100%'
-          // margin: 10
-        }}>
-          {/* <div className="chatbox__footer"> */}
-          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
-          <h3>채팅</h3>
-          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
-            <Messages messages={messages} />
-            {/*<div />
-           </div> */}
-          </Box>
+          </div>
+          <div className="chatbox__footer">
             <input
               id="chat_message"
               type="text"
-              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
               placeholder="Write a message..."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <Button
+            <button
               className="chatbox__send--footer"
-              sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
               Enter
-            </Button></Box>
-          </Box>
-          </Box></Box>
+            </button>
+          </div>
+          <div className="chatbox__messages">
+            <Messages messages={messages} />
+            <div />
+          </div>
+          </div>
         ) : null}
       </Container>
   );
@@ -1128,7 +964,6 @@ function BasicSelect(props: any) {
   );
 }
 
-
 const Container = styled.div`
   // position: sticky;
   // align-self: center;
@@ -1139,48 +974,3 @@ const Container = styled.div`
   // // padding:150px 0;
   // background-color: #D7D7D7;
 `;
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '40%',
-  height: '75%',
-  bgcolor: 'white',
-  border: '2px solid #000',
-  borderRadius: 3,
-  boxShadow: 24,
-  p: 4,
-};
-
-
-function BasicModal() {
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  return (
-    <div>
-      <Button onClick={handleOpen}>게임 방법</Button>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            몸으로 말해요
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
-            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
-            3. 참여자는 채팅으로 정답을 맞춥니다.
-          </Typography>
-          <Button onClick={handleClose}>닫기</Button>
-        </Box>
-      </Modal>
-    </div>
-  );
-}
