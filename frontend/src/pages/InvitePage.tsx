@@ -550,6 +550,14 @@ const InvitePage = () => {
       .catch((e: any) => {
         console.log("방 삭제 실패");
       });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   };
 
   const switchCamera = async () => {
