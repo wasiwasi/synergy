@@ -736,13 +736,14 @@ const InvitePage = () => {
                 )}
               </InvitePageInput>
 
-              <InvitePageInput onClick={onEnter}>
+              <InvitePageInput>
                 <Button
                   type="submit"
                   variant="contained"
                   size="medium"
                   fullWidth
                   disabled={!(isNickName && usableNickName)}
+                  onClick={onEnter}
                 >
                   채널 입장하기
                 </Button>
