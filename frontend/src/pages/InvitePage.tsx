@@ -157,7 +157,6 @@ const InvitePage = () => {
 
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
-  const [hostConnectionId, setHostConnectionId] = useState<string>("");
 
   const didMount = useRef(false);
 
@@ -971,7 +970,7 @@ const InvitePage = () => {
                         overflow: "auto",
                       }}
                     >
-                      <Messages messages={messages} />
+                      <Messages messages={messages} myUserName={myUserName} />
                       {/* <div />
             </div> */}
                     </Box>

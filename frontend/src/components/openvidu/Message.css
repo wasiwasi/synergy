@@ -1,0 +1,31 @@
+#you {
+    background-color: #ddd;
+    margin-right: 20px;
+    align-items: flex-end;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+#yourname {
+    align-items: flex-end;
+    margin-right: 200px;
+    /* float: left; */
+}
+
+
+#me {
+    background-color: #F9EB54;
+    margin-left: 20px;
+    align-items: flex-start;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+
+#myname {
+    align-items: flex-start;
+    margin-left: 200px;
+    /* float: right; */
+}
+
+
