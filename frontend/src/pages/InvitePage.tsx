@@ -952,7 +952,7 @@ const InvitePage = () => {
                   <Box
                     className="chatspace"
                     sx={{
-                      backgroundColor: "#85B6FF",
+                      backgroundColor: "#ddd",
                       width: "100%",
                       height: "400px",
                       borderRadius: "20px",
@@ -962,7 +962,7 @@ const InvitePage = () => {
                     <Box
                       className="chatbox__messages"
                       sx={{
-                        backgroundColor: "white",
+                        backgroundColor: "#A8C0D6",
                         margin: "10px",
                         width: "80%",
                         height: "300px",
