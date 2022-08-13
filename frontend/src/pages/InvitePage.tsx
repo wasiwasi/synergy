@@ -963,8 +963,8 @@ const InvitePage = () => {
                       className="chatbox__messages"
                       sx={{
                         backgroundColor: "#A8C0D6",
-                        margin: "10px",
-                        width: "80%",
+                        margin: "auto",
+                        width: "90%",
                         height: "300px",
                         borderRadius: "20px",
                         overflow: "auto",
@@ -978,7 +978,7 @@ const InvitePage = () => {
                       id="chat_message"
                       type="text"
                       style={{
-                        margin: "10px",
+                        margin: "15px",
                         width: "70%",
                         borderRadius: "20px",
                         border: "none",
