@@ -26,9 +26,13 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { constants } from "buffer";
 
 import Grid from "@mui/material/Grid"; // Grid version 1
-import Grid2 from "@mui/material/Unstable_Grid2"; // Grid version 2
+
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import Swal from "sweetalert2";
+import { Label } from "@mui/icons-material";
 
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -79,6 +83,7 @@ const Mypage = () => {
       bodytalkList: [],
     },
   ]);
+  const [gameTitle, setGameTitle] = useState("");
   const [wordList, setWordList] = useState([{ id: 1, word: "" }]);
 
   const handletWordAdd = () => {
@@ -93,17 +98,15 @@ const Mypage = () => {
 
     setWordList(newlist);
   };
-  const handleWordChange = (
-    id: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    // const idx = wordList.findIndex((w) => w.word === word);
-    let list = [...wordList] as any;
-    const idx = wordList.findIndex((w) => w.id === id);
-    const { name, value } = event.target;
-    list[idx][name] = value;
-    setWordList(list);
-  };
+  const handleWordChange =
+    (id: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      // const idx = wordList.findIndex((w) => w.word === word);
+      let list = [...wordList] as any;
+      const idx = wordList.findIndex((w) => w.id === id);
+      const { name, value } = event.target;
+      list[idx][name] = value;
+      setWordList(list);
+    };
 
   const handleSubjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
     const sj = {
@@ -147,7 +150,7 @@ const Mypage = () => {
 
   const createSubject = () => {
     const st = subjectSet.subjectName;
-    const gameTitle = "bodytalk";
+    // const gameTitle = "bodytalk";
     let wordSet = [...wordList];
     let bodyTalk = subjectSet.bodytalkList;
     wordSet.map((word, idx) => {
@@ -156,7 +159,7 @@ const Mypage = () => {
 
     const sj = {
       subjectName: st,
-      gameTitle: "bodytalk",
+      gameTitle: gameTitle,
       bodytalkList: bodyTalk,
     };
 
@@ -168,7 +171,7 @@ const Mypage = () => {
         `${BE_URL}/subjects/create`,
         {
           subjectName: subjectSet.subjectName,
-          gameTitle: "bodytalk",
+          gameTitle: gameTitle,
           bodytalkList: subjectSet.bodytalkList,
         },
         {
@@ -257,6 +260,9 @@ const Mypage = () => {
     setWordList([{ id: 1, word: "" }]);
     setDialogOpen(false);
   };
+  const handleGameTitle = (event: SelectChangeEvent) => {
+    setGameTitle(event.target.value);
+  };
 
   const handelDelteAllSubject = () => {
     let token = localStorage.getItem("access-token");
@@ -304,6 +310,9 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
@@ -317,12 +326,15 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
             <br />
-            <Grid container spacing={3}>
-              <Grid xs={4}>
+            <Grid container spacing={2}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
@@ -333,24 +345,24 @@ const Mypage = () => {
                 </Button>
               </Grid>
 
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handleClickOpen}
                 >
-                  문제집 생성하기
+                  문제집 생성
                 </Button>
               </Grid>
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handelDelteAllSubject}
                 >
-                  문제집 전부 삭제하기
+                  문제집 전부 삭제
                 </Button>
               </Grid>
             </Grid>
@@ -374,21 +386,49 @@ const Mypage = () => {
                     variant="standard"
                     onChange={handleSubjectName}
                   />
+                  <FormControl sx={{ m: 1, minWidth: 150 }}>
+                    <InputLabel>GameTitle</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple"
+                      label="GameTitle"
+                      value={gameTitle}
+                      onChange={handleGameTitle}
+                    >
+                      <MenuItem value={"bodytalk"}>몸으로 말해요</MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        골든벨
+                      </MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        라이어게임
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+
                   {wordList.map((singleWord, idx) => (
                     <div key={singleWord.id}>
-                      <input
-                        name="word"
-                        id="word"
-                        required
-                        onChange={(e) => handleWordChange(singleWord.id, e)}
-                      />
-
-                      {wordList.length > 1 && (
-                        <Button onClick={() => handleWordRemove(singleWord.id)}>
-                          delete
-                        </Button>
-                      )}
+                      <Grid container spacing={1}>
+                        <Grid item xs={12} md={8}>
+                          <Input
+                            name="word"
+                            id="word"
+                            required
+                            onChange={handleWordChange(singleWord.id)}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item md={4}>
+                          {wordList.length > 1 && (
+                            <Button
+                              onClick={() => handleWordRemove(singleWord.id)}
+                            >
+                              delete
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
                       <br />
+
                       {wordList.length - 1 === idx && wordList.length < 30 && (
                         <Button onClick={handletWordAdd}>add word</Button>
                       )}

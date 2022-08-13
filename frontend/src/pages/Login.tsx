@@ -126,7 +126,7 @@ const Login = () => {
       setIsEmail(false);
       setIsEmpty(false);
     } else {
-      setEmailError("올바른 이메일 형식입니다!");
+      setEmailError("");
       setIsEmail(true);
       setIsEmpty(false);
     }
@@ -144,11 +144,11 @@ const Login = () => {
       setIsPassword(false);
       setIsEmpty(true);
     } else if (event.target.value.length < 8) {
-      setPasswordError("비밀번호는 8자리 이상 입니다.");
+      setPasswordError("");
       setIsPassword(false);
       setIsEmpty(false);
     } else {
-      setPasswordError("8자리 이상 입니다!");
+      setPasswordError("");
       setIsPassword(true);
       setIsEmpty(false);
     }
