@@ -1,34 +1,39 @@
 import React, { Component, useState } from "react";
 import axios from "axios";
-import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
+import {
+  OpenVidu,
+  Publisher,
+  Session,
+  StreamManager,
+  Subscriber,
+} from "openvidu-browser";
 import "./App.css";
 import Messages from "./Messages";
 import UserVideoComponent from "./UserVideoComponent";
+import Swal from "sweetalert2";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 
 const SPRINGBOOT_SERVER_URL = `${process.env.REACT_APP_BACKEND_URL}/api/channels`;
 
-interface IProps {
-
-}
+interface IProps {}
 
 interface IState {
-  OV: OpenVidu | null,
-  mySessionId: string,
-  myUserName: string,
-  session: Session | undefined,
-  mainStreamManager: Publisher | undefined,
-  publisher: Publisher | undefined,
-  subscribers: Subscriber[],
-  myConnectionId: string,
-  audiostate: boolean,
-  audioallowed: boolean,
-  videostate: boolean,
-  videoallowed: boolean,
-  messages: object[],
-  message: string,
+  OV: OpenVidu | null;
+  mySessionId: string;
+  myUserName: string;
+  session: Session | undefined;
+  mainStreamManager: Publisher | undefined;
+  publisher: Publisher | undefined;
+  subscribers: Subscriber[];
+  myConnectionId: string;
+  audiostate: boolean;
+  audioallowed: boolean;
+  videostate: boolean;
+  videoallowed: boolean;
+  messages: object[];
+  message: string;
   // //openvidu
   // const [mySessionId, setMySessionId] = useState<string>();
   // const [myUserName, setMyUserName] = useState<string>();
@@ -49,7 +54,7 @@ interface IState {
 }
 
 class OpenviduJoin extends Component<IProps, IState> {
-  constructor(props : IProps) {
+  constructor(props: IProps) {
     super(props);
     this.state = {
       OV: null,
@@ -61,13 +66,13 @@ class OpenviduJoin extends Component<IProps, IState> {
       subscribers: [],
       // user need to hold their own connection.id
       myConnectionId: "",
-      
+
       // audio, video
       audiostate: true,
       audioallowed: true,
       videostate: true,
       videoallowed: true,
-      
+
       // chatting
       messages: [],
       message: "",
@@ -79,7 +84,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     this.handleChangeUserName = this.handleChangeUserName.bind(this);
     this.handleMainVideoStream = this.handleMainVideoStream.bind(this);
     this.onbeforeunload = this.onbeforeunload.bind(this);
-    
+
     // chatting
     // this.chatToggle = this.chatToggle.bind(this);
     // this.messageContainer = useRef(null);
@@ -88,7 +93,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     //this.sendMessageByEnter = this.sendMessageByEnter.bind(this);
     this.handleChatMessageChange = this.handleChatMessageChange.bind(this);
     // this.getHeader = this.getHeader.bind(this);
-    
+
     // REST
     // client에서 springboot server로 방 생성을 위한 랜덤 sessionId 생성 요청
     this.createRandomSessionId = this.createRandomSessionId.bind(this);
@@ -98,7 +103,6 @@ class OpenviduJoin extends Component<IProps, IState> {
 
     this.handleCreateRoom = this.handleCreateRoom.bind(this);
     this.handleJoinRoom = this.handleJoinRoom.bind(this);
-
   }
 
   // chatting
@@ -107,7 +111,7 @@ class OpenviduJoin extends Component<IProps, IState> {
   // }
 
   // getHeader() {
-    // axios.get(OPENVIDU_SERVER_URL + "/sessions", {
+  // axios.get(OPENVIDU_SERVER_URL + "/sessions", {
   //     headers: {
   //       Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
   //       "Content-Type": "application/json",
@@ -214,7 +218,6 @@ class OpenviduJoin extends Component<IProps, IState> {
   //   });
   // }
 
-
   sendMessageByClick() {
     if (this.state.message !== "") {
       this.setState({
@@ -241,7 +244,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     });
   }
 
-  sendMessageByEnter(e : any) {
+  sendMessageByEnter(e: any) {
     if (e.key === "Enter") {
       if (this.state.message !== "") {
         this.setState({
@@ -269,7 +272,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     }
   }
 
-  handleChatMessageChange(e : any) {
+  handleChatMessageChange(e: any) {
     this.setState({
       message: e.target.value,
     });
@@ -284,23 +287,23 @@ class OpenviduJoin extends Component<IProps, IState> {
     window.removeEventListener("beforeunload", this.onbeforeunload);
   }
 
-  onbeforeunload(event : any) {
+  onbeforeunload(event: any) {
     this.leaveSession();
   }
 
-  handleChangeSessionId(e : any) {
+  handleChangeSessionId(e: any) {
     this.setState({
       mySessionId: e.target.value,
     });
   }
 
-  handleChangeUserName(e : any) {
+  handleChangeUserName(e: any) {
     this.setState({
       myUserName: e.target.value,
     });
   }
 
-  handleMainVideoStream(stream : any) {
+  handleMainVideoStream(stream: any) {
     if (this.state.mainStreamManager !== stream) {
       this.setState({
         mainStreamManager: stream,
@@ -308,7 +311,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     }
   }
 
-  deleteSubscriber(streamManager : any) {
+  deleteSubscriber(streamManager: any) {
     let subscribers = this.state.subscribers;
     let index = subscribers.indexOf(streamManager, 0);
     if (index > -1) {
@@ -319,7 +322,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     }
   }
   //방생성 요청
-  handleCreateRoom(event : any) {
+  handleCreateRoom(event: any) {
     event.preventDefault();
 
     this.createRandomSessionId().then(() => {
@@ -329,7 +332,7 @@ class OpenviduJoin extends Component<IProps, IState> {
   //방참가 요청
   handleJoinRoom(event: any) {
     event.preventDefault();
-    this.setState({mySessionId : prompt() as string});
+    this.setState({ mySessionId: prompt() as string });
     console.log("mSSS" + this.state.mySessionId);
     this.joinSession();
   }
@@ -349,10 +352,10 @@ class OpenviduJoin extends Component<IProps, IState> {
 
           console.log(response);
           this.setState({
-            mySessionId: response.data
+            mySessionId: response.data,
           });
           setTimeout(() => {
-            console.log("sessionId timeout: " + this.state.mySessionId)
+            console.log("sessionId timeout: " + this.state.mySessionId);
           }, 3000);
           console.log("sessionId 1: " + this.state.mySessionId);
           resolve();
@@ -377,118 +380,122 @@ class OpenviduJoin extends Component<IProps, IState> {
         console.log(response);
       });
   }
-  
+
   joinSession() {
     // --- 1) Get an OpenVidu object ---
-    this.setState({
-      OV:  new OpenVidu()
-    }, () => {
-      // --- 2) Init a session ---
-      this.setState(
-        {
-          session: this.state.OV?.initSession(),
-        },
-        () => {
-          console.log(this.state.session);
-          var mySession = this.state.session;
+    this.setState(
+      {
+        OV: new OpenVidu(),
+      },
+      () => {
+        // --- 2) Init a session ---
+        this.setState(
+          {
+            session: this.state.OV?.initSession(),
+          },
+          () => {
+            console.log(this.state.session);
+            var mySession = this.state.session;
 
-          // --- 3) Specify the actions when events take place in the session ---
+            // --- 3) Specify the actions when events take place in the session ---
 
-          // On every new Stream received...
-          mySession?.on("streamCreated", (event : any) => {
-            // Subscribe to the Stream to receive it. Second parameter is undefined
-            // so OpenVidu doesn't create an HTML video by its own
-            var subscriber = mySession?.subscribe(event.stream, "undefined");
-            var subscribers = this.state.subscribers;
-            subscribers.push(subscriber as Subscriber);
+            // On every new Stream received...
+            mySession?.on("streamCreated", (event: any) => {
+              // Subscribe to the Stream to receive it. Second parameter is undefined
+              // so OpenVidu doesn't create an HTML video by its own
+              var subscriber = mySession?.subscribe(event.stream, "undefined");
+              var subscribers = this.state.subscribers;
+              subscribers.push(subscriber as Subscriber);
 
-            // Update the state with the new subscribers
-            this.setState({
-              subscribers: subscribers,
-            });
-          });
-
-          // On every Stream destroyed...
-          mySession?.on("streamDestroyed", (event : any) => {
-            // Remove the stream from 'subscribers' array
-            this.deleteSubscriber(event.stream.streamManager);
-          });
-
-          // On every asynchronous exception...
-          mySession?.on("exception", (exception) => {
-            console.warn(exception);
-          });
-
-          // chatting
-          mySession?.on("signal:chat", (event : any) => {
-            let chatdata = event.data.split(",");
-            // let chatdata = event.;
-            console.log(chatdata);
-            if (chatdata[0] !== this.state.myUserName) {
+              // Update the state with the new subscribers
               this.setState({
-                messages: [
-                  ...this.state.messages,
-                  {
-                    userName: chatdata[0],
-                    text: chatdata[1],
-                    boxClass: "messages__box--visitor",
-                  },
-                ],
+                subscribers: subscribers,
               });
-            }
-          });
+            });
 
-          // --- 4) Connect to the session with a valid user token ---
+            // On every Stream destroyed...
+            mySession?.on("streamDestroyed", (event: any) => {
+              // Remove the stream from 'subscribers' array
+              this.deleteSubscriber(event.stream.streamManager);
+            });
 
-          // 'getToken' method is simulating what your server-side should do.
-          // 'token' parameter should be retrieved and returned by your own backend
-          this.getToken().then((token) => {
-            // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
-            // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
-            mySession?.connect(String(token), { clientData: this.state.myUserName })
-              .then(async () => {
-                var devices = await this.state.OV?.getDevices();
-                var videoDevices = devices?.filter(
-                  (device) => device.kind === "videoinput"
-                );
+            // On every asynchronous exception...
+            mySession?.on("exception", (exception) => {
+              console.warn(exception);
+            });
 
-                // --- 5) Get your own camera stream ---
-
-                // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
-                // element: we will manage it on our own) and with the desired properties
-                let publisher = this.state.OV?.initPublisher("", {
-                  audioSource: undefined, // The source of audio. If undefined default microphone
-                  videoSource: undefined, // The source of video. If undefined default webcam
-                  publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
-                  publishVideo: true, // Whether you want to start publishing with your video enabled or not
-                  resolution: "640x480", // The resolution of your video
-                  frameRate: 30, // The frame rate of your video
-                  insertMode: "APPEND", // How the video is inserted in the target element 'video-container'
-                  mirror: false, // Whether to mirror your local video or not
-                });
-
-                // --- 6) Publish your stream ---
-
-                mySession?.publish(publisher as Publisher);
-
-                // Set the main video in the page to display our webcam and store our Publisher
+            // chatting
+            mySession?.on("signal:chat", (event: any) => {
+              let chatdata = event.data.split(",");
+              // let chatdata = event.;
+              console.log(chatdata);
+              if (chatdata[0] !== this.state.myUserName) {
                 this.setState({
-                  // currentVideoDevice: videoDevices[0],
-                  mainStreamManager: publisher,
-                  publisher: publisher,
+                  messages: [
+                    ...this.state.messages,
+                    {
+                      userName: chatdata[0],
+                      text: chatdata[1],
+                      boxClass: "messages__box--visitor",
+                    },
+                  ],
                 });
-              })
-              .catch((error: any) => {
-                console.log(
-                  "There was an error connecting to the session:",
-                  error.code,
-                  error.message
-                );
-              });
-          });
-        }
-      );
-    });
+              }
+            });
+
+            // --- 4) Connect to the session with a valid user token ---
+
+            // 'getToken' method is simulating what your server-side should do.
+            // 'token' parameter should be retrieved and returned by your own backend
+            this.getToken().then((token) => {
+              // First param is the token got from OpenVidu Server. Second param can be retrieved by every user on event
+              // 'streamCreated' (property Stream.connection.data), and will be appended to DOM as the user's nickname
+              mySession
+                ?.connect(String(token), { clientData: this.state.myUserName })
+                .then(async () => {
+                  var devices = await this.state.OV?.getDevices();
+                  var videoDevices = devices?.filter(
+                    (device) => device.kind === "videoinput"
+                  );
+
+                  // --- 5) Get your own camera stream ---
+
+                  // Init a publisher passing undefined as targetElement (we don't want OpenVidu to insert a video
+                  // element: we will manage it on our own) and with the desired properties
+                  let publisher = this.state.OV?.initPublisher("", {
+                    audioSource: undefined, // The source of audio. If undefined default microphone
+                    videoSource: undefined, // The source of video. If undefined default webcam
+                    publishAudio: true, // Whether you want to start publishing with your audio unmuted or not
+                    publishVideo: true, // Whether you want to start publishing with your video enabled or not
+                    resolution: "640x480", // The resolution of your video
+                    frameRate: 30, // The frame rate of your video
+                    insertMode: "APPEND", // How the video is inserted in the target element 'video-container'
+                    mirror: false, // Whether to mirror your local video or not
+                  });
+
+                  // --- 6) Publish your stream ---
+
+                  mySession?.publish(publisher as Publisher);
+
+                  // Set the main video in the page to display our webcam and store our Publisher
+                  this.setState({
+                    // currentVideoDevice: videoDevices[0],
+                    mainStreamManager: publisher,
+                    publisher: publisher,
+                  });
+                })
+                .catch((error: any) => {
+                  console.log(
+                    "There was an error connecting to the session:",
+                    error.code,
+                    error.message
+                  );
+                });
+            });
+          }
+        );
+      }
+    );
   }
 
   leaveSession() {
@@ -536,7 +543,9 @@ class OpenviduJoin extends Component<IProps, IState> {
           });
 
           //newPublisher.once("accessAllowed", () => {
-          await this.state.session?.unpublish(this.state.mainStreamManager as Publisher);
+          await this.state.session?.unpublish(
+            this.state.mainStreamManager as Publisher
+          );
 
           await this.state.session?.publish(newPublisher as Publisher);
           this.setState({
@@ -546,7 +555,7 @@ class OpenviduJoin extends Component<IProps, IState> {
           });
         }
       }
-    } catch (e : any) {
+    } catch (e: any) {
       console.error(e);
     }
   }
@@ -732,7 +741,7 @@ class OpenviduJoin extends Component<IProps, IState> {
     );
   }
 
-  createSession(sessionId : string) {
+  createSession(sessionId: string) {
     console.log("created session " + sessionId);
     return new Promise((resolve, reject) => {
       var data = JSON.stringify({ customSessionId: sessionId });
@@ -758,26 +767,51 @@ class OpenviduJoin extends Component<IProps, IState> {
               "No connection to OpenVidu Server. This may be a certificate error at " +
                 OPENVIDU_SERVER_URL
             );
-            if (
-              window.confirm(
+            //swal
+            Swal.fire({
+              title: "모든 문제집을 삭제하시겠습니까?",
+              text:
                 'No connection to OpenVidu Server. This may be a certificate error at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"\n\nClick OK to navigate and accept it. ' +
-                  'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"'
-              )
-            ) {
-              window.location.assign(
-                OPENVIDU_SERVER_URL + "/accept-certificate"
-              );
-            }
+                OPENVIDU_SERVER_URL +
+                '"\n\nClick OK to navigate and accept it. ' +
+                'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+                OPENVIDU_SERVER_URL +
+                '"',
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "예, 전부 삭제합니다",
+              cancelButtonText: "취소하기",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.assign(
+                  OPENVIDU_SERVER_URL + "/accept-certificate"
+                );
+              }
+            });
+            //원래 confrim
+            // if (
+            //   window.confirm(
+            //     'No connection to OpenVidu Server. This may be a certificate error at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"\n\nClick OK to navigate and accept it. ' +
+            //       'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"'
+            //   )
+            // ) {
+            //   window.location.assign(
+            //     OPENVIDU_SERVER_URL + "/accept-certificate"
+            //   );
+            // }
+            //
           }
         });
     });
   }
 
-  createToken(sessionId : string) {
+  createToken(sessionId: string) {
     return new Promise((resolve, reject) => {
       var data = {};
       axios
@@ -797,7 +831,7 @@ class OpenviduJoin extends Component<IProps, IState> {
           resolve(response.data.token);
           console.log("connection id : " + response.data.id);
           this.setState({
-            myConnectionId: response.data.id
+            myConnectionId: response.data.id,
           });
           this.recordParticipant();
         })

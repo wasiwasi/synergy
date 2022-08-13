@@ -676,20 +676,44 @@ const InvitePage = () => {
               "No connection to OpenVidu Server. This may be a certificate error at " +
                 OPENVIDU_SERVER_URL
             );
-            if (
-              window.confirm(
+            //swal
+            Swal.fire({
+              title: "모든 문제집을 삭제하시겠습니까?",
+              text:
                 'No connection to OpenVidu Server. This may be a certificate error at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"\n\nClick OK to navigate and accept it. ' +
-                  'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"'
-              )
-            ) {
-              window.location.assign(
-                OPENVIDU_SERVER_URL + "/accept-certificate"
-              );
-            }
+                OPENVIDU_SERVER_URL +
+                '"\n\nClick OK to navigate and accept it. ' +
+                'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+                OPENVIDU_SERVER_URL +
+                '"',
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "예, 전부 삭제합니다",
+              cancelButtonText: "취소하기",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.assign(
+                  OPENVIDU_SERVER_URL + "/accept-certificate"
+                );
+              }
+            });
+            //원래 confrim
+            // if (
+            //   window.confirm(
+            //     'No connection to OpenVidu Server. This may be a certificate error at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"\n\nClick OK to navigate and accept it. ' +
+            //       'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"'
+            //   )
+            // ) {
+            //   window.location.assign(
+            //     OPENVIDU_SERVER_URL + "/accept-certificate"
+            //   );
+            // }
           }
         });
     });
