@@ -1062,10 +1062,10 @@ function SwipeableTextMobileStepper() {
           // margin: 10
         }}>
           {/* <div className="chatbox__footer"> */}
-          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
+          <Box className="chatspace" sx={{backgroundColor: '#ddd', width: '100%', height: '400px', borderRadius: '20px'}}>
           <h3>채팅</h3>
-          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
-            <Messages messages={messages} />
+          <Box className="chatbox__messages" sx={{backgroundColor: '#A8C0D6', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
+            <Messages messages={messages} myUserName={myUserName} />
             {/*<div />
            </div> */}
           </Box>
