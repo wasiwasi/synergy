@@ -22,6 +22,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid"; // Grid version 1
 
 import TextField from "@mui/material/TextField";
 import "./Signup.css";
@@ -336,22 +337,28 @@ const Signup = () => {
             </SignupMsg>
 
             <SignupInput>
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="component-helper" shrink>
-                  Nick Name
-                </InputLabel>
-                <Input
-                  id="component-helper-nickname"
-                  placeholder="닉네임을 입력해 주세요."
-                  // value={nickName}
-                  onChange={onChangeNickName}
-                  required
-                  aria-describedby="component-helper-text"
-                />
-              </FormControl>
-              <NickNameButton onClick={nickNameCheck}>
-                닉네임 중복체크
-              </NickNameButton>
+              <Grid container xs={12} spacing={1}>
+                <Grid item xs={12} sm={8}>
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
+                </Grid>
+              </Grid>
 
               {nickName.length > 0 && (
                 <div className={`${isNickName ? "success" : "error"}`}>
@@ -359,28 +366,38 @@ const Signup = () => {
                 </div>
               )}
             </SignupInput>
+
             <SignupInput>
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="component-helper" shrink>
-                  Email
-                </InputLabel>
-                <Input
-                  id="component-helper-email"
-                  placeholder="이메일을 입력해 주세요."
-                  // value={email}
-                  onChange={onChangeEmail}
-                  required
-                  aria-describedby="component-helper-text"
-                />
-              </FormControl>
-              <EmailButton onClick={emailCheck}>이메일 중복체크</EmailButton>
+              <Grid container xs={12} spacing={1}>
+                <Grid item xs={12} sm={8}>
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Email
+                    </InputLabel>
+
+                    <Input
+                      id="component-helper-email"
+                      placeholder="이메일을 입력해 주세요."
+                      // value={email}
+                      onChange={onChangeEmail}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <EmailButton onClick={emailCheck}>
+                    이메일 중복체크
+                  </EmailButton>
+                </Grid>
+              </Grid>
               {email.length > 0 && (
                 <div className={`${isEmail ? "success" : "error"}`}>
                   {emailError}
                 </div>
               )}
             </SignupInput>
-
             <SignupInput>
               <FormControl variant="standard" fullWidth>
                 <InputLabel htmlFor="standard-adornment-password" shrink>
