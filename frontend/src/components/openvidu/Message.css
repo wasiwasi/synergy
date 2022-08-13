@@ -9,7 +9,7 @@
 
 #yourname {
     align-items: flex-end;
-    margin-right: 200px;
+    margin-right: 100px;
     /* float: left; */
 }
 
@@ -32,7 +32,7 @@
 
 #myname {
     align-items: flex-start;
-    margin-left: 200px;
+    margin-left: 100px;
     /* float: right; */
 }
 
