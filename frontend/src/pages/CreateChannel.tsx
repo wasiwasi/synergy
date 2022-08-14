@@ -59,7 +59,13 @@ function SwipeableTextMobileStepper() {
   const [selectData, setSelectData] = useState([
     // [],
     new Array(),
-    [5, 10, 15, 20], // round 문자열 -> 숫자로 변경
+    new Array(
+      {id:5, name: 5},
+      {id:10, name: 10},
+      {id:15, name: 15},
+      {id:20, name: 20}
+    )
+    // [5, 10, 15, 20], // round 문자열 -> 숫자로 변경
   ])
   const [category, setCategory] = useState('')
   const [round, setRound] = useState(0)
@@ -97,6 +103,10 @@ function SwipeableTextMobileStepper() {
 
   let [examiners, setExaminers] = useState<string[]>([]);
   let [subjects, setSubjects] = useState<string[]>([]);
+  let [isPlaying, setIsPlaying] = useState<boolean>(false);
+  let [currentRound, setCurrentRound] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(0);
+  let [score, setScore] = useState<number>(0);
 
   const emptyAllOV = () => {
     setOV(null);
@@ -143,6 +153,10 @@ function SwipeableTextMobileStepper() {
       ))
       console.log(copy[0])
       setSelectData(copy)
+      
+      // category, round에 기본 값 부여
+      setCategory(copy[0][0].id);
+      setRound(copy[1][0].id);
     });
     //닉네임 가져와서 세팅
     axios.get(`${BE_URL}/users`, {
@@ -660,7 +674,9 @@ function SwipeableTextMobileStepper() {
    */
   const initGame = () => {
     makeExaminers().then(
-      () => getSubjects()
+      () => getSubjects().then(
+        
+      )
     )
   }
 
@@ -1106,7 +1122,7 @@ function SwipeableTextMobileStepper() {
 export default SwipeableTextMobileStepper;
 
 function BasicSelect(props: any) {
-  const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
+  const [category, setCategory] = useState(`${props.selectData[props.index][0].id}`);
 
   // ISSUE 
   // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
