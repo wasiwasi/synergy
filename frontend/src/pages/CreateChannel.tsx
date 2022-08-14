@@ -109,8 +109,7 @@ function SwipeableTextMobileStepper() {
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
 
-  const audioRef = useRef<any>();
-  const videoRef = useRef<any>();
+  const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
   const emptyAllOV = () => {
     setOV(null);
@@ -321,22 +320,20 @@ function SwipeableTextMobileStepper() {
     console.log("examinerId:"+examinerId);
     console.log("connection:"+myConnectionId);
     console.log("videoState:"+videostate);
-    console.log("audioState:"+audiostate);
-    if(examinerId === myConnectionId) { // 내가 출제자라면
+    console.log("audioState:" + audiostate);
+    if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
         reverseVideoState()
       }
-      videoRef.current.disabled = true
       // 마이크를 끄고 마이크를 키지 못하도록.
       if(audiostate) {
         reverseAudioState()
       }
-      audioRef.current.disabled = true
+      setIsExaminer(true);
     } else { // 내가 출제자가 아니라면
+      setIsExaminer(false);
       console.log("I'm not examiner")
-      videoRef.current.disabled = false
-      audioRef.current.disabled = false
     }
   }
 
@@ -709,15 +706,22 @@ function SwipeableTextMobileStepper() {
 
   //카메라, 마이크 온오프
   const reverseAudioState = () => {
-    publisher?.publishAudio(!audiostate);
-    setAudiostate(!audiostate);
+    if (!isExaminer) {
+      publisher?.publishAudio(!audiostate);
+      setAudiostate(!audiostate);
+    } else {
+      alert("출제자는 마이크를 켤 수 없습니다.");
+    }
   }
 
   const reverseVideoState = () => {
-    publisher?.publishVideo(!videostate);
-    setVideostate(!videostate);
+    if (!isExaminer) {
+      publisher?.publishVideo(!videostate);
+      setVideostate(!videostate);
+    } else {
+      alert("출제자는 카메라를 끌 수 없습니다.");
+    }
   }
-
   // game logics
   /*
    게임 시작하려면
@@ -1089,47 +1093,34 @@ function SwipeableTextMobileStepper() {
             }}>
            <Button><SettingsIcon /></Button>
             
-           {audiostate ? (
-                <Button
-                ref={ audioRef }
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color='success'
-                />
-                </Button>
-              ) : (
-                <Button
-                ref={ audioRef }
-                onClick={reverseAudioState}>
-                  <MicOutlinedIcon
-                  color="disabled"
-                  />
-                </Button>
-              )}
-              {videostate ? (
-                <Button
-                ref={ videoRef }
+            <Button
+              onClick={reverseAudioState}>
+                  {audiostate ? (
+                    <MicOutlinedIcon
+                      color='success' />
+                  ) : (
+                    <MicOutlinedIcon
+                      color='disabled' />
+                  )}
+            </Button>
+            <Button
                 onClick={reverseVideoState}>
+                {videostate ? (
                   <VideocamIcon 
                   color='success'
                   />
-                </Button>                 
-              ) : (
-                <Button
-                ref={ videoRef }
-                onClick={reverseVideoState}>
-                  <VideocamIcon
-                  color="disabled"
+                ) : (
+                  <VideocamIcon 
+                  color='disabled'
                   />
-                </Button>                   
-              )}
-                             
-              <Button
-              onClick={leaveSession}>
-                <ExitToAppIcon
-                  color='error' 
-                />
-              </Button>
+                )}
+            </Button>                                    
+          <Button
+          onClick={leaveSession}>
+            <ExitToAppIcon
+              color='error' 
+            />
+          </Button>
 
           
           </Box>
