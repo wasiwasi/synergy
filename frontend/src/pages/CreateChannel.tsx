@@ -222,28 +222,8 @@ function SwipeableTextMobileStepper() {
     })
 
     mySession?.on("signal:word", (event: any) => {
-      // if(!isPlaying) return
-      // subjects[idx]+","+examiners[idx]
-      const answer = event.data.split(",")[0];
-      const examinerId = event.data.split(",")[1];
-      console.log("catch signal:word")
-      if(examinerId === mySessionId) { // 내가 출제자라면
-        // 카메라를 키고 카메라를 끄지 못하도록.
-        if(!videostate) {
-          reverseVideoState()
-        }
-        videoRef.current.disabled = true
-        // 마이크를 끄고 마이크를 키지 못하도록.
-        if(audiostate) {
-          reverseAudioState()
-        }
-        audioRef.current.disabled = true
-      } else { // 내가 출제자가 아니라면
-        videoRef.current.disabled = false
-        audioRef.current.disabled = false
-      }
+      handleSignalWord(event)
     })
-
 
     // --- 4) Connect to the session with a valid user token ---
 
@@ -326,6 +306,34 @@ function SwipeableTextMobileStepper() {
       }
     });
   }, [session, messages]);
+
+  const handleSignalWord = (event: any) => {
+    // if(!isPlaying) return
+    // subjects[idx]+","+examiners[idx]
+    const answer = event.data.split(",")[0];
+    const examinerId = event.data.split(",")[1];
+    // console.log("catch signal:word")
+    console.log("examinerId:"+examinerId);
+    console.log("connection:"+myConnectionId);
+    console.log("videoState:"+videostate);
+    console.log("audioState:"+audiostate);
+    if(examinerId === myConnectionId) { // 내가 출제자라면
+      // 카메라를 키고 카메라를 끄지 못하도록.
+      if(!videostate) {
+        reverseVideoState()
+      }
+      videoRef.current.disabled = true
+      // 마이크를 끄고 마이크를 키지 못하도록.
+      if(audiostate) {
+        reverseAudioState()
+      }
+      audioRef.current.disabled = true
+    } else { // 내가 출제자가 아니라면
+      console.log("I'm not examiner")
+      videoRef.current.disabled = false
+      audioRef.current.disabled = false
+    }
+  }
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -788,22 +796,12 @@ function SwipeableTextMobileStepper() {
    // idx번째 출제자에게 정답 알려줌
   const giveWordToExaminer = (idx: number) => {
     return new Promise<void>((resolve) => {
-      axios
-      .post(`${OPENVIDU_SERVER_URL}/signal`, {
-          "session": mySessionId,
-          "to": [],
-          "type": "word",
-          "data": subjects[idx]+","+examiners[idx]
-        }, {
-          headers : {
-            "Authorization": "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
-              "Content-Type": "application/json",
-          }
+      session?.signal({
+        "to": [],
+        "type": "word",
+        "data": subjects[idx]+","+examiners[idx]
       })
-      .then((response) => {
-        // console.log(response);
-        resolve()
-      })
+      resolve()
     })
   }
 
