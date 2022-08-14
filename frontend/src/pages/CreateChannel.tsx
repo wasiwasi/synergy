@@ -23,7 +23,7 @@ import {Button, Grid} from "@mui/material/";
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
+import { Connection, OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
@@ -653,7 +653,11 @@ function SwipeableTextMobileStepper() {
     setVideostate(!videostate);
   }
 
-  /* game logics */
+  // game logics
+  /*
+   게임 시작하려면
+   문제집, 출제자 정보 받아오고
+   */
   const initGame = () => {
     makeExaminers().then(
       () => getSubjects()
@@ -705,12 +709,46 @@ function SwipeableTextMobileStepper() {
         for(let idx=0; idx<response.data.data.length; idx++) {
           subjects.push(response.data.data[idx].word);
         }
+        
+        // shuffle using lambda
+        subjects.sort(() => Math.random() - 0.5);
+
         console.log(subjects);
         resolve();
       })
     })
   }
 
+  /*
+   i번째 출제자에게 정답 알려주고,
+   출제자 표시하고,
+   출제자 음소거,
+   출제자 카메라 비활성화 불가
+   */
+
+   // idx번째 출제자에게 정답 알려줌
+  const giveWordToExaminer = (idx: number) => {
+    return new Promise<void>((resolve) => {
+      axios
+      .post(`${OPENVIDU_SERVER_URL}/signal`, {
+          "session": mySessionId,
+          "to": [examiners[idx]],
+          "type": "word",
+          "data": subjects[idx]
+        }, {
+          headers : {
+            "Authorization": "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+              "Content-Type": "application/json",
+          }
+      })
+      .then((response) => {
+        console.log(response);
+        resolve()
+      })
+    })
+  }
+
+  // 게임이 끝났는지 확인
   const checkGameOver = () => {
     return new Promise<boolean>((resolve) => {
       if(round > 0) {
@@ -1070,7 +1108,9 @@ export default SwipeableTextMobileStepper;
 function BasicSelect(props: any) {
   const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
 
-  // ISSUE 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
+  // ISSUE 
+  // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
+  // 카테고리 초기값 화면에 바로 안뜸. 라운드는 아예 숫자가 안 뜸
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
     console.log("event.target.value:"+event.target.value);
