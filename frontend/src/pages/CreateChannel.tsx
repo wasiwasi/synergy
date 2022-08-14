@@ -221,10 +221,6 @@ function SwipeableTextMobileStepper() {
       navigate("/");
     })
 
-    mySession?.on("signal:word", (event: any) => {
-      handleSignalWord(event)
-    })
-
     // --- 4) Connect to the session with a valid user token ---
 
     // 'getToken' method is simulating what your server-side should do.
@@ -281,6 +277,7 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     const mySession = session;
+    mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
       if(isPlaying == true) { // 현재 게임 중일 때
@@ -306,6 +303,14 @@ function SwipeableTextMobileStepper() {
       }
     });
   }, [session, messages]);
+
+  useEffect(() => {
+    const mySession = session;
+    mySession?.off("signal:word");
+    mySession?.on("signal:word", (event: any) => {
+      handleSignalWord(event)
+    })
+  }, [session, myConnectionId, audiostate, videostate, isPlaying])
 
   const handleSignalWord = (event: any) => {
     // if(!isPlaying) return
