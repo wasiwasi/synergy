@@ -103,10 +103,14 @@ function SwipeableTextMobileStepper() {
 
   let [examiners, setExaminers] = useState<string[]>([]);
   let [subjects, setSubjects] = useState<string[]>([]);
+  let [scores, setScores] = useState<number[]>([]);
+
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
-  let [score, setScore] = useState<number>(0);
+
+  const audioRef = useRef<any>();
+  const videoRef = useRef<any>();
 
   const emptyAllOV = () => {
     setOV(null);
@@ -217,6 +221,30 @@ function SwipeableTextMobileStepper() {
       navigate("/");
     })
 
+    mySession?.on("signal:word", (event: any) => {
+      // if(!isPlaying) return
+      // subjects[idx]+","+examiners[idx]
+      const answer = event.data.split(",")[0];
+      const examinerId = event.data.split(",")[1];
+      console.log("catch signal:word")
+      if(examinerId === mySessionId) { // 내가 출제자라면
+        // 카메라를 키고 카메라를 끄지 못하도록.
+        if(!videostate) {
+          reverseVideoState()
+        }
+        videoRef.current.disabled = true
+        // 마이크를 끄고 마이크를 키지 못하도록.
+        if(audiostate) {
+          reverseAudioState()
+        }
+        audioRef.current.disabled = true
+      } else { // 내가 출제자가 아니라면
+        videoRef.current.disabled = false
+        audioRef.current.disabled = false
+      }
+    })
+
+
     // --- 4) Connect to the session with a valid user token ---
 
     // 'getToken' method is simulating what your server-side should do.
@@ -275,6 +303,16 @@ function SwipeableTextMobileStepper() {
     const mySession = session;
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
+      if(isPlaying == true) { // 현재 게임 중일 때
+        // console.log(subjects);
+        console.log(event);
+        // console.log("answer:"+subjects[currentRound])
+        if(chatdata[1] == subjects[currentRound]) { // 나온 채팅이 현재 라운드의 정답과 같다면
+          scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
+          console.log("Correct!! "+examiners.indexOf(event.from.connectionId)+" : "+scores[examiners.indexOf(event.from.connectionId)])
+          setScores(scores);
+        }
+      }
       if (chatdata[0] !== myUserName) {
         setMessages([
             ...messages,
@@ -609,8 +647,8 @@ function SwipeableTextMobileStepper() {
           }
         )
         .then((response) => {
-          console.log("TOKEN", response);
-          console.log("connection id : " + response.data.id);
+          // console.log("TOKEN", response);
+          // console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
           //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
           //임시로 connectionId를 인자로 넘겨주어 해결
@@ -673,15 +711,18 @@ function SwipeableTextMobileStepper() {
    문제집, 출제자 정보 받아오고
    */
   const initGame = () => {
-    makeExaminers().then(
+    isPlaying = true;
+    setIsPlaying(true);
+
+    initExaminerAndScores().then(
       () => getSubjects().then(
-        
+        () => giveWordToExaminer(0)
       )
     )
   }
 
   // 출제자 목록 받아오고 랜덤으로 출제자 순서 정함
-  const makeExaminers = () => {
+  const initExaminerAndScores = () => {
     return new Promise<void>((resolve) => {
       axios
       .get(`${OPENVIDU_SERVER_URL}/sessions/${mySessionId}/connection`, {
@@ -695,14 +736,15 @@ function SwipeableTextMobileStepper() {
         for(let idx=0; idx<response.data.content.length; idx++) {
           examiners.push(response.data.content[idx].id);
         }
-        
         // shuffle using lambda
         examiners.sort(() => Math.random() - 0.5);
-  
-        // 출제자 순서와 라운드, 카테고리 확인
-        console.log("examiners:"+examiners);
-        console.log("round:"+round);
-        console.log("category:"+category);
+        setExaminers(examiners);
+
+        scores = [];
+        for(let idx=0; idx<response.data.content.length; idx++) {
+          scores[idx] = 0;
+        }
+        setScores(scores);
 
         resolve();
       })
@@ -721,15 +763,16 @@ function SwipeableTextMobileStepper() {
       })
       .then((response) => {
         subjects = [];
-        console.log(response);
+        // console.log(response);
         for(let idx=0; idx<response.data.data.length; idx++) {
           subjects.push(response.data.data[idx].word);
         }
+        setSubjects(subjects);
         
         // shuffle using lambda
         subjects.sort(() => Math.random() - 0.5);
 
-        console.log(subjects);
+        // console.log(subjects);
         resolve();
       })
     })
@@ -748,9 +791,9 @@ function SwipeableTextMobileStepper() {
       axios
       .post(`${OPENVIDU_SERVER_URL}/signal`, {
           "session": mySessionId,
-          "to": [examiners[idx]],
+          "to": [],
           "type": "word",
-          "data": subjects[idx]
+          "data": subjects[idx]+","+examiners[idx]
         }, {
           headers : {
             "Authorization": "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
@@ -758,7 +801,7 @@ function SwipeableTextMobileStepper() {
           }
       })
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         resolve()
       })
     })
@@ -1045,6 +1088,7 @@ function SwipeableTextMobileStepper() {
             
            {audiostate ? (
                 <Button
+                ref={ audioRef }
                 onClick={reverseAudioState}>
                   <MicOutlinedIcon
                   color='success'
@@ -1052,6 +1096,7 @@ function SwipeableTextMobileStepper() {
                 </Button>
               ) : (
                 <Button
+                ref={ audioRef }
                 onClick={reverseAudioState}>
                   <MicOutlinedIcon
                   color="disabled"
@@ -1060,6 +1105,7 @@ function SwipeableTextMobileStepper() {
               )}
               {videostate ? (
                 <Button
+                ref={ videoRef }
                 onClick={reverseVideoState}>
                   <VideocamIcon 
                   color='success'
@@ -1067,6 +1113,7 @@ function SwipeableTextMobileStepper() {
                 </Button>                 
               ) : (
                 <Button
+                ref={ videoRef }
                 onClick={reverseVideoState}>
                   <VideocamIcon
                   color="disabled"
