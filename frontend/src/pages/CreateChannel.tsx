@@ -40,6 +40,8 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
+const INITIAL_TIME = 5;
+
 const steps = [
   {
     label: '게임을 선택해주세요',
@@ -107,7 +109,8 @@ function SwipeableTextMobileStepper() {
 
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
-  let [timer, setTimer] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(INITIAL_TIME);
+  let [isCorrect, setIsCorrect] = useState<boolean>(false);
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
@@ -149,12 +152,10 @@ function SwipeableTextMobileStepper() {
       }
     }).then((res) => {
       const copy = [...selectData]
-      console.log(res)
       res.data.data.map((d: any, i: any) => (
         // copy[0].push(d.subject_name)
         copy[0].push({name : d.subject_name, id : d.subject_set_id})
       ))
-      console.log(copy[0])
       setSelectData(copy)
       
       // category, round에 기본 값 부여
@@ -280,13 +281,12 @@ function SwipeableTextMobileStepper() {
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
       if(isPlaying == true) { // 현재 게임 중일 때
-        // console.log(subjects);
-        console.log(event);
-        // console.log("answer:"+subjects[currentRound])
         if(chatdata[1] == subjects[currentRound]) { // 나온 채팅이 현재 라운드의 정답과 같다면
           scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
-          console.log("Correct!! "+examiners.indexOf(event.from.connectionId)+" : "+scores[examiners.indexOf(event.from.connectionId)])
-          setScores(scores);
+          console.log("Correct!!")
+          setScores(scores); // scores 갱신
+          sendSignalCorrect(event.from.connectionId) // 맞췄다고 시그널
+          setTimeout(() => {}, 1000) // 1초 대기
         }
       }
       if (chatdata[0] !== myUserName) {
@@ -311,16 +311,88 @@ function SwipeableTextMobileStepper() {
     })
   }, [session, myConnectionId, audiostate, videostate, isPlaying])
 
+  const gameTimer = setInterval(() => {
+    // 게임 중이 아니거나 정답이 나왔거나 timer가 끝나면 실행 X
+    if(!isPlaying || isCorrect || timer <= 0) return;
+
+    sendSignalTimer(); // 시그널 전송 + timer 갱신
+  }, 1000);
+
+  // BUG: signal이 1초에 한 번만 떠야 하는데 여러번 뜸
+  const sendSignalTimer = () => {
+    session?.signal({
+      data: String(timer),
+      to: [],
+      type: "time"
+    });
+    setTimer(--timer);
+  }
+
+  useEffect(() => {
+    session?.off("signal:time")
+    session?.on("signal:time", (event: any) => {
+      // console.log(event.data);
+    })
+  })
+
+  // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
+  const sendSignalCorrect = (connectionId: string) => {
+    session?.signal({
+      data: connectionId,
+      to: [],
+      type: "correct"
+    })
+  }
+
+  useEffect(() => {
+    session?.off("signal:correct"); 
+    session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
+      clearInterval(gameTimer); // timer 중단
+      if(currentRound < round) { // 아직 round가 남았다면
+        setCurrentRound(currentRound++); // round 갱신
+      } else { // round가 다 끝났다면
+        setIsPlaying(false); // 게임 종료
+        return;
+      }
+      setIsCorrect(true); // 정답이 나왔다고 표시하고
+      sendSignalRoundOver(); // 라운드가 끝났다고 시그널 보냄
+    }) 
+  })
+
+  // round가 끝났다는 시그널
+  const sendSignalRoundOver = () => {
+    session?.signal({
+      data: "round over",
+      to: [],
+      type: "roundover"
+    });
+  }
+
+  useEffect(() => {
+    session?.off("signal:roundover");
+    session?.on("signal:roundover", (event: any) => { // 라운드가 끝났다면
+      if(isCorrect == true) { // 정답이 나와서 끝난거라면
+        setIsCorrect(false); // 정답 표시 초기화하고 종료
+        return;
+      }
+
+      clearInterval(gameTimer); // 정답이 나와서 끝난게 아니라면 timer 종료
+      setTimer(INITIAL_TIME); // timer 초기화
+  
+      if(currentRound < round) { // 아직 round가 남았다면
+        setCurrentRound(++currentRound); // round 증가시키고
+        giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
+      } else { // round가 다 끝났다면
+        setIsPlaying(false); // 게임 종료
+        return;
+      }
+    })
+  })
+
   const handleSignalWord = (event: any) => {
-    // if(!isPlaying) return
-    // subjects[idx]+","+examiners[idx]
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-    // console.log("catch signal:word")
-    console.log("examinerId:"+examinerId);
-    console.log("connection:"+myConnectionId);
-    console.log("videoState:"+videostate);
-    console.log("audioState:" + audiostate);
+
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
@@ -349,7 +421,6 @@ function SwipeableTextMobileStepper() {
     let copy: string[] = [...info]
     copy.push(e)
     setInfo(copy)
-    console.log("copy:"+copy)
     handleNext()
   }
 
@@ -453,16 +524,12 @@ function SwipeableTextMobileStepper() {
       connectionId: conId,
       nickName: myUserName,
     });
-    console.log("put session id " + mySessionId);
     axios
       .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-      })
-      .then((response) => {
-        console.log(response);
       });
   }
 
@@ -549,8 +616,6 @@ function SwipeableTextMobileStepper() {
       var videoDevices = devices?.filter(
         (device) => device.kind === "videoinput"
       );
-      console.log((publisher));
-      console.log(videoDevices);
       if (videoDevices && videoDevices.length > 1) {
         var newVideoDevice = videoDevices.filter(
           (device) => device.deviceId !== currentVideoDeviceId
@@ -596,7 +661,6 @@ function SwipeableTextMobileStepper() {
   }
 
   const createSession = (sessionId : string) => {
-    console.log("created session " + sessionId);
     return new Promise((resolve, reject) => {
       var data = JSON.stringify({ customSessionId: sessionId });
       axios
@@ -608,7 +672,6 @@ function SwipeableTextMobileStepper() {
           },
         })
         .then((response) => {
-          console.log("CREATE SESSION", response);
           resolve(response.data.id);
         })
         .catch((response) => {
@@ -657,8 +720,6 @@ function SwipeableTextMobileStepper() {
           }
         )
         .then((response) => {
-          // console.log("TOKEN", response);
-          // console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
           //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
           //임시로 connectionId를 인자로 넘겨주어 해결
@@ -733,9 +794,13 @@ function SwipeableTextMobileStepper() {
 
     initExaminerAndScores().then(
       () => getSubjects().then(
-        () => giveWordToExaminer(0)
+        () => giveWordToExaminer(currentRound)
       )
     )
+  }
+
+  const startRound = (round: number) => {
+
   }
 
   // 출제자 목록 받아오고 랜덤으로 출제자 순서 정함
@@ -780,7 +845,6 @@ function SwipeableTextMobileStepper() {
       })
       .then((response) => {
         subjects = [];
-        // console.log(response);
         for(let idx=0; idx<response.data.data.length; idx++) {
           subjects.push(response.data.data[idx].word);
         }
@@ -788,8 +852,6 @@ function SwipeableTextMobileStepper() {
         
         // shuffle using lambda
         subjects.sort(() => Math.random() - 0.5);
-
-        // console.log(subjects);
         resolve();
       })
     })
@@ -811,17 +873,6 @@ function SwipeableTextMobileStepper() {
         "data": subjects[idx]+","+examiners[idx]
       })
       resolve()
-    })
-  }
-
-  // 게임이 끝났는지 확인
-  const checkGameOver = () => {
-    return new Promise<boolean>((resolve) => {
-      if(round > 0) {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
     })
   }
 
@@ -1165,21 +1216,13 @@ export default SwipeableTextMobileStepper;
 function BasicSelect(props: any) {
   const [category, setCategory] = useState(`${props.selectData[props.index][0].id}`);
 
-  // ISSUE 
-  // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
-  // 카테고리 초기값 화면에 바로 안뜸. 라운드는 아예 숫자가 안 뜸
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
-    console.log("event.target.value:"+event.target.value);
     if (props.index == 0) {
-      // props.setCategory(category) // 이전 코드는 선택하기 이전 값이 들어감
       props.setCategory(event.target.value)
-      console.log("category:" +event.target.value)
     }
     else {
-      // props.setRound(category) // 이전 코드는 선택하기 이전 값이 들어감
       props.setRound(event.target.value)
-      console.log("round: "+event.target.value)
     }
   };
 
