@@ -56,6 +56,7 @@ import Swal from "sweetalert2";
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
+const JOIN_MEMBER_LIMIT = 6;
 
 const themeA306 = createTheme({
   palette: {
@@ -135,12 +136,19 @@ const InvitePage = () => {
   const [message, setMessage] = useState<string>("");
   const emptyAllOV = () => {
     setOV(null);
-    setSession(undefined);
-    setSubscribers([]);
     setMySessionId("");
     setMyUserName("");
+    setSession(undefined);
     setMainStreamManager(undefined);
     setPublisher(undefined);
+    setSubscribers([]);
+    setMyConnectionId("");
+    setAudiostate(true);
+    setAudioallowed(false);
+    setVideostate(true);
+    setVideoallowed(false);
+    setMessages([]);
+    setMessage("");
   };
   //닉네임 확인
   const [nickName, setNickName] = useState<string>("");
@@ -360,8 +368,16 @@ const InvitePage = () => {
     });
   }, [session, messages]);
 
-  const onEnter = async () => {
-    await joinSession();
+  const onEnter = () => {
+    axios
+      .get(`${BE_URL}/api/channels/info/${mySessionId}`)
+      .then((response) => {
+        if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
+          alert("참여하려는 채널이 꽉 찼습니다.");
+          return;
+        }
+        joinSession();
+    })
   };
 
   // 닉네임
@@ -533,6 +549,10 @@ const InvitePage = () => {
       })
       .then((response: any) => {
         console.log(response);
+      })
+      .catch((error: any) => {
+        alert("참여하려는 채널이 꽉 찼습니다.");
+        leaveSession();
       });
   };
 
