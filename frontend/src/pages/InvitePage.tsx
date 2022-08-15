@@ -164,7 +164,17 @@ const InvitePage = () => {
 
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
+  //게임관련
+  let [isPlaying, setIsPlaying] = useState<boolean>(false);
+  let [currentRound, setCurrentRound] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(0);
+  const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
+  const [gamestart, setGamestart] = useState<boolean>(false);
+  const [gameover, setGameover] = useState<boolean>(false);
+  const [correct, setCorrect] = useState<boolean>(false);
+  const [roundover, setRoundover] = useState<boolean>(false);
+  
   const didMount = useRef(false);
 
   // URL에서 방 코드를 가져옴
@@ -239,22 +249,6 @@ const InvitePage = () => {
       navigate("/");
     });
 
-    // chatting
-    mySession?.on("signal:chat", (event: any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      console.log(chatdata);
-      if (chatdata[0] !== myUserName) {
-        setMessages([
-          ...messages,
-          {
-            userName: chatdata[0],
-            text: chatdata[1],
-            boxClass: "messages__box--visitor",
-          },
-        ]);
-      }
-    });
     mySession?.on("sessionDisconnected", (event: any) => {
       Swal.fire({
         icon: "warning",
@@ -314,6 +308,7 @@ const InvitePage = () => {
   }, [session]);
   useEffect(() => {
     const mySession = session;
+    mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
@@ -342,31 +337,85 @@ const InvitePage = () => {
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event: any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      if (chatdata[0] !== myUserName) {
-        console.log("messages: " + messages);
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      setIsPlaying(true);
+      setGamestart(true);
+      setTimeout(() => {
+        setGamestart(false);
+      }, 5000);
+    })
 
-        // messages.push({
-        //   userName: chatdata[0],
-        //   text: chatdata[1],
-        //   boxClass: "messages__box--visitor",
-        // });
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setGameover(true);
+      setTimeout(() => {
+        setGameover(false);
+      }, 5000);
+    })
 
-        // setMessages([...messages]);
-
-        setMessages([
-          ...messages,
-          {
-            userName: chatdata[0],
-            text: chatdata[1],
-            boxClass: "messages__box--visitor",
-          },
-        ]);
-      }
+    mySession?.off("signal:time");
+    mySession?.on("signal:time", (event: any) => {
+      setTimer(event.data);
     });
-  }, [session, messages]);
+
+    mySession?.off("signal:correct");
+    mySession?.on("signal:correct", (event: any) => {
+      setCorrect(true);
+      setTimeout(() => {
+        setCorrect(false);
+      }, 5000);
+    });
+
+    mySession?.off("signal:roundover");
+    mySession?.on("signal:roundover", (event: any) => {
+      setRoundover(true);
+      setTimeout(() => {
+        setRoundover(false);
+      }, 5000);
+    });
+
+  }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
+    mySession?.off("signal:word");
+    mySession?.on("signal:word", (event: any) => {
+      setTimer(0);
+      handleSignalWord(event)
+    })
+  }, [session, myConnectionId, audiostate, videostate, isPlaying]);
+
+  useEffect(() => {
+    console.log(timer);
+  }, [timer]);
+
+  const handleSignalWord = (event: any) => {
+    // if(!isPlaying) return
+    // subjects[idx]+","+examiners[idx]
+    const answer = event.data.split(",")[0];
+    const examinerId = event.data.split(",")[1];
+    // console.log("catch signal:word")
+    console.log("examinerId:"+examinerId);
+    console.log("connection:"+myConnectionId);
+    console.log("videoState:"+videostate);
+    console.log("audioState:" + audiostate);
+    if (examinerId === myConnectionId) { // 내가 출제자라면
+      // 카메라를 키고 카메라를 끄지 못하도록.
+      if(!videostate) {
+        reverseVideoState()
+      }
+      // 마이크를 끄고 마이크를 키지 못하도록.
+      if(audiostate) {
+        reverseAudioState()
+      }
+      setIsExaminer(true);
+    } else { // 내가 출제자가 아니라면
+      setIsExaminer(false);
+      console.log("I'm not examiner")
+    }
+  }
 
   const onEnter = () => {
     axios
@@ -473,7 +522,7 @@ const InvitePage = () => {
 
   const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
-      if (message !== "") {
+      if (message !== "") { 
         setMessages([
           ...messages,
           {
@@ -495,7 +544,6 @@ const InvitePage = () => {
   };
 
   const handleChatMessageChange = (e: any) => {
-    console.log("message event occur");
     setMessage(e.target.value);
   };
   // chatting
