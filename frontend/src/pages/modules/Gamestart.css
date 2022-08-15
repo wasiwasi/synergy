@@ -1,10 +1,10 @@
-@import url(https://fonts.googleapis.com/css?family=Noto+Sans+Korean);
+@import url(https://fonts.googleapis.com/css?family=Jua);
 
 .dh3 {
   font-size: 8vh;
   /* font-size: 70px; */
 
-  font-family: "Noto Sans Korean", cursive;
+  font-family: "Jua", cursive;
   color: rgb(66, 135, 226);
   /* cursor: pointer; */
   /* z-index: 2; */
