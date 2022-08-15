@@ -52,6 +52,8 @@ import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -1022,6 +1024,16 @@ const InvitePage = () => {
                       // margin: 10
                     }}
                   >
+                    {gamestart === true ? (
+                          <GamestartMain></GamestartMain>
+                    ) : null}
+                    {correct ? (
+                      <AlertPage text={"정답"}></AlertPage>
+                    ) : roundover ? (
+                      <AlertPage text={"시간초과"}></AlertPage>
+                    ) : gameover ? (
+                      <AlertPage text={"게임종료"}></AlertPage>
+                    ) : null}
                     {/* 큰 화면 카메라 */}
                     {/* {mainStreamManager !== undefined ? (
                   <div id="main-video" className="col-md-6">
