@@ -134,6 +134,8 @@ function SwipeableTextMobileStepper() {
 
   const didMount = useRef(false);
 
+
+
   useEffect(() => {
     let token = localStorage.getItem("access-token");
     //토큰이 없으면 api호출안함
@@ -272,7 +274,7 @@ function SwipeableTextMobileStepper() {
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
         console.log("messages: "+messages);
-  
+
 
         // messages.push({
         //   userName: chatdata[0],
@@ -845,7 +847,7 @@ function SwipeableTextMobileStepper() {
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%',
-            height: '15%'
+            height: '15%',
           }}>
           <Box id='logo'
           sx={{
@@ -901,6 +903,7 @@ function SwipeableTextMobileStepper() {
                 value="Leave session"
               /> */}
           {/* </div> */}
+
           <Button>게임 시작</Button>
           <BasicModal/>        
         </Box>
@@ -1063,7 +1066,7 @@ function SwipeableTextMobileStepper() {
         }}>
           {/* <div className="chatbox__footer"> */}
           <Box className="chatspace" sx={{backgroundColor: '#ddd', width: '100%', height: '400px', borderRadius: '20px'}}>
-          <h3>채팅</h3>
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
           <Box className="chatbox__messages" sx={{backgroundColor: '#A8C0D6', margin: 'auto', width: '90%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
             <Messages messages={messages} myUserName={myUserName} />
             {/*<div />
