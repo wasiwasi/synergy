@@ -51,10 +51,12 @@ import {
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import Swal from "sweetalert2";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
+const JOIN_MEMBER_LIMIT = 6;
 
 const themeA306 = createTheme({
   palette: {
@@ -134,12 +136,19 @@ const InvitePage = () => {
   const [message, setMessage] = useState<string>("");
   const emptyAllOV = () => {
     setOV(null);
-    setSession(undefined);
-    setSubscribers([]);
     setMySessionId("");
     setMyUserName("");
+    setSession(undefined);
     setMainStreamManager(undefined);
     setPublisher(undefined);
+    setSubscribers([]);
+    setMyConnectionId("");
+    setAudiostate(true);
+    setAudioallowed(false);
+    setVideostate(true);
+    setVideoallowed(false);
+    setMessages([]);
+    setMessage("");
   };
   //닉네임 확인
   const [nickName, setNickName] = useState<string>("");
@@ -221,7 +230,12 @@ const InvitePage = () => {
       console.warn(exception);
     });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
@@ -242,7 +256,12 @@ const InvitePage = () => {
       }
     });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
@@ -323,11 +342,11 @@ const InvitePage = () => {
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event : any) => {
+    mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
       if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
+        console.log("messages: " + messages);
 
         // messages.push({
         //   userName: chatdata[0],
@@ -338,20 +357,27 @@ const InvitePage = () => {
         // setMessages([...messages]);
 
         setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
+          ...messages,
+          {
+            userName: chatdata[0],
+            text: chatdata[1],
+            boxClass: "messages__box--visitor",
+          },
+        ]);
       }
     });
   }, [session, messages]);
 
-  const onEnter = async () => {
-    await joinSession();
+  const onEnter = () => {
+    axios
+      .get(`${BE_URL}/api/channels/info/${mySessionId}`)
+      .then((response) => {
+        if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
+          alert("참여하려는 채널이 꽉 찼습니다.");
+          return;
+        }
+        joinSession();
+    })
   };
 
   // 닉네임
@@ -389,18 +415,37 @@ const InvitePage = () => {
         })
         .then((response: any) => {
           if (response.status == 226) {
-            alert("중복된 닉네임입니다.");
+            Swal.fire({
+              icon: "question",
+              title: "Oops...",
+              text: "중복된 닉네임입니다",
+              timer: 1000,
+            });
           } else {
-            alert("사용가능한 닉네임입니다.");
+            Swal.fire({
+              icon: "success",
+              title: "사용가능한 닉네임입니다.",
+              timer: 1000,
+            });
             setUsableNickName(true);
             setMyUserName(nickName);
           }
         })
         .catch((error: any) => {
-          alert("서버 오류");
+          Swal.fire({
+            icon: "warning",
+            title: "Sorry...",
+            text: "서버 오류입니다.",
+            timer: 1000,
+          });
         });
     } else {
-      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+      Swal.fire({
+        icon: "error",
+        title: "닉네임을 다시 입력해주세요",
+        text: "6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.",
+        timer: 1000,
+      });
     }
   };
 
@@ -426,7 +471,7 @@ const InvitePage = () => {
     }
   };
 
-  const sendMessageByEnter = (e : any) => {
+  const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
       if (message !== "") {
         setMessages([
@@ -449,7 +494,7 @@ const InvitePage = () => {
     }
   };
 
-  const handleChatMessageChange = (e : any) => {
+  const handleChatMessageChange = (e: any) => {
     console.log("message event occur");
     setMessage(e.target.value);
   };
@@ -504,6 +549,10 @@ const InvitePage = () => {
       })
       .then((response: any) => {
         console.log(response);
+      })
+      .catch((error: any) => {
+        alert("참여하려는 채널이 꽉 찼습니다.");
+        leaveSession();
       });
   };
 
@@ -550,6 +599,14 @@ const InvitePage = () => {
       .catch((e: any) => {
         console.log("방 삭제 실패");
       });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   };
 
   const switchCamera = async () => {
@@ -628,7 +685,13 @@ const InvitePage = () => {
               "Content-Type": "application/json",
             },
           });
-          alert(`참가하려는 ${sessionId}방이 존재하지 않습니다.`);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `참가하려는 ${sessionId}방이 존재하지 않습니다.`,
+            showConfirmButton: false,
+            timer: 1500,
+          });
           reject(response);
         })
         .catch((response: any) => {
@@ -641,20 +704,44 @@ const InvitePage = () => {
               "No connection to OpenVidu Server. This may be a certificate error at " +
                 OPENVIDU_SERVER_URL
             );
-            if (
-              window.confirm(
+            //swal
+            Swal.fire({
+              title: "모든 문제집을 삭제하시겠습니까?",
+              text:
                 'No connection to OpenVidu Server. This may be a certificate error at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"\n\nClick OK to navigate and accept it. ' +
-                  'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"'
-              )
-            ) {
-              window.location.assign(
-                OPENVIDU_SERVER_URL + "/accept-certificate"
-              );
-            }
+                OPENVIDU_SERVER_URL +
+                '"\n\nClick OK to navigate and accept it. ' +
+                'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+                OPENVIDU_SERVER_URL +
+                '"',
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "예, 전부 삭제합니다",
+              cancelButtonText: "취소하기",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.assign(
+                  OPENVIDU_SERVER_URL + "/accept-certificate"
+                );
+              }
+            });
+            //원래 confrim
+            // if (
+            //   window.confirm(
+            //     'No connection to OpenVidu Server. This may be a certificate error at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"\n\nClick OK to navigate and accept it. ' +
+            //       'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"'
+            //   )
+            // ) {
+            //   window.location.assign(
+            //     OPENVIDU_SERVER_URL + "/accept-certificate"
+            //   );
+            // }
           }
         });
     });

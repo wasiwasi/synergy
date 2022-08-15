@@ -26,7 +26,13 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { constants } from "buffer";
 
 import Grid from "@mui/material/Grid"; // Grid version 1
-import Grid2 from "@mui/material/Unstable_Grid2"; // Grid version 2
+
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+
+import Swal from "sweetalert2";
+import { Label } from "@mui/icons-material";
 
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -77,6 +83,7 @@ const Mypage = () => {
       bodytalkList: [],
     },
   ]);
+  const [gameTitle, setGameTitle] = useState("");
   const [wordList, setWordList] = useState([{ id: 1, word: "" }]);
 
   const handletWordAdd = () => {
@@ -91,17 +98,15 @@ const Mypage = () => {
 
     setWordList(newlist);
   };
-  const handleWordChange = (
-    id: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    // const idx = wordList.findIndex((w) => w.word === word);
-    let list = [...wordList] as any;
-    const idx = wordList.findIndex((w) => w.id === id);
-    const { name, value } = event.target;
-    list[idx][name] = value;
-    setWordList(list);
-  };
+  const handleWordChange =
+    (id: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      // const idx = wordList.findIndex((w) => w.word === word);
+      let list = [...wordList] as any;
+      const idx = wordList.findIndex((w) => w.id === id);
+      const { name, value } = event.target;
+      list[idx][name] = value;
+      setWordList(list);
+    };
 
   const handleSubjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
     const sj = {
@@ -116,23 +121,36 @@ const Mypage = () => {
 
   const onUserDelete = () => {
     let token = localStorage.getItem("access-token");
-    if (window.confirm("정말 탈퇴하시겠습니까?")) {
-      axios
-        .delete(`${BE_URL}/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(() => {
-          localStorage.removeItem("access-token");
-          navigate("/");
-        });
-    }
+
+    Swal.fire({
+      title: "정말 탈퇴하시겠습니까?",
+      text: "탈퇴하면 되돌릴 수 없습니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "취소하기",
+      confirmButtonText: "예, 탈퇴 하겠습니다",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/users`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            localStorage.removeItem("access-token");
+            Swal.fire("탈퇴성공!", "Your file has been deleted.", "success");
+            navigate("/");
+          });
+      }
+    });
   };
 
   const createSubject = () => {
     const st = subjectSet.subjectName;
-    const gameTitle = "bodytalk";
+    // const gameTitle = "bodytalk";
     let wordSet = [...wordList];
     let bodyTalk = subjectSet.bodytalkList;
     wordSet.map((word, idx) => {
@@ -141,7 +159,7 @@ const Mypage = () => {
 
     const sj = {
       subjectName: st,
-      gameTitle: "bodytalk",
+      gameTitle: gameTitle,
       bodytalkList: bodyTalk,
     };
 
@@ -153,7 +171,7 @@ const Mypage = () => {
         `${BE_URL}/subjects/create`,
         {
           subjectName: subjectSet.subjectName,
-          gameTitle: "bodytalk",
+          gameTitle: gameTitle,
           bodytalkList: subjectSet.bodytalkList,
         },
         {
@@ -199,18 +217,33 @@ const Mypage = () => {
   };
 
   const removeSubject = (id: number) => {
-    // console.log(id);
-
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+
+    Swal.fire({
+      title: `${id} 번 문제집을 정말 삭제하시겠습니까?`,
+      text: "문제집을 한번 삭제하면 취소 할 수 없습니다!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예 삭제하겠습니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "문제집이 삭제되었습니다.", "success");
+      }
+    });
+
+    //삭제 로직 추가하기 -- 0813 ming
   };
 
   useEffect(() => {
@@ -227,18 +260,35 @@ const Mypage = () => {
     setWordList([{ id: 1, word: "" }]);
     setDialogOpen(false);
   };
+  const handleGameTitle = (event: SelectChangeEvent) => {
+    setGameTitle(event.target.value);
+  };
 
   const handelDelteAllSubject = () => {
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+    Swal.fire({
+      title: "모든 문제집을 삭제하시겠습니까?",
+      text: "한번 삭제한 문제집들은 복구가 불가능합니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예, 전부 삭제합니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "전부다 삭제하였습니다!", "success");
+      }
+    });
   };
 
   // constMypage HomePage: React.FC = () => {
@@ -260,6 +310,9 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
@@ -273,12 +326,15 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
             <br />
-            <Grid container spacing={3}>
-              <Grid xs={4}>
+            <Grid container spacing={2}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
@@ -289,24 +345,24 @@ const Mypage = () => {
                 </Button>
               </Grid>
 
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handleClickOpen}
                 >
-                  문제집 생성하기
+                  문제집 생성
                 </Button>
               </Grid>
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handelDelteAllSubject}
                 >
-                  문제집 전부 삭제하기
+                  문제집 전부 삭제
                 </Button>
               </Grid>
             </Grid>
@@ -330,21 +386,49 @@ const Mypage = () => {
                     variant="standard"
                     onChange={handleSubjectName}
                   />
+                  <FormControl sx={{ m: 1, minWidth: 150 }}>
+                    <InputLabel>GameTitle</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple"
+                      label="GameTitle"
+                      value={gameTitle}
+                      onChange={handleGameTitle}
+                    >
+                      <MenuItem value={"bodytalk"}>몸으로 말해요</MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        골든벨
+                      </MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        라이어게임
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+
                   {wordList.map((singleWord, idx) => (
                     <div key={singleWord.id}>
-                      <input
-                        name="word"
-                        id="word"
-                        required
-                        onChange={(e) => handleWordChange(singleWord.id, e)}
-                      />
-
-                      {wordList.length > 1 && (
-                        <Button onClick={() => handleWordRemove(singleWord.id)}>
-                          delete
-                        </Button>
-                      )}
+                      <Grid container spacing={1}>
+                        <Grid item xs={12} md={8}>
+                          <Input
+                            name="word"
+                            id="word"
+                            required
+                            onChange={handleWordChange(singleWord.id)}
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item md={4}>
+                          {wordList.length > 1 && (
+                            <Button
+                              onClick={() => handleWordRemove(singleWord.id)}
+                            >
+                              delete
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
                       <br />
+
                       {wordList.length - 1 === idx && wordList.length < 30 && (
                         <Button onClick={handletWordAdd}>add word</Button>
                       )}

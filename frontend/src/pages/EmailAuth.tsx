@@ -2,6 +2,7 @@ import Header from "../components/common/Header";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const EmailAuth = () => {
   const BE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -20,11 +21,21 @@ const EmailAuth = () => {
         code: code,
       })
       .then((res) => {
-        alert(res.data.message);
+        Swal.fire({
+          icon: "success",
+          title: res.data.message,
+          showConfirmButton: false,
+          timer: 1000,
+        });
         navigate("/");
       })
       .catch((error) => {
-        alert(error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          showConfirmButton: false,
+          timer: 1000,
+        });
         navigate("/");
       });
   }, []);
