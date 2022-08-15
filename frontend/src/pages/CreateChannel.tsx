@@ -23,7 +23,7 @@ import {Button, Grid} from "@mui/material/";
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
+import { Connection, OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
@@ -32,6 +32,8 @@ import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import userEvent from '@testing-library/user-event';
+import { Shuffle } from '@mui/icons-material';
 
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
@@ -53,30 +55,20 @@ const steps = [
   },
 ];
 
-// interface IState {
-//   OV: OpenVidu | null,
-//   mySessionId: string,
-//   myUserName: string,
-//   session: Session | undefined,
-//   mainStreamManager: Publisher | undefined,
-//   publisher: Publisher | undefined,
-//   subscribers: Subscriber[],
-//   myConnectionId: string,
-//   audiostate: boolean,
-//   audioallowed: boolean,
-//   videostate: boolean,
-//   videoallowed: boolean,
-//   messages: object[],
-//   message: string,
-// }
-
 function SwipeableTextMobileStepper() {
   const [selectData, setSelectData] = useState([
-    [],
-    ['5', '10', '15', '20'],
+    // [],
+    new Array(),
+    new Array(
+      {id:5, name: 5},
+      {id:10, name: 10},
+      {id:15, name: 15},
+      {id:20, name: 20}
+    )
+    // [5, 10, 15, 20], // round 문자열 -> 숫자로 변경
   ])
   const [category, setCategory] = useState('')
-  const [round, setRound] = useState('')
+  const [round, setRound] = useState(0)
   
   const [info, setInfo] = useState<string[]>([]);
   const theme = useTheme();
@@ -108,6 +100,17 @@ function SwipeableTextMobileStepper() {
   const [message, setMessage] = useState<string>("");
 
   const [joinLink, setJoinLink] = useState<string>("");
+
+  let [examiners, setExaminers] = useState<string[]>([]);
+  let [subjects, setSubjects] = useState<string[]>([]);
+  let [scores, setScores] = useState<number[]>([]);
+
+  let [isPlaying, setIsPlaying] = useState<boolean>(false);
+  let [currentRound, setCurrentRound] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(0);
+
+  const audioRef = useRef<any>();
+  const videoRef = useRef<any>();
 
   const emptyAllOV = () => {
     setOV(null);
@@ -142,17 +145,24 @@ function SwipeableTextMobileStepper() {
     if (!token) return;
     setAccessToken(token as string);
 
+    // 전체 문제집 조회
     axios.get(`${BE_URL}/subjects`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     }).then((res) => {
       const copy = [...selectData]
+      console.log(res)
       res.data.data.map((d: any, i: any) => (
-        copy[0].push(d.subject_name)
+        // copy[0].push(d.subject_name)
+        copy[0].push({name : d.subject_name, id : d.subject_set_id})
       ))
       console.log(copy[0])
       setSelectData(copy)
+      
+      // category, round에 기본 값 부여
+      setCategory(copy[0][0].id);
+      setRound(copy[1][0].id);
     });
     //닉네임 가져와서 세팅
     axios.get(`${BE_URL}/users`, {
@@ -213,6 +223,10 @@ function SwipeableTextMobileStepper() {
       navigate("/");
     })
 
+    mySession?.on("signal:word", (event: any) => {
+      handleSignalWord(event)
+    })
+
     // --- 4) Connect to the session with a valid user token ---
 
     // 'getToken' method is simulating what your server-side should do.
@@ -271,19 +285,17 @@ function SwipeableTextMobileStepper() {
     const mySession = session;
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
-      // let chatdata = event.;
+      if(isPlaying == true) { // 현재 게임 중일 때
+        // console.log(subjects);
+        console.log(event);
+        // console.log("answer:"+subjects[currentRound])
+        if(chatdata[1] == subjects[currentRound]) { // 나온 채팅이 현재 라운드의 정답과 같다면
+          scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
+          console.log("Correct!! "+examiners.indexOf(event.from.connectionId)+" : "+scores[examiners.indexOf(event.from.connectionId)])
+          setScores(scores);
+        }
+      }
       if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
-
-
-        // messages.push({
-        //   userName: chatdata[0],
-        //   text: chatdata[1],
-        //   boxClass: "messages__box--visitor",
-        // });
-
-        // setMessages([...messages]);
-
         setMessages([
             ...messages,
             {
@@ -297,6 +309,34 @@ function SwipeableTextMobileStepper() {
     });
   }, [session, messages]);
 
+  const handleSignalWord = (event: any) => {
+    // if(!isPlaying) return
+    // subjects[idx]+","+examiners[idx]
+    const answer = event.data.split(",")[0];
+    const examinerId = event.data.split(",")[1];
+    // console.log("catch signal:word")
+    console.log("examinerId:"+examinerId);
+    console.log("connection:"+myConnectionId);
+    console.log("videoState:"+videostate);
+    console.log("audioState:"+audiostate);
+    if(examinerId === myConnectionId) { // 내가 출제자라면
+      // 카메라를 키고 카메라를 끄지 못하도록.
+      if(!videostate) {
+        reverseVideoState()
+      }
+      videoRef.current.disabled = true
+      // 마이크를 끄고 마이크를 키지 못하도록.
+      if(audiostate) {
+        reverseAudioState()
+      }
+      audioRef.current.disabled = true
+    } else { // 내가 출제자가 아니라면
+      console.log("I'm not examiner")
+      videoRef.current.disabled = false
+      audioRef.current.disabled = false
+    }
+  }
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -309,6 +349,7 @@ function SwipeableTextMobileStepper() {
     let copy: string[] = [...info]
     copy.push(e)
     setInfo(copy)
+    console.log("copy:"+copy)
     handleNext()
   }
 
@@ -321,14 +362,6 @@ function SwipeableTextMobileStepper() {
 
   const sendMessageByClick = () => {
     if (message !== "") {
-      // messages.push({
-      //   userName: myUserName,
-      //   text: message,
-      //   boxClass: "messages__box--operator",
-      // });
-
-      // setMessages([...messages]);
-
       setMessages(
         [
           ...messages,
@@ -353,14 +386,6 @@ function SwipeableTextMobileStepper() {
   const sendMessageByEnter = (e : any) => {
     if (e.key === "Enter") {
       if (message !== "") {
-        // messages.push({
-        //   userName: myUserName,
-        //   text: message,
-        //   boxClass: "messages__box--operator",
-        // });
-  
-        // setMessages([...messages]);
-
         setMessages([
             ...messages,
             {
@@ -384,7 +409,6 @@ function SwipeableTextMobileStepper() {
   }
 
   const handleChatMessageChange = (e : any) => {
-    console.log("message event occur");
     setMessage(e.target.value);
   }
   // chatting
@@ -542,12 +566,8 @@ function SwipeableTextMobileStepper() {
             publishVideo: true,
             mirror: true,
           });
-          console.log((newPublisher));
-          //newPublisher.once("accessAllowed", () => {
           await session?.unpublish(mainStreamManager as Publisher);
-
           await session?.publish(newPublisher as Publisher);
-          // currentVideoDevice: newVideoDevice,
           setMainStreamManager(newPublisher);
           setPublisher(newPublisher);
         }
@@ -637,8 +657,8 @@ function SwipeableTextMobileStepper() {
           }
         )
         .then((response) => {
-          console.log("TOKEN", response);
-          console.log("connection id : " + response.data.id);
+          // console.log("TOKEN", response);
+          // console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
           //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
           //임시로 connectionId를 인자로 넘겨주어 해결
@@ -669,10 +689,6 @@ function SwipeableTextMobileStepper() {
         })
         .then((response) => {
           // setState 호출 시 render도 호출 (https://velog.io/@lllen/React-%EC%9D%B4%EB%B2%A4%ED%8A%B8)
-          console.log("created random sessionId");
-          // this.mySessionId = response.data;
-
-          console.log(response);
           setMySessionId(response.data);
           resolve();
         });
@@ -697,6 +713,109 @@ function SwipeableTextMobileStepper() {
   const reverseVideoState = () => {
     publisher?.publishVideo(!videostate);
     setVideostate(!videostate);
+  }
+
+  // game logics
+  /*
+   게임 시작하려면
+   문제집, 출제자 정보 받아오고
+   */
+  const initGame = () => {
+    isPlaying = true;
+    setIsPlaying(true);
+
+    initExaminerAndScores().then(
+      () => getSubjects().then(
+        () => giveWordToExaminer(0)
+      )
+    )
+  }
+
+  // 출제자 목록 받아오고 랜덤으로 출제자 순서 정함
+  const initExaminerAndScores = () => {
+    return new Promise<void>((resolve) => {
+      axios
+      .get(`${OPENVIDU_SERVER_URL}/sessions/${mySessionId}/connection`, {
+        headers : {
+          "Authorization": "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+          "Content-Type": "application/json",
+        }
+      })
+      .then((response) => {
+        examiners = []; // clear examiners
+        for(let idx=0; idx<response.data.content.length; idx++) {
+          examiners.push(response.data.content[idx].id);
+        }
+        // shuffle using lambda
+        examiners.sort(() => Math.random() - 0.5);
+        setExaminers(examiners);
+
+        scores = [];
+        for(let idx=0; idx<response.data.content.length; idx++) {
+          scores[idx] = 0;
+        }
+        setScores(scores);
+
+        resolve();
+      })
+    })
+  }
+
+  // 문제들 받아옴
+  const getSubjects = () => {
+    return new Promise<void>((resolve) => {
+      axios
+      .get(`${BE_URL}/subjects/${category}`, {
+        headers : {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        }
+      })
+      .then((response) => {
+        subjects = [];
+        // console.log(response);
+        for(let idx=0; idx<response.data.data.length; idx++) {
+          subjects.push(response.data.data[idx].word);
+        }
+        setSubjects(subjects);
+        
+        // shuffle using lambda
+        subjects.sort(() => Math.random() - 0.5);
+
+        // console.log(subjects);
+        resolve();
+      })
+    })
+  }
+
+  /*
+   i번째 출제자에게 정답 알려주고,
+   출제자 표시하고,
+   출제자 음소거,
+   출제자 카메라 비활성화 불가
+   */
+
+   // idx번째 출제자에게 정답 알려줌
+  const giveWordToExaminer = (idx: number) => {
+    return new Promise<void>((resolve) => {
+      session?.signal({
+        "to": [],
+        "type": "word",
+        "data": subjects[idx]+","+examiners[idx]
+      })
+      resolve()
+    })
+  }
+
+  // 게임이 끝났는지 확인
+  const checkGameOver = () => {
+    return new Promise<boolean>((resolve) => {
+      if(round > 0) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    })
   }
 
   return (
@@ -780,19 +899,6 @@ function SwipeableTextMobileStepper() {
           activeStep={activeStep}
           nextButton={
             activeStep === maxSteps - 1 ? 
-            // <Link to="/channel/gamechannel" style={{ textDecoration: 'inherit'}}>
-            //   <Button
-            //     size="small"
-            //     // onClick={()=> {데이터 서버로 전송}}
-            //   >
-            //     게임 생성
-            //     {theme.direction === 'rtl' ? (
-            //       <KeyboardArrowLeft />
-            //     ) : (
-            //       <KeyboardArrowRight />
-            //     )}
-            //   </Button>
-            // </Link>
             <Button
                 size="small"
                 onClick={handleCreateRoom}
@@ -895,16 +1001,11 @@ function SwipeableTextMobileStepper() {
                   justifyContent: 'space-evenly',
                   alignItems: 'center',
               }}>
-              {/* <input
-                className="btn btn-large btn-danger"
-                type="button"
-                id="buttonLeaveSession"
-                onClick={leaveSession}
-                value="Leave session"
-              /> */}
-          {/* </div> */}
-
-          <Button>게임 시작</Button>
+          <Button
+          onClick={initGame}
+          >
+            게임 시작
+          </Button>
           <BasicModal/>        
         </Box>
       </Box>
@@ -966,7 +1067,6 @@ function SwipeableTextMobileStepper() {
                 <Grid
                   item sm={4} md={4}
                   key={i}
-                  // className="stream-container col-md-6 col-xs-6"
                   onClick={() => handleMainVideoStream(sub)}
                 >
                   <UserVideoComponent streamManager={sub} />
@@ -988,6 +1088,7 @@ function SwipeableTextMobileStepper() {
             
            {audiostate ? (
                 <Button
+                ref={ audioRef }
                 onClick={reverseAudioState}>
                   <MicOutlinedIcon
                   color='success'
@@ -995,6 +1096,7 @@ function SwipeableTextMobileStepper() {
                 </Button>
               ) : (
                 <Button
+                ref={ audioRef }
                 onClick={reverseAudioState}>
                   <MicOutlinedIcon
                   color="disabled"
@@ -1003,6 +1105,7 @@ function SwipeableTextMobileStepper() {
               )}
               {videostate ? (
                 <Button
+                ref={ videoRef }
                 onClick={reverseVideoState}>
                   <VideocamIcon 
                   color='success'
@@ -1010,6 +1113,7 @@ function SwipeableTextMobileStepper() {
                 </Button>                 
               ) : (
                 <Button
+                ref={ videoRef }
                 onClick={reverseVideoState}>
                   <VideocamIcon
                   color="disabled"
@@ -1027,37 +1131,6 @@ function SwipeableTextMobileStepper() {
           
           </Box>
         </Box>
-          
-          {/* <div>
-            {audiostate ? (
-              <button 
-                onClick={reverseAudioState}
-              >
-                Audio Off
-              </button>
-            ) : (
-              <button
-                onClick={reverseAudioState}
-              >
-                Audio On
-              </button>
-            )}
-          </div>
-          <div>
-          {videostate ? (
-              <button 
-                onClick={reverseVideoState}
-              >
-                Video Off
-              </button>
-            ) : (
-              <button
-                onClick={reverseVideoState}
-              >
-                Video On
-              </button>
-            )}
-          </div> */}
           <Box id='chat' 
           sx={{
           width: '25%',
@@ -1098,15 +1171,23 @@ function SwipeableTextMobileStepper() {
 export default SwipeableTextMobileStepper;
 
 function BasicSelect(props: any) {
-  const [category, setCategory] = useState(`${props.selectData[props.index][0]}`);
+  const [category, setCategory] = useState(`${props.selectData[props.index][0].id}`);
 
+  // ISSUE 
+  // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
+  // 카테고리 초기값 화면에 바로 안뜸. 라운드는 아예 숫자가 안 뜸
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
+    console.log("event.target.value:"+event.target.value);
     if (props.index == 0) {
-      props.setCategory(category)
+      // props.setCategory(category) // 이전 코드는 선택하기 이전 값이 들어감
+      props.setCategory(event.target.value)
+      console.log("category:" +event.target.value)
     }
     else {
-      props.setRound(category)
+      // props.setRound(category) // 이전 코드는 선택하기 이전 값이 들어감
+      props.setRound(event.target.value)
+      console.log("round: "+event.target.value)
     }
   };
 
@@ -1123,7 +1204,7 @@ function BasicSelect(props: any) {
           onChange={handleChange}
         >
           {props.selectData[props.index].map((d: any, i: any)=> (
-            <MenuItem key={i} value={d}>{d}</MenuItem>
+            <MenuItem key={i} value={d.id}>{d.name}</MenuItem>
           ))}
         </Select>
       </FormControl>
