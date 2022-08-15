@@ -958,7 +958,7 @@ const InvitePage = () => {
                       borderRadius: "20px",
                     }}
                   >
-                    <h3>채팅</h3>
+                    <h3 style={{paddingTop: '5px'}}>채팅</h3>
                     <Box
                       className="chatbox__messages"
                       sx={{
