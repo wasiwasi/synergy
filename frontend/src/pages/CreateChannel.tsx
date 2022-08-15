@@ -36,6 +36,8 @@ import userEvent from '@testing-library/user-event';
 import { Shuffle } from '@mui/icons-material';
 
 import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -135,6 +137,11 @@ function SwipeableTextMobileStepper() {
 
   const [hostName, sethostName] = useState<string>("");
 
+  const [gamestart, setGamestart] = useState<boolean>(false);
+  const [gameover, setGameover] = useState<boolean>(false);
+  const [correct, setCorrect] = useState<boolean>(false);
+  const [roundover, setRoundover] = useState<boolean>(false);
+  
   const didMount = useRef(false);
 
   useEffect(() => {
@@ -280,6 +287,49 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     const mySession = session;
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      setIsPlaying(true);
+      setGamestart(true);
+      setTimeout(() => {
+        setGamestart(false);
+      }, 5000);
+    })
+
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setGameover(true);
+      setTimeout(() => {
+        setGameover(false);
+      }, 5000);
+    })
+
+    mySession?.off("signal:time");
+    mySession?.on("signal:time", (event: any) => {
+      setTimer(event.data);
+    });
+
+    mySession?.off("signal:correct");
+    mySession?.on("signal:correct", (event: any) => {
+      setCorrect(true);
+      setTimeout(() => {
+        setCorrect(false);
+      }, 5000);
+    });
+
+    mySession?.off("signal:roundover");
+    mySession?.on("signal:roundover", (event: any) => {
+      setRoundover(true);
+      setTimeout(() => {
+        setRoundover(false);
+      }, 5000);
+    });
+
+  }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
     mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
@@ -311,6 +361,7 @@ function SwipeableTextMobileStepper() {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
+      setTimer(0);
       handleSignalWord(event)
     })
   }, [session, myConnectionId, audiostate, videostate, isPlaying])
@@ -1071,6 +1122,16 @@ function SwipeableTextMobileStepper() {
             height: '90%',
             // margin: 10
             }}>
+            {gamestart === true ? (
+                  <GamestartMain></GamestartMain>
+            ) : null}
+            {correct ? (
+              <AlertPage text={"정답"}></AlertPage>
+            ) : roundover ? (
+              <AlertPage text={"시간초과"}></AlertPage>
+            ) : gameover ? (
+              <AlertPage text={"게임종료"}></AlertPage>
+            ) : null}
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
