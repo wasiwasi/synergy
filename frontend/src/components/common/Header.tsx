@@ -9,6 +9,8 @@ import styled from '@emotion/styled';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 
+import Swal from "sweetalert2";
+
 interface MenuListProps {
   isExpanded: boolean;
 }
@@ -32,7 +34,18 @@ const Header = () => {
       if (window.location.pathname === '/login' || window.location.pathname === '/signup') navigate("/");
     } else {
       if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage'
-          || window.location.pathname === '/channel/gamechannel' || window.location.pathname === '/channel/createchannel') navigate("/");
+          || window.location.pathname === '/channel/gamechannel') navigate("/");
+      else if(window.location.pathname === '/channel/createchannel') {
+        navigate("/");
+        Swal.fire({
+          title: `채널을 생성하실 수 없습니다!`,
+          text: "로그인을 하여 채널을 생성하거나, 초대받은 링크를 통해서 들어가세요~",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+        });
+      }
     }
     //로그인 상태 체크
     if (localStorage.getItem("access-token")) {
