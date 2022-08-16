@@ -107,6 +107,8 @@ function SwipeableTextMobileStepper() {
 
   const [joinLink, setJoinLink] = useState<string>("");
 
+  let [subjectName, setSubjectName] = useState<string>("");
+  let [answer, setAnswer] = useState<string[]>([]);
   let [examiners, setExaminers] = useState<string[]>([]);
   let [subjects, setSubjects] = useState<string[]>([]);
   let [scores, setScores] = useState<number[]>([]);
@@ -298,6 +300,9 @@ function SwipeableTextMobileStepper() {
 
     mySession?.off("signal:gamestart");
     mySession?.on("signal:gamestart", (event: any) => {
+      let parsedData = event.data.split(',');
+      setSubjectName(parsedData[1]);
+      setRound(parsedData[0]);
       setIsPlaying(true);
       setIsGamestart(true);
       setTimeout(() => {
@@ -417,7 +422,7 @@ function SwipeableTextMobileStepper() {
         setTimeout(() => {
           sendSignalGameOver(); // 게임 종료됐다는 시그널
         }, 3000);
-        setCurrentRound(0); // 라운드 0으로 초기화
+        // setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
     }) 
@@ -469,6 +474,8 @@ function SwipeableTextMobileStepper() {
   const handleSignalWord = (event: any) => {
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
+    setAnswer(answer)
+    setCurrentRound(event.data.split(",")[2])
     setExaminerId(examinerId)
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
@@ -965,7 +972,7 @@ function SwipeableTextMobileStepper() {
       session?.signal({
         "to": [],
         "type": "word",
-        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]
+        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length] + ',' + idx
       })
   }
 
@@ -1148,13 +1155,24 @@ function SwipeableTextMobileStepper() {
                     <h1 style={{
                       color: 'indigo',
                       fontWeight: 'bold'
-                    }}>3라운드</h1>
+                    }}>{Number(currentRound)+1}라운드</h1>
                   </Box>
                   <Box id='category'>
-                    <h1 style={{
-                      color: 'skyblue',
-                      fontWeight: 'bold'
-                    }}>{category}</h1>
+                    {isExaminer === true ?
+                    <Box>
+                      <h3 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'}}>{subjectName}</h3>
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{answer}</h1>
+                    </Box>
+                    :
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h1>}
                   </Box>
                   <Box id='category'>
                     <span>남은 시간</span>
