@@ -112,6 +112,7 @@ function SwipeableTextMobileStepper() {
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
+  let [categoryName, setCategoryName] = useState<string>("");
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
@@ -169,6 +170,7 @@ function SwipeableTextMobileStepper() {
       
       // category, round에 기본 값 부여
       setCategory(copy[0][0].id);
+      setCatagoryName(copy[0][0].name);
       setRound(copy[1][0].id);
     });
     //닉네임 가져와서 세팅
@@ -348,7 +350,7 @@ function SwipeableTextMobileStepper() {
   // 게임 시작할 때 최대 라운드 수도 함께 
   const sendSignalGameStart = () => {
     session?.signal({
-      data: String(round),
+      data: String(round)+","+categoryName,
       to: [],
       type: "gamestart"
     })
