@@ -286,8 +286,8 @@ function SwipeableTextMobileStepper() {
           console.log("Correct!!")
           setScores(scores); // scores 갱신
           setIsCorrect(true);
-          sendSignalCorrect(event.from.connectionId) // 맞췄다고 시그널
-          setTimeout(() => {}, 1000) // 1초 대기
+          setTimer(-1);
+          sendSignalCorrect(event.from.connectionId); // 맞췄다고 시그널
         }
       }
       if (chatdata[0] !== myUserName) {
@@ -310,7 +310,8 @@ function SwipeableTextMobileStepper() {
     mySession?.on("signal:word", (event: any) => {
       handleSignalWord(event)
     })
-  }, [session, myConnectionId, audiostate, videostate, isPlaying])
+  // }, [session, myConnectionId, audiostate, videostate, isPlaying])
+  }, [session, myConnectionId, audiostate, videostate, isPlaying, subjects, examiners])
 
   const sendSignalTimer = (time: number) => {
     session?.signal({
@@ -318,15 +319,34 @@ function SwipeableTextMobileStepper() {
       to: [],
       type: "time"
     });
-    
   }
+
+  useEffect(() => {
+    if (timer == 0) {
+      sendSignalRoundOver();
+      return;
+    }
+
+    if(timer == -1) {
+      return;
+    }
+
+    const tt = setInterval(() => {
+      sendSignalTimer(timer);
+      setTimer(--timer);
+    }, 1000);
+
+    return () => {
+      clearInterval(tt);
+    }
+  }, [timer])
 
   useEffect(() => {
     session?.off("signal:time")
     session?.on("signal:time", (event: any) => {
-      // console.log(event.data);
+      console.log(event.data);
     })
-  }, [session])
+  }, [session, timer])
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
@@ -343,17 +363,20 @@ function SwipeableTextMobileStepper() {
 
       setIsCorrect(false);
 
-      if(currentRound < round) { // 아직 round가 남았다면
+      if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
-        giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
-        setTimer(INITIAL_TIME); // timer 초기화
+        setTimeout(() => {
+          setTimer(INITIAL_TIME); 
+          giveWordToExaminer(currentRound)
+        }, 3000);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
+        sendSignalGameOver(); // 게임 종료됐다는 시그널
         setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
     }) 
-  }, [session, currentRound])
+  }, [session, subjects, examiners, currentRound])
 
   // round가 끝났다는 시그널
   const sendSignalRoundOver = () => {
@@ -367,19 +390,25 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:roundover");
     session?.on("signal:roundover", (event: any) => { // roundover 시그널을 받았을 때
-      if(currentRound < round) { // 아직 round가 남았다면
+      if(isCorrect == true) {
+        setIsCorrect(false);
+        return;
+      }
+      if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         console.log("round:"+currentRound);
-        giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
-        setTimer(INITIAL_TIME); // timer 초기화
-        console.log("timer:"+timer);
+        setTimeout(() => {
+          setTimer(INITIAL_TIME); // timer 초기화
+          giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
+        }, 3000);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
+        sendSignalGameOver(); // 게임 종료됐다는 시그널
         setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
     })
-  }, [session, isCorrect, currentRound])
+  }, [session, isCorrect, currentRound, subjects, examiners])
 
   const sendSignalGameOver = () => {
     session?.signal({
@@ -799,10 +828,6 @@ function SwipeableTextMobileStepper() {
     )
   }
 
-  const startRound = (round: number) => {
-
-  }
-
   // 출제자 목록 받아오고 랜덤으로 출제자 순서 정함
   const initExaminerAndScores = () => {
     return new Promise<void>((resolve) => {
@@ -868,18 +893,15 @@ function SwipeableTextMobileStepper() {
 
    // idx번째 출제자에게 정답 알려줌
   const giveWordToExaminer = (idx: number) => {
-    console.log("send signal word to "+idx); // idx는 갱신됨
-    console.log(subjects); // 문제들
+    console.log("send signal word to "+idx);
+    console.log(subjects);
     console.log(examiners)
-    console.log(subjects[idx]+","+examiners[idx]);
-    return new Promise<void>((resolve) => {
+    console.log(subjects[idx]+","+examiners[(idx+1)%examiners.length]);
       session?.signal({
         "to": [],
         "type": "word",
-        "data": subjects[idx]+","+examiners[idx]
+        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]
       })
-      resolve()
-    })
   }
 
   return (
