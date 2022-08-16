@@ -1,6 +1,6 @@
 import React from "react";
 import HomeProductLayout from "./HomeProudctLayOut";
-import img from "../images/mafia.png";
+import img from "../images/book.png";
 import { Button, Container, Grid, Link, Typography } from "@mui/material";
 
 import blue from "@mui/material/colors/blue";
@@ -22,7 +22,7 @@ const HomeProduct = () => {
               variant="h3"
               sx={{ mb: 2, mt: { sx: 4, sm: 10 } }}
             >
-              기능2
+              우리만의 문제집 만들기
             </Typography>
             <Typography
               color="black"
@@ -30,7 +30,12 @@ const HomeProduct = () => {
               // variant="h5"
               sx={{ mb: 1, mt: { sx: 2, sm: 5 } }}
             >
-              <h5>기능2설명</h5>
+              <h5>
+                우리에게 맞는 주제로 커스텀 문제집을 만들 수 있어요.<br/>
+                친구들과 원하는 단어들로 구성해 문제를 낼 수도 있고,<br/>
+                단체에서 교육이나 레크레이션을 위해 활용할 수도 있답니다!<br/> 
+                상황과 목적에 맞게 자유롭게 문제집을 생성, 삭제해보세요!
+              </h5>
             </Typography>
           </Grid>
           <Grid item xs={6}>
