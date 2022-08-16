@@ -1,6 +1,7 @@
 // import { log } from "console";
 
 import styled from "@emotion/styled";
+import { Preview } from "@mui/icons-material";
 import {
   Button,
   Input,
@@ -30,7 +31,7 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "40%",
+  width: "30%",
   height: "75%",
   bgcolor: "white",
   border: "2px solid #000",
@@ -38,53 +39,68 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+// 아래와 같은 형태로 호출해야함.
+  //점수 테스트를 위한거 0815
+  // const [marks, setMarks] = useState<number[]>([
+  //   100, 200, 10, 1, 2, 3, 399, 123, 34,
+  // ]);
+  // /**Map(3) {'con_OamEtKlMpU' => 'okokoko', 'con_Xq403PSAVl' => 'dsfsdf', 'con_FJoEpZK8GU' => 'sfsdfsf'} */
+  // const [examiners, setExaminers] = useState<string[]>([
+  //   "con_CX4hrP30pU",
+  //   "con_ADOxM2PXRT",
+  // ]);
 
+{/* <ScoreRate score={marks} examiners={examiners} channelId="AA7164" /> */}
 function ScoreRate(props: {
   score: number[];
   examiners: string[];
   channelId: string;
 }) {
-  const [participantList, setParticipantList] = useState({});
+  const [participantList, setParticipantList] = useState(new Map());
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const [orderList, setOrderList] = useState([
-    {
-      idx: 1,
-      nickname: "",
-    },
-  ]);
+  const [orderList, setOrderList] = useState<string[]>([]);
 
   const getParticipantList = (channelId: string) => {
-    axios.get(`${BE_URL}/api/channels/info/${channelId}`).then((res) => {
+    axios.get(`${BE_URL}/api/channels/info/${channelId}`)
+    .then((res) => {
       let temp = res.data.participantList;
-      let map = new Map();
+        
       temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
-        map.set(object.connectionId, object.nickName);
+        setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
       });
-      setParticipantList(map);
-      // console.log(participantList.get("con_FJoEpZK8GU"));
+      
+    
     });
+    
+    
   };
+  const getOrderList =(examinerList:string[])=>{
+    let order = [...orderList];
+      
+    examinerList.map((val,index)=>{
+        let name = participantList.get(val);
+        console.log(name, index);
+        
+        order[index]=name;
+        
+  
+    })
+      setOrderList(order);
+      console.log(orderList);
+  }
 
   useEffect(() => {
     getParticipantList(props.channelId);
-    getorder();
   }, []);
 
-  let examinerList = props.examiners;
+  useEffect(()=>{
+    getOrderList(props.examiners);
+  },[participantList])
 
-  const getorder = () => {
-    examinerList.map((val: string, index) => {
-      let c = [...orderList];
-      console.log(val);
-      // console.log(participantList[val]);
 
-      c.push({ idx: index, nickname: "" });
-      setOrderList(c);
-    });
-    console.log(orderList);
-  };
+  
   const sort = (obj: any) => {
     let items = Object.keys(obj).map(function (key) {
       return [key, obj[key]];
@@ -113,6 +129,10 @@ function ScoreRate(props: {
   let result;
 
   result = sort(dic);
+  console.log("order_render");
+  
+  console.log(orderList);
+  
 
   return (
     <Container>
@@ -124,6 +144,7 @@ function ScoreRate(props: {
               <TableRow>
                 <TableCell>등수</TableCell>
                 <TableCell>점수</TableCell>
+                <TableCell>이름</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -136,23 +157,12 @@ function ScoreRate(props: {
                     {idx + 1}
                   </TableCell>
                   <TableCell>{val.score}</TableCell>
-                  {/* <TableCell align="right">{examinerList[{val.index}]}</TableCell> */}
+                  <TableCell >{orderList[val.index]}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* <List>
-          {result.map((val, idx) => (
-            <li key={idx}>
-              <ul>
-                
-                < readOnly value={idx + 1} />
-                <Input readOnly value={val.score} />
-              </ul>
-            </li>
-          ))}
-        </List> */}
       </Modal>
     </Container>
   );
