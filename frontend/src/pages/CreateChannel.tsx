@@ -660,12 +660,10 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
+      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
         {
-          data : {
-            nickName: myUserName,
-            connectionId: myConnectionId,
-          } 
+          nickName: myUserName,
+          connectionId: myConnectionId,
         })
       .then((res) => {
         console.log("방 나가기 성공");
