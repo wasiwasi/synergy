@@ -21,7 +21,8 @@ import styled from "@emotion/styled";
 import {Button, Grid} from "@mui/material/";
 
 import "./Signup.css";
-
+import "./modules/Gamestart.css";
+  
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Connection, OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
 import "../components/openvidu/App.css";
@@ -1253,17 +1254,19 @@ function SwipeableTextMobileStepper() {
             width: '100%',
             height: '90%',
             // margin: 10
-            }}>
-            {isGamestart === true ? (
-              <GamestartMain></GamestartMain>
-            ) : null}
-            {isGameover ? (
-            <AlertPage text={"게임종료"}></AlertPage>
-            ) : isCorrect ? (
-            <AlertPage text={"정답"}></AlertPage>
-            ): isRoundover ? (
-              <AlertPage text={"시간초과"}></AlertPage>
-            ) : null}
+                }}>
+            <div className="chbox">
+              {isGamestart === true ? (
+                <GamestartMain></GamestartMain>
+              ) : null}
+              {isGameover ? (
+              <AlertPage text={"게임종료"}></AlertPage>
+              ) : isCorrect ? (
+              <AlertPage text={"정답"}></AlertPage>
+              ): isRoundover ? (
+                <AlertPage text={"시간초과"}></AlertPage>
+                    ) : null}
+            </div>
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
