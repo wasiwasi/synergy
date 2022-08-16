@@ -373,7 +373,13 @@ const InvitePage = () => {
       .get(`${BE_URL}/api/channels/info/${mySessionId}`)
       .then((response) => {
         if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
-          alert("참여하려는 채널이 꽉 찼습니다.");
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "참여하려는 채널이 꽉 찼습니다.",
+            timer: 1000,
+          });
+          navigate("/");
           return;
         }
         joinSession();
@@ -551,7 +557,13 @@ const InvitePage = () => {
         console.log(response);
       })
       .catch((error: any) => {
-        alert("참여하려는 채널이 꽉 찼습니다.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `참여하려는 채널이 꽉 찼습니다.`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
         leaveSession();
       });
   };
