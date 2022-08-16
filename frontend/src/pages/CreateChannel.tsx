@@ -39,7 +39,7 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
-const INITIAL_TIME = 5;
+const INITIAL_TIME = 60;
 
 const steps = [
   {
@@ -91,6 +91,7 @@ function SwipeableTextMobileStepper() {
   const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
   const [myConnectionId, setMyConnectionId] = useState<string>("");
+  const [examinerId, setExaminerId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
   const [audioallowed, setAudioallowed] = useState<boolean>(true);
@@ -428,7 +429,7 @@ function SwipeableTextMobileStepper() {
   const handleSignalWord = (event: any) => {
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-
+    setExaminerId(examinerId)
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
@@ -1096,13 +1097,26 @@ function SwipeableTextMobileStepper() {
                   borderBottomRightRadius: 20,
                   boxShadow: 4,
                   display: 'flex',
-                  justifyContent: 'center',
+                  justifyContent: 'space-evenly',
                   alignItems: 'center',
                 }}>
-                  <h1 style={{
-                    color: 'skyblue',
-                    fontWeight: 'bold'
-                  }}>게임 종류</h1>
+                  <Box id='round'>
+                    <span>{round} 라운드 중</span>
+                    <h1 style={{
+                      color: 'indigo',
+                      fontWeight: 'bold'
+                    }}>3라운드</h1>
+                  </Box>
+                  <Box id='category'>
+                    <h1 style={{
+                      color: 'skyblue',
+                      fontWeight: 'bold'
+                    }}>{category}</h1>
+                  </Box>
+                  <Box id='category'>
+                    <span>남은 시간</span>
+                    <h1>{timer}초</h1>
+                  </Box>
 
               </Paper>
               <Box id='buttons'
@@ -1194,7 +1208,7 @@ function SwipeableTextMobileStepper() {
             ))} */}
             {isPlaying == true ?         
               streamManagers.map((sub: any, i: any) => (
-                sub.stream.connection.connectionId != examiners[0] ?
+                sub.stream.connection.connectionId != examinerId ?
                   <Grid
                     item sm={4} md={4}
                     key={i}
