@@ -351,6 +351,8 @@ const InvitePage = () => {
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
       setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
       setIsGameover(true);
       setTimeout(() => {
         setIsGameover(false);
@@ -365,17 +367,11 @@ const InvitePage = () => {
     mySession?.off("signal:correct");
     mySession?.on("signal:correct", (event: any) => {
       setIsCorrect(true);
-      setTimeout(() => {
-        setIsCorrect(false);
-      }, 5000);
     });
 
     mySession?.off("signal:roundover");
     mySession?.on("signal:roundover", (event: any) => {
       setIsRoundover(true);
-      setTimeout(() => {
-        setIsRoundover(false);
-      }, 5000);
     });
 
   }, [session]);
@@ -384,6 +380,8 @@ const InvitePage = () => {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
       handleSignalWord(event)
     })
   }, [session, myConnectionId, audiostate, videostate, isPlaying]);
@@ -1041,12 +1039,12 @@ const InvitePage = () => {
                   {isGamestart === true ? (
                     <GamestartMain></GamestartMain>
                   ) : null}
-                  {isCorrect ? (
-                    <AlertPage text={"정답"}></AlertPage>
-                  ) : isRoundover ? (
+                  {isGameover ? (
+                  <AlertPage text={"게임종료"}></AlertPage>
+                  ) : isCorrect ? (
+                  <AlertPage text={"정답"}></AlertPage>
+                  ): isRoundover ? (
                     <AlertPage text={"시간초과"}></AlertPage>
-                  ) : isGameover ? (
-                    <AlertPage text={"게임종료"}></AlertPage>
                   ) : null}
                   {/* 큰 화면 카메라 */}
                   {/* {mainStreamManager !== undefined ? (
