@@ -52,6 +52,8 @@ import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -164,7 +166,17 @@ const InvitePage = () => {
 
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
+  //게임관련
+  let [isPlaying, setIsPlaying] = useState<boolean>(false);
+  let [currentRound, setCurrentRound] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(0);
+  const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
+  const [isGamestart, setIsGamestart] = useState<boolean>(false);
+  const [isGameover, setIsGameover] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [isRoundover, setIsRoundover] = useState<boolean>(false);
+  
   const didMount = useRef(false);
 
   // URL에서 방 코드를 가져옴
@@ -239,22 +251,6 @@ const InvitePage = () => {
       navigate("/");
     });
 
-    // chatting
-    mySession?.on("signal:chat", (event: any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      console.log(chatdata);
-      if (chatdata[0] !== myUserName) {
-        setMessages([
-          ...messages,
-          {
-            userName: chatdata[0],
-            text: chatdata[1],
-            boxClass: "messages__box--visitor",
-          },
-        ]);
-      }
-    });
     mySession?.on("sessionDisconnected", (event: any) => {
       Swal.fire({
         icon: "warning",
@@ -314,6 +310,7 @@ const InvitePage = () => {
   }, [session]);
   useEffect(() => {
     const mySession = session;
+    mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
@@ -342,31 +339,82 @@ const InvitePage = () => {
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event: any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      if (chatdata[0] !== myUserName) {
-        console.log("messages: " + messages);
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      setIsPlaying(true);
+      setIsGamestart(true);
+      setTimeout(() => {
+        setIsGamestart(false);
+      }, 5000);
+    })
 
-        // messages.push({
-        //   userName: chatdata[0],
-        //   text: chatdata[1],
-        //   boxClass: "messages__box--visitor",
-        // });
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
+      setIsGameover(true);
+      setTimeout(() => {
+        setIsGameover(false);
+      }, 5000);
+    })
 
-        // setMessages([...messages]);
-
-        setMessages([
-          ...messages,
-          {
-            userName: chatdata[0],
-            text: chatdata[1],
-            boxClass: "messages__box--visitor",
-          },
-        ]);
-      }
+    mySession?.off("signal:time");
+    mySession?.on("signal:time", (event: any) => {
+      setTimer(event.data);
     });
-  }, [session, messages]);
+
+    mySession?.off("signal:correct");
+    mySession?.on("signal:correct", (event: any) => {
+      setIsCorrect(true);
+    });
+
+    mySession?.off("signal:roundover");
+    mySession?.on("signal:roundover", (event: any) => {
+      setIsRoundover(true);
+    });
+
+  }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
+    mySession?.off("signal:word");
+    mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
+      handleSignalWord(event)
+    })
+  }, [session, myConnectionId, audiostate, videostate, isPlaying]);
+
+  useEffect(() => {
+    console.log(timer);
+  }, [timer]);
+
+  const handleSignalWord = (event: any) => {
+    // if(!isPlaying) return
+    // subjects[idx]+","+examiners[idx]
+    const answer = event.data.split(",")[0];
+    const examinerId = event.data.split(",")[1];
+    // console.log("catch signal:word")
+    console.log("examinerId:"+examinerId);
+    console.log("connection:"+myConnectionId);
+    console.log("videoState:"+videostate);
+    console.log("audioState:" + audiostate);
+    if (examinerId === myConnectionId) { // 내가 출제자라면
+      // 카메라를 키고 카메라를 끄지 못하도록.
+      if(!videostate) {
+        reverseVideoState()
+      }
+      // 마이크를 끄고 마이크를 키지 못하도록.
+      if(audiostate) {
+        reverseAudioState()
+      }
+      setIsExaminer(true);
+    } else { // 내가 출제자가 아니라면
+      setIsExaminer(false);
+      console.log("I'm not examiner")
+    }
+  }
 
   const onEnter = () => {
     axios
@@ -478,7 +526,7 @@ const InvitePage = () => {
 
   const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
-      if (message !== "") {
+      if (message !== "") { 
         setMessages([
           ...messages,
           {
@@ -988,8 +1036,18 @@ const InvitePage = () => {
                       // margin: 10
                     }}
                   >
-                    {/* 큰 화면 카메라 */}
-                    {/* {mainStreamManager !== undefined ? (
+                  {isGamestart === true ? (
+                    <GamestartMain></GamestartMain>
+                  ) : null}
+                  {isGameover ? (
+                  <AlertPage text={"게임종료"}></AlertPage>
+                  ) : isCorrect ? (
+                  <AlertPage text={"정답"}></AlertPage>
+                  ): isRoundover ? (
+                    <AlertPage text={"시간초과"}></AlertPage>
+                  ) : null}
+                  {/* 큰 화면 카메라 */}
+                  {/* {mainStreamManager !== undefined ? (
                   <div id="main-video" className="col-md-6">
                     <UserVideoComponent
                       streamManager={mainStreamManager}
