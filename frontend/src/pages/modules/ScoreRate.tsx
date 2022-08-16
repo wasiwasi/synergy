@@ -4,6 +4,11 @@ import styled from "@emotion/styled";
 import { Preview } from "@mui/icons-material";
 import {
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Input,
   List,
   ListItem,
@@ -16,6 +21,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -138,14 +144,71 @@ function ScoreRate(props: {
   return (
     <Container>
       <Button onClick={handleOpen}>랭크 오픈</Button>
-      <Modal open={open} onClose={handleClose}>
+      <RankDialog
+          fullWidth
+          open={open}
+          onClose={handleClose}
+          // TransitionComponent={Transition}
+          aria-labelledby="form-dialog-title"
+        >
+          <RankDialogTitle id="form-dialog-title">
+            <Title>
+            랭킹
+            </Title>
+          </RankDialogTitle>
+          <RankDialogContent>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <CustomTableCell align="center"> 순위 </CustomTableCell>
+                    <CustomTableCell align="center"> 닉네임 </CustomTableCell>
+                    <CustomTableCell align="center"> 개수 </CustomTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {result.map((val, idx) => {
+                    return (
+                      <TableRow key={idx}>
+                        <BodyTableCell
+                          component="th"
+                          scope="row"
+                          align="center"
+                        >
+                          {idx + 1 === 1 && '🥇'}
+                          {idx + 1 === 2 && '🥈'}
+                          {idx + 1 === 3 && '🥉'}
+                          {idx + 1 >= 4 && idx + 1}
+                        </BodyTableCell>
+                        <BodyTableCell align="center">
+                          {orderList[val.index]}
+                        </BodyTableCell>
+                        <BodyTableCell align="center">
+                          {val.score}
+                        </BodyTableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <RankDialogActions>
+              <CancelButton
+                onClick={() => {
+                  handleClose();
+                }}
+              />
+            </RankDialogActions>
+          </RankDialogContent>
+        </RankDialog>
+      {/* <Modal open={open} onClose={handleClose}>
         <TableContainer component={Paper}>
           <Table sx={style} aria-label="simple table">
             <TableHead>
               <TableRow>
                 <TableCell>등수</TableCell>
                 <TableCell>점수</TableCell>
-                <TableCell>이름</TableCell>
+                <TableCell>nickname</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -164,10 +227,66 @@ function ScoreRate(props: {
             </TableBody>
           </Table>
         </TableContainer>
-      </Modal>
+      </Modal> */}
     </Container>
   );
 }
 
 const Container = styled.div``;
+
+const RankDialogContent = styled(DialogContent)`
+  display: flex;
+  color: white;
+  flex-direction: column;
+  background-color: rgba(106, 96, 169, 0.5);
+`;
+
+const RankDialogContentText = styled(DialogContentText)``;
+
+const RankDialogActions = styled(DialogActions)`
+  flex-direction: row;
+`;
+
+const RankRecordContainer = styled(Table)`
+  color: white;
+  display: flex;
+`;
+// modal
+const RankDialog = styled(Dialog)`
+  opacity: 0.97;
+  padding: 0 50px 0 100px;
+  & .MuiPaper-rounded {
+    border-radius: 15px;
+  }
+`;
+
+const RankDialogTitle = styled(DialogTitle)`
+  display: flex;
+  justify-content: center;
+  background-color: rgba(106, 96, 169, 0.5);
+  padding-bottom: 0;
+  & > .MuiTypography-root {
+    display: flex;
+    align-items: center;
+  }
+`;
+const CustomTableCell = styled(TableCell)`
+  font-size: 1.2rem;
+`;
+const CancelButton = styled(CloseIcon)`
+  cursor: pointer;
+  color: white;
+  justify-self: flex-end;
+`;
+const BodyTableCell = styled(TableCell)`
+  font-size: 1.5rem;
+`;
+
+const Title = styled.p`
+  font-weight: bold;
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 40px;
+`;
+
 export default ScoreRate;
