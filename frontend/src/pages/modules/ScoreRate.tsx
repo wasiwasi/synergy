@@ -40,20 +40,17 @@ const style = {
   p: 4,
 };
 // 아래와 같은 형태로 호출해야함.
-  //점수 테스트를 위한거 0815
-  // const [marks, setMarks] = useState<number[]>([
-  //   100, 200, 10, 1, 2, 3, 399, 123, 34,
-  // ]);
-  // /**Map(3) {'con_OamEtKlMpU' => 'okokoko', 'con_Xq403PSAVl' => 'dsfsdf', 'con_FJoEpZK8GU' => 'sfsdfsf'} */
-  // const [examiners, setExaminers] = useState<string[]>([
-  //   "con_CX4hrP30pU",
-  //   "con_ADOxM2PXRT",
-  // ]);
-
-{/* <ScoreRate score={marks} examiners={examiners} channelId="AA7164" /> */}
+    //점수 테스트를 위한거 0815
+    // const [marks, setMarks] = useState("100, 200, 10, 1");
+    // 
+    // const [examiners, setExaminers] = useState(
+    //   "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
+    // );
+  
+    // <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" />
 function ScoreRate(props: {
-  score: number[];
-  examiners: string[];
+  mark: string;
+  examiners: string;
   channelId: string;
 }) {
   const [participantList, setParticipantList] = useState(new Map());
@@ -61,6 +58,8 @@ function ScoreRate(props: {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [orderList, setOrderList] = useState<string[]>([]);
+  const [examinerList, setExaminerList] = useState<string[]>([]);
+  const [score,setScore] =useState<number[]>([]);
 
   const getParticipantList = (channelId: string) => {
     axios.get(`${BE_URL}/api/channels/info/${channelId}`)
@@ -70,33 +69,39 @@ function ScoreRate(props: {
       temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
         setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
       });
-      
-    
     });
-    
-    
   };
   const getOrderList =(examinerList:string[])=>{
     let order = [...orderList];
       
     examinerList.map((val,index)=>{
         let name = participantList.get(val);
-        console.log(name, index);
         
         order[index]=name;
-        
+
   
     })
       setOrderList(order);
-      console.log(orderList);
+  }
+  const setDataArray=(examiners:string, mark:string)=>{
+    examiners.split(',').map((val,index)=>{
+      examinerList[index] =val;
+    });
+    setExaminerList(examinerList);
+    
+    mark.split(',').map((val,index)=>{
+      score[index] =Number(val);
+    });
+    setScore(score);
   }
 
   useEffect(() => {
+    setDataArray(props.examiners,props.mark);
     getParticipantList(props.channelId);
   }, []);
 
   useEffect(()=>{
-    getOrderList(props.examiners);
+    getOrderList(examinerList);
   },[participantList])
 
 
@@ -118,20 +123,16 @@ function ScoreRate(props: {
     return sorted_obj;
   };
 
-  let scoreList = props.score;
+  // let scoreList = props.score;
   let index = 0;
 
   let dic: { [index: number]: number } = {};
-  scoreList.map(function (num) {
+  score.map(function (num) {
     dic[index++] = num;
   });
 
   let result;
-
   result = sort(dic);
-  console.log("order_render");
-  
-  console.log(orderList);
   
 
   return (
