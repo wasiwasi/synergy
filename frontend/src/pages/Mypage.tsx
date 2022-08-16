@@ -144,7 +144,7 @@ const Mypage = () => {
           })
           .then(() => {
             localStorage.removeItem("access-token");
-            Swal.fire("탈퇴성공!", "Your file has been deleted.", "success");
+            Swal.fire("탈퇴성공!", "success");
             navigate("/");
           });
       }
