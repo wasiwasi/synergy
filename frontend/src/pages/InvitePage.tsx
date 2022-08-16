@@ -51,6 +51,8 @@ import {
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import { display } from "@mui/system";
+import { AddBox } from "@mui/icons-material";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -321,35 +323,6 @@ const InvitePage = () => {
     });
   }, [session, messages]);
 
-  useEffect(() => {
-    const mySession = session;
-    mySession?.on("signal:chat", (event : any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
-
-        // messages.push({
-        //   userName: chatdata[0],
-        //   text: chatdata[1],
-        //   boxClass: "messages__box--visitor",
-        // });
-
-        // setMessages([...messages]);
-
-        setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
-      }
-    });
-  }, [session, messages]);
-
   const onEnter = async () => {
     await joinSession();
   };
@@ -414,7 +387,6 @@ const InvitePage = () => {
           boxClass: "messages__box--operator",
         },
       ]);
-
       setMessage("");
       const mySession = session;
 
@@ -426,7 +398,7 @@ const InvitePage = () => {
     }
   };
 
-  const sendMessageByEnter = (e : any) => {
+  const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
       if (message !== "") {
         setMessages([
@@ -449,8 +421,7 @@ const InvitePage = () => {
     }
   };
 
-  const handleChatMessageChange = (e : any) => {
-    console.log("message event occur");
+  const handleChatMessageChange = (e: any) => {
     setMessage(e.target.value);
   };
   // chatting
@@ -736,14 +707,13 @@ const InvitePage = () => {
                 )}
               </InvitePageInput>
 
-              <InvitePageInput>
+              <InvitePageInput onClick={onEnter}>
                 <Button
                   type="submit"
                   variant="contained"
                   size="medium"
                   fullWidth
                   disabled={!(isNickName && usableNickName)}
-                  onClick={onEnter}
                 >
                   채널 입장하기
                 </Button>
@@ -988,7 +958,7 @@ const InvitePage = () => {
                       borderRadius: "20px",
                     }}
                   >
-                    <h3>채팅</h3>
+                    <h3 style={{paddingTop: '5px'}}>채팅</h3>
                     <Box
                       className="chatbox__messages"
                       sx={{
