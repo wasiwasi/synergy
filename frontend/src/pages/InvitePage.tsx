@@ -423,7 +423,13 @@ const InvitePage = () => {
       .get(`${BE_URL}/api/channels/info/${mySessionId}`)
       .then((response) => {
         if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
-          alert("참여하려는 채널이 꽉 찼습니다.");
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "참여하려는 채널이 꽉 찼습니다.",
+            timer: 1000,
+          });
+          navigate("/");
           return;
         }
         joinSession();
@@ -509,7 +515,6 @@ const InvitePage = () => {
           boxClass: "messages__box--operator",
         },
       ]);
-
       setMessage("");
       const mySession = session;
 
@@ -600,7 +605,13 @@ const InvitePage = () => {
         console.log(response);
       })
       .catch((error: any) => {
-        alert("참여하려는 채널이 꽉 찼습니다.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `참여하려는 채널이 꽉 찼습니다.`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
         leaveSession();
       });
   };
@@ -848,23 +859,28 @@ const InvitePage = () => {
               </InvitePageMsg>
 
               <InvitePageInput>
-                <FormControl variant="standard" fullWidth>
-                  <InputLabel htmlFor="component-helper" shrink>
-                    Nick Name
-                  </InputLabel>
-                  <Input
-                    id="component-helper-nickname"
-                    placeholder="닉네임을 입력해 주세요."
-                    // value={nickName}
-                    onChange={onChangeNickName}
-                    required
-                    aria-describedby="component-helper-text"
-                  />
-                </FormControl>
-                <NickNameButton onClick={nickNameCheck}>
-                  닉네임 중복체크
-                </NickNameButton>
-
+                <Grid container spacing={2}>
+                  <Grid item  xs={8} >
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                  </Grid>
+                  <Grid item  xs={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
+                  </Grid>
+                  </Grid>
                 {nickName.length > 0 && (
                   <div className={`${isNickName ? "success" : "error"}`}>
                     {nickNameError}
@@ -872,14 +888,13 @@ const InvitePage = () => {
                 )}
               </InvitePageInput>
 
-              <InvitePageInput>
+              <InvitePageInput onClick={onEnter}>
                 <Button
                   type="submit"
                   variant="contained"
                   size="medium"
                   fullWidth
                   disabled={!(isNickName && usableNickName)}
-                  onClick={onEnter}
                 >
                   채널 입장하기
                 </Button>
@@ -933,9 +948,9 @@ const InvitePage = () => {
                             margin: 0,
                           }}
                           src="/images/common/logo_A306.png"
-                          alt="A306 logo img"
+                          alt="SYNERGY logo img"
                         />
-                        <LogoName>A306</LogoName>
+                        <LogoName>SYNERGY</LogoName>
                       </Logo>
                     </Brand>
                   </BrandWrapper>
@@ -1115,66 +1130,55 @@ const InvitePage = () => {
                     </Button>
                   </Box>
                 </Box>
-                <Box
-                  id="chat"
-                  sx={{
-                    // backgroundColor: 'grey',
-                    width: "25%",
-                    height: "100%",
-                    // margin: 10
-                  }}
-                >
-                  {/* <div className="chatbox__footer"> */}
-                  <Box
-                    className="chatspace"
-                    sx={{
-                      backgroundColor: "#85B6FF",
-                      width: "100%",
-                      height: "400px",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <h3>채팅</h3>
-                    <Box
-                      className="chatbox__messages"
-                      sx={{
-                        backgroundColor: "white",
-                        margin: "10px",
-                        width: "80%",
-                        height: "300px",
-                        borderRadius: "20px",
-                        overflow: "auto",
-                      }}
-                    >
-                      <Messages messages={messages} />
-                      {/* <div />
-            </div> */}
-                    </Box>
-                    <input
-                      id="chat_message"
-                      type="text"
-                      style={{
-                        margin: "10px",
-                        width: "70%",
-                        borderRadius: "20px",
-                        border: "none",
-                      }}
-                      placeholder="Write a message..."
-                      onChange={handleChatMessageChange}
-                      onKeyPress={sendMessageByEnter}
-                      value={message}
-                    />
-                    <Button
-                      className="chatbox__send--footer"
-                      sx={{ borderRadius: "20px", border: "none" }}
-                      onClick={sendMessageByClick}
-                    >
-                      Enter
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
+                <Box id='chat' 
+          sx={{
+          width: '25%',
+          height: '100%'
+          // margin: 10
+        }}>
+         
+          <Box className="chatspace" 
+          sx={{
+            backgroundColor: '#ddd', 
+            width: '100%', 
+            height: '70%', 
+            borderRadius: '20px'
+          }}
+        >
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
+          <Box 
+          className="chatbox__messages" 
+          sx={{
+            backgroundColor: '#A8C0D6', 
+            margin: 'auto', 
+            width: '90%', 
+            height: '75%', 
+            borderRadius: '20px', 
+            overflow: 'auto'
+            }}
+          >
+            <Messages messages={messages} myUserName={myUserName} />
+            {/*<div />
+           </div> */}
+          </Box>
+            <input
+              id="chat_message"
+              type="text"
+              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
+              placeholder="Write a message..."
+              onChange={handleChatMessageChange}
+              onKeyPress={sendMessageByEnter}
+              value={message}
+            />
+            <Button
+              className="chatbox__send--footer"
+              sx={{borderRadius: '20px', border: 'none'}}
+              onClick={sendMessageByClick}
+            >
+              Enter
+            </Button></Box>
+          </Box>
+          </Box></Box>
           ) : null}
         </ThemeProvider>
       </Wrapper>

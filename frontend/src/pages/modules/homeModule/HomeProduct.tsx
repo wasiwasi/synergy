@@ -2,6 +2,7 @@ import React from "react";
 import HomeProductLayout from "./HomeProudctLayOut";
 import img from "../images/homeImage.png";
 import { Button, Container, Link, Typography } from "@mui/material";
+import {   useNavigate } from "react-router-dom";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import blue from "@mui/material/colors/blue";
@@ -15,6 +16,13 @@ const theme = createTheme({
 });
 
 const HomeProduct = () => {
+
+
+  const navigate = useNavigate();
+  const handleClick =()=>{
+    navigate('/channel/createchannel');
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <HomeProductLayout
@@ -43,6 +51,7 @@ const HomeProduct = () => {
           variant="contained"
           size="large"
           sx={{ minWidth: 200 }}
+          onClick={handleClick}
         >
           아이스 브레이킹~
         </Button>

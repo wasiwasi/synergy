@@ -42,7 +42,7 @@ const EmailAuth = () => {
 
   return (
     <div>
-      <h4>A306의 회원이 되신 것을 환영합니다 :) !!</h4>
+      <h4>SYNERGY의 회원이 되신 것을 환영합니다 :) !!</h4>
     </div>
   );
 };
