@@ -1428,8 +1428,7 @@ function SwipeableTextMobileStepper() {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"
