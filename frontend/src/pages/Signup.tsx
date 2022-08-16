@@ -332,7 +332,7 @@ const Signup = () => {
             <SignupHead>회원 가입</SignupHead>
 
             <SignupMsg>
-              이미 Brand 회원이신가요?
+              이미 SYNERGY 회원이신가요?
               <LinkLogin to="/login"> 로그인</LinkLogin>
             </SignupMsg>
 
