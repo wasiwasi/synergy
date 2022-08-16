@@ -109,7 +109,7 @@ function SwipeableTextMobileStepper() {
 
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
-  let [timer, setTimer] = useState<number>(INITIAL_TIME);
+  let [timer, setTimer] = useState<number>(0);
   let [isCorrect, setIsCorrect] = useState<boolean>(false);
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
@@ -285,6 +285,7 @@ function SwipeableTextMobileStepper() {
           scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
           console.log("Correct!!")
           setScores(scores); // scores 갱신
+          setIsCorrect(true);
           sendSignalCorrect(event.from.connectionId) // 맞췄다고 시그널
           setTimeout(() => {}, 1000) // 1초 대기
         }
@@ -311,21 +312,13 @@ function SwipeableTextMobileStepper() {
     })
   }, [session, myConnectionId, audiostate, videostate, isPlaying])
 
-  const gameTimer = setInterval(() => {
-    // 게임 중이 아니거나 정답이 나왔거나 timer가 끝나면 실행 X
-    if(!isPlaying || isCorrect || timer <= 0) return;
-
-    sendSignalTimer(); // 시그널 전송 + timer 갱신
-  }, 1000);
-
-  // BUG: signal이 1초에 한 번만 떠야 하는데 여러번 뜸
-  const sendSignalTimer = () => {
+  const sendSignalTimer = (time: number) => {
     session?.signal({
-      data: String(timer),
+      data: String(time),
       to: [],
       type: "time"
     });
-    setTimer(--timer);
+    
   }
 
   useEffect(() => {
@@ -333,7 +326,7 @@ function SwipeableTextMobileStepper() {
     session?.on("signal:time", (event: any) => {
       // console.log(event.data);
     })
-  })
+  }, [session])
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
@@ -347,17 +340,20 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
-      clearInterval(gameTimer); // timer 중단
+
+      setIsCorrect(false);
+
       if(currentRound < round) { // 아직 round가 남았다면
-        setCurrentRound(currentRound++); // round 갱신
+        setCurrentRound(++currentRound); // round 증가시키고
+        giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
+        setTimer(INITIAL_TIME); // timer 초기화
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
+        setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
-      setIsCorrect(true); // 정답이 나왔다고 표시하고
-      sendSignalRoundOver(); // 라운드가 끝났다고 시그널 보냄
     }) 
-  })
+  }, [session, currentRound])
 
   // round가 끝났다는 시그널
   const sendSignalRoundOver = () => {
@@ -370,24 +366,28 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     session?.off("signal:roundover");
-    session?.on("signal:roundover", (event: any) => { // 라운드가 끝났다면
-      if(isCorrect == true) { // 정답이 나와서 끝난거라면
-        setIsCorrect(false); // 정답 표시 초기화하고 종료
-        return;
-      }
-
-      clearInterval(gameTimer); // 정답이 나와서 끝난게 아니라면 timer 종료
-      setTimer(INITIAL_TIME); // timer 초기화
-  
+    session?.on("signal:roundover", (event: any) => { // roundover 시그널을 받았을 때
       if(currentRound < round) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
+        console.log("round:"+currentRound);
         giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
+        setTimer(INITIAL_TIME); // timer 초기화
+        console.log("timer:"+timer);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
+        setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
     })
-  })
+  }, [session, isCorrect, currentRound])
+
+  const sendSignalGameOver = () => {
+    session?.signal({
+      data: "game over",
+      to: [],
+      type: "gameover"
+    })
+  }
 
   const handleSignalWord = (event: any) => {
     const answer = event.data.split(",")[0];
@@ -789,9 +789,9 @@ function SwipeableTextMobileStepper() {
    문제집, 출제자 정보 받아오고
    */
   const initGame = () => {
-    isPlaying = true;
     setIsPlaying(true);
-
+    setTimer(INITIAL_TIME);
+    setCurrentRound(0);
     initExaminerAndScores().then(
       () => getSubjects().then(
         () => giveWordToExaminer(currentRound)
@@ -821,6 +821,7 @@ function SwipeableTextMobileStepper() {
         // shuffle using lambda
         examiners.sort(() => Math.random() - 0.5);
         setExaminers(examiners);
+        console.log(examiners);
 
         scores = [];
         for(let idx=0; idx<response.data.content.length; idx++) {
@@ -852,6 +853,7 @@ function SwipeableTextMobileStepper() {
         
         // shuffle using lambda
         subjects.sort(() => Math.random() - 0.5);
+        console.log(subjects);
         resolve();
       })
     })
@@ -866,6 +868,10 @@ function SwipeableTextMobileStepper() {
 
    // idx번째 출제자에게 정답 알려줌
   const giveWordToExaminer = (idx: number) => {
+    console.log("send signal word to "+idx); // idx는 갱신됨
+    console.log(subjects); // 문제들
+    console.log(examiners)
+    console.log(subjects[idx]+","+examiners[idx]);
     return new Promise<void>((resolve) => {
       session?.signal({
         "to": [],
