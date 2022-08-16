@@ -303,11 +303,11 @@ const Mypage = () => {
     setWordList(list);
     }
   }
-  const [marks, setMarks] = useState("100, 200, 10, 1");
+  // const [marks, setMarks] = useState("100, 200, 10, 1");
     
-    const [examiners, setExaminers] = useState(
-      "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
-    );
+  //   const [examiners, setExaminers] = useState(
+  //     "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
+  //   );
 
   // constMypage HomePage: React.FC = () => {
   return (
@@ -388,15 +388,15 @@ const Mypage = () => {
             <Box
               sx={{ width: "100%", height: 400, bgcolor: "background.paper" }}
             >
-              <RankDialog open={dialogOpen} onClose={handleClose}>
-                <RankDialogTitle>
+              <SubjectDialog open={dialogOpen} onClose={handleClose}>
+                <SubjectDialogTitle>
                   <Title>
                   문제집 작성하기
-                  </Title></RankDialogTitle>
-                <RankDialogContent>
-                  <RankDialogContentText>
+                  </Title></SubjectDialogTitle>
+                <SubjectDialogContent>
+                  <SubjectDialogContentText>
                     원하는 문제를 작성하세요.
-                  </RankDialogContentText>
+                  </SubjectDialogContentText>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -446,28 +446,28 @@ const Mypage = () => {
                         </Grid>
                         <Grid item xs={4}>
                           {wordList.length > 1 && (
-                            <Button
+                            <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
                             >
                               delete
-                            </Button>
+                            </SubjectButton>
                           )}
                         </Grid>
                       </Grid>
                       <br />
 
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <Button onClick={handletWordAdd}>add word</Button>
+                        <SubjectButton onClick={handletWordAdd}>add word</SubjectButton>
                       )}
                     </div>
                   ))}
                 <DialogActions>
-                  <Button onClick={handleClose}>취소하기</Button>
-                  <Button onClick={createSubject}>생성하기</Button>
+                  <SubjectButton onClick={handleClose}>취소하기</SubjectButton>
+                  <SubjectButton onClick={createSubject}>생성하기</SubjectButton>
                 </DialogActions>
 
-                </RankDialogContent>
-              </RankDialog>
+                </SubjectDialogContent>
+              </SubjectDialog>
               {mypage[0].length === 0 ? (
                 <Input
                   value="내가 만든 문제집이없습니다! 생성해주세요!"
@@ -486,7 +486,7 @@ const Mypage = () => {
             </Box>
           </ProfileForm>
         </ThemeProvider>
-        <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" />
+        {/* <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" /> */}
       </Wrapper>
     </Container>
   );
@@ -512,23 +512,27 @@ const ProfileInput = styled.div`
   margin: 15px 0px;
 `;
 
-const RankDialogContent = styled(DialogContent)`
+const SubjectDialogContent = styled(DialogContent)`
   display: flex;
   color: white;
   flex-direction: column;
   background-color: rgba(106, 96, 169, 0.5);
 `;
 
-const RankDialogContentText = styled(DialogContentText)``;
+const SubjectDialogContentText = styled(DialogContentText)`
+
+  color:white
+
+`;
 
 // modal
-const RankDialog = styled(Dialog)`
+const SubjectDialog = styled(Dialog)`
   & .MuiPaper-rounded {
     border-radius: 15px;
   }
 `;
 
-const RankDialogTitle = styled(DialogTitle)`
+const SubjectDialogTitle = styled(DialogTitle)`
   display: flex;
   justify-content: center;
   background-color: rgba(106, 96, 169, 0.5);
@@ -546,8 +550,14 @@ const Title = styled.p`
   margin-bottom: 40px;
 `;
 
+const SubjectButton = styled(Button)`
+&.MuiButton-text{
+  color:white
+}
+`
 
-const RankDialogActions = styled(DialogActions)`
+
+const SubjectDialogActions = styled(DialogActions)`
   flex-direction: row;
 `;
 
