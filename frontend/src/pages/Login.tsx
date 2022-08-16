@@ -173,8 +173,8 @@ const Login = () => {
       <Wrapper>
         <ThemeProvider theme={themeA306}>
           <LoginForm>
-            <LoginHead>A306</LoginHead>
-            <LoginMsg>A306에 오신것을 환영합니다.</LoginMsg>
+            <LoginHead>SYNERGY</LoginHead>
+            <LoginMsg>SYNERGY에 오신것을 환영합니다.</LoginMsg>
 
             <LoginInput>
               <FormControl

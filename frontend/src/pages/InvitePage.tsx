@@ -901,9 +901,9 @@ const InvitePage = () => {
                             margin: 0,
                           }}
                           src="/images/common/logo_A306.png"
-                          alt="A306 logo img"
+                          alt="SYNERGY logo img"
                         />
-                        <LogoName>A306</LogoName>
+                        <LogoName>SYNERGY</LogoName>
                       </Logo>
                     </Brand>
                   </BrandWrapper>

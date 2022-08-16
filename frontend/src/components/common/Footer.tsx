@@ -20,8 +20,8 @@ const Footer = () => {
         <BrandWrapper>
           <Brand to="/">
             <Logo>
-              <LogoImg src="/images/common/logo_A306.png" alt="A306 logo img" />
-              <LogoName>A306</LogoName>
+              <LogoImg src="/images/common/logo_A306.png" alt="SYNERGY logo img" />
+              <LogoName>SYNERGY</LogoName>
             </Logo>
           </Brand>
         </BrandWrapper>
@@ -32,7 +32,7 @@ const Footer = () => {
             <HeadMsg>문의 및 고객센터</HeadMsg>
             1:1 라이브챗
             <br />
-            Email: A306@gmail.com
+            Email: SYNERGY@gmail.com
             <br />
             운영 시간 : 오전 9시 ~ 오후 6시 (주말 및 공휴일 휴무)
           </ServiceMsg>
