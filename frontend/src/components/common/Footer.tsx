@@ -12,8 +12,8 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 
 const Footer = () => {
-  if (window.location.pathname === '/join') return null;
-  if (window.location.pathname === '/channel/createchannel') return null;
+  if (window.location.pathname === '/join'||window.location.pathname === '/channel/createchannel') return null;
+  
   return (
     <Container>
       <Wrapper>
