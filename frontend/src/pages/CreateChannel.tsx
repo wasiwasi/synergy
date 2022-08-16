@@ -43,10 +43,12 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
+const INITIAL_TIME = 5;
+
 const steps = [
   {
     label: '게임을 선택해주세요',
-    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '준비 중']
+    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '라이어 게임']
   },
   {
     label: '개인전/팀전을 선택해주세요',
@@ -90,8 +92,8 @@ function SwipeableTextMobileStepper() {
   const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
-  
   const [myConnectionId, setMyConnectionId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
@@ -118,6 +120,7 @@ function SwipeableTextMobileStepper() {
     setOV(null);
     setSession(undefined);
     setSubscribers([]);
+    setStreamManagers([]);
     setMySessionId("");
     setMyUserName("");
     setMainStreamManager(undefined);
@@ -157,12 +160,10 @@ function SwipeableTextMobileStepper() {
       }
     }).then((res) => {
       const copy = [...selectData]
-      console.log(res)
       res.data.data.map((d: any, i: any) => (
         // copy[0].push(d.subject_name)
         copy[0].push({name : d.subject_name, id : d.subject_set_id})
       ))
-      console.log(copy[0])
       setSelectData(copy)
       
       // category, round에 기본 값 부여
@@ -206,6 +207,8 @@ function SwipeableTextMobileStepper() {
       // Update the state with the new subscribers
       subscribers.push(subscriber);
       setSubscribers([...subscribers]);
+      streamManagers.push(subscriber);
+      setStreamManagers([...streamManagers]);
     });
 
     // On every Stream destroyed...
@@ -273,6 +276,8 @@ function SwipeableTextMobileStepper() {
           // Set the main video in the page to display our webcam and store our Publisher
           setMainStreamManager(publisher);
           setPublisher(publisher);
+          streamManagers.push(publisher as StreamManager)
+          setStreamManagers([...streamManagers])
         })
         .catch((error: any) => {
           console.log(
@@ -287,6 +292,7 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     const mySession = session;
+
     mySession?.off("signal:gamestart");
     mySession?.on("signal:gamestart", (event: any) => {
       setIsPlaying(true);
@@ -305,42 +311,21 @@ function SwipeableTextMobileStepper() {
       }, 5000);
     })
 
-    mySession?.off("signal:time");
-    mySession?.on("signal:time", (event: any) => {
-      setTimer(event.data);
-    });
-
-    mySession?.off("signal:correct");
-    mySession?.on("signal:correct", (event: any) => {
-      setIsCorrect(true);
-      setTimeout(() => {
-        setIsCorrect(false);
-      }, 5000);
-    });
-
-    mySession?.off("signal:roundover");
-    mySession?.on("signal:roundover", (event: any) => {
-      setIsRoundover(true);
-      setTimeout(() => {
-        setIsRoundover(false);
-      }, 5000);
-    });
-
   }, [session]);
-
+  
   useEffect(() => {
     const mySession = session;
+
     mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
       if(isPlaying == true) { // 현재 게임 중일 때
-        // console.log(subjects);
-        console.log(event);
-        // console.log("answer:"+subjects[currentRound])
         if(chatdata[1] == subjects[currentRound]) { // 나온 채팅이 현재 라운드의 정답과 같다면
           scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
-          console.log("Correct!! "+examiners.indexOf(event.from.connectionId)+" : "+scores[examiners.indexOf(event.from.connectionId)])
-          setScores(scores);
+          console.log("Correct!!")
+          setScores(scores); // scores 갱신
+          setTimer(-1);
+          sendSignalCorrect(event.from.connectionId); // 맞췄다고 시그널
         }
       }
       if (chatdata[0] !== myUserName) {
@@ -361,21 +346,127 @@ function SwipeableTextMobileStepper() {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
-      setTimer(0);
       handleSignalWord(event)
     })
-  }, [session, myConnectionId, audiostate, videostate, isPlaying])
+  // }, [session, myConnectionId, audiostate, videostate, isPlaying])
+  }, [session, myConnectionId, audiostate, videostate, isPlaying, subjects, examiners])
+
+  const sendSignalTimer = (time: number) => {
+    session?.signal({
+      data: String(time),
+      to: [],
+      type: "time"
+    });
+  }
+
+  useEffect(() => {
+    if (timer == 0) {
+      sendSignalRoundOver();
+      return;
+    }
+
+    if(timer == -1) {
+      return;
+    }
+
+    const tt = setInterval(() => {
+      sendSignalTimer(timer);
+      setTimer(--timer);
+    }, 1000);
+
+    return () => {
+      clearInterval(tt);
+    }
+  }, [timer])
+
+  useEffect(() => {
+    session?.off("signal:time")
+    session?.on("signal:time", (event: any) => {
+      setTimer(event.data);
+    })
+  }, [session])
+
+  // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
+  const sendSignalCorrect = (connectionId: string) => {
+    session?.signal({
+      data: connectionId,
+      to: [],
+      type: "correct"
+    })
+  }
+
+  useEffect(() => {
+    session?.off("signal:correct"); 
+    session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
+      setIsCorrect(true);
+      setTimeout(() => {
+        setIsCorrect(false);
+      }, 5000)
+      if(currentRound < round-1) { // 아직 round가 남았다면
+        setCurrentRound(++currentRound); // round 증가시키고
+        setTimeout(() => {
+          setTimer(INITIAL_TIME); 
+          giveWordToExaminer(currentRound)
+        }, 3000);
+      } else { // round가 다 끝났다면
+        setIsPlaying(false); // 게임 종료
+        sendSignalGameOver(); // 게임 종료됐다는 시그널
+        setCurrentRound(0); // 라운드 0으로 초기화
+        return;
+      }
+    }) 
+  }, [session, subjects, examiners, currentRound])
+
+  // round가 끝났다는 시그널
+  const sendSignalRoundOver = () => {
+    session?.signal({
+      data: "round over",
+      to: [],
+      type: "roundover"
+    });
+  }
+
+  useEffect(() => {
+    session?.off("signal:roundover");
+    session?.on("signal:roundover", (event: any) => { // roundover 시그널을 받았을 때
+      if(isCorrect == true) {
+        setIsCorrect(false);
+        return;
+      }
+
+      setIsRoundover(true);
+      setTimeout(() => {
+        setIsRoundover(false);
+      }, 5000);
+      
+      if(currentRound < round-1) { // 아직 round가 남았다면
+        setCurrentRound(++currentRound); // round 증가시키고
+        console.log("round:"+currentRound);
+        setTimeout(() => {
+          setTimer(INITIAL_TIME); // timer 초기화
+          giveWordToExaminer(currentRound); // 다음 출제자에게 문제 전달
+        }, 3000);
+      } else { // round가 다 끝났다면
+        setIsPlaying(false); // 게임 종료
+        sendSignalGameOver(); // 게임 종료됐다는 시그널
+        setCurrentRound(0); // 라운드 0으로 초기화
+        return;
+      }
+    })
+  }, [session, isCorrect, currentRound, subjects, examiners])
+
+  const sendSignalGameOver = () => {
+    session?.signal({
+      data: "game over",
+      to: [],
+      type: "gameover"
+    })
+  }
 
   const handleSignalWord = (event: any) => {
-    // if(!isPlaying) return
-    // subjects[idx]+","+examiners[idx]
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-    // console.log("catch signal:word")
-    console.log("examinerId:"+examinerId);
-    console.log("connection:"+myConnectionId);
-    console.log("videoState:"+videostate);
-    console.log("audioState:" + audiostate);
+
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
@@ -392,6 +483,15 @@ function SwipeableTextMobileStepper() {
     }
   }
 
+  useEffect(() => {
+    const mySession = session;
+    mySession?.off("signal:word");
+    mySession?.on("signal:word", (event: any) => {
+      setTimer(0);
+      handleSignalWord(event)
+    })
+  }, [session, myConnectionId, audiostate, videostate, isPlaying])
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -404,7 +504,6 @@ function SwipeableTextMobileStepper() {
     let copy: string[] = [...info]
     copy.push(e)
     setInfo(copy)
-    console.log("copy:"+copy)
     handleNext()
   }
 
@@ -501,6 +600,12 @@ function SwipeableTextMobileStepper() {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
     }
+    let varStreamMangers = streamManagers;
+    let index2 = varStreamMangers.indexOf(streamManager, 0);
+    if (index2 > -1) {
+      varStreamMangers.splice(index2, 1);
+      setStreamManagers(varStreamMangers);
+    }
   }
   // 호스트 백엔드에 등록
   const recordParticipant = (conId : string) => {
@@ -508,16 +613,12 @@ function SwipeableTextMobileStepper() {
       connectionId: conId,
       nickName: myUserName,
     });
-    console.log("put session id " + mySessionId);
     axios
       .put(`${BE_URL}/api/channels/generate/${mySessionId}`, requestBody, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-      })
-      .then((response) => {
-        console.log(response);
       });
   }
 
@@ -543,6 +644,7 @@ function SwipeableTextMobileStepper() {
       })
       .finally(() => {
         deleteSession();
+        navigate("/")
       });
     
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
@@ -604,8 +706,6 @@ function SwipeableTextMobileStepper() {
       var videoDevices = devices?.filter(
         (device) => device.kind === "videoinput"
       );
-      console.log((publisher));
-      console.log(videoDevices);
       if (videoDevices && videoDevices.length > 1) {
         var newVideoDevice = videoDevices.filter(
           (device) => device.deviceId !== currentVideoDeviceId
@@ -651,7 +751,6 @@ function SwipeableTextMobileStepper() {
   }
 
   const createSession = (sessionId : string) => {
-    console.log("created session " + sessionId);
     return new Promise((resolve, reject) => {
       var data = JSON.stringify({ customSessionId: sessionId });
       axios
@@ -663,7 +762,6 @@ function SwipeableTextMobileStepper() {
           },
         })
         .then((response) => {
-          console.log("CREATE SESSION", response);
           resolve(response.data.id);
         })
         .catch((response) => {
@@ -676,48 +774,24 @@ function SwipeableTextMobileStepper() {
               "No connection to OpenVidu Server. This may be a certificate error at " +
                 OPENVIDU_SERVER_URL
             );
-            //swal
-            Swal.fire({
-              title: "모든 문제집을 삭제하시겠습니까?",
-              text:
+            if (
+              window.confirm(
                 'No connection to OpenVidu Server. This may be a certificate error at "' +
-                OPENVIDU_SERVER_URL +
-                '"\n\nClick OK to navigate and accept it. ' +
-                'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-                OPENVIDU_SERVER_URL +
-                '"',
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "예, 전부 삭제합니다",
-              cancelButtonText: "취소하기",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                window.location.assign(
-                  OPENVIDU_SERVER_URL + "/accept-certificate"
-                );
-              }
-            });
-            //
-            // if (
-            //   window.confirm(
-            //     'No connection to OpenVidu Server. This may be a certificate error at "' +
-            //       OPENVIDU_SERVER_URL +
-            //       '"\n\nClick OK to navigate and accept it. ' +
-            //       'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-            //       OPENVIDU_SERVER_URL +
-            //       '"'
-            //   )
-            // ) {
-            //   window.location.assign(
-            //     OPENVIDU_SERVER_URL + "/accept-certificate"
-            //   );
-            // }
+                  OPENVIDU_SERVER_URL +
+                  '"\n\nClick OK to navigate and accept it. ' +
+                  'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+                  OPENVIDU_SERVER_URL +
+                  '"'
+              )
+            ) {
+              window.location.assign(
+                OPENVIDU_SERVER_URL + "/accept-certificate"
+              );
+            }
           }
         });
     });
-  };
+  }
 
   const createToken = (sessionId: string) => {
     generateJoinLink(sessionId as string);
@@ -736,8 +810,6 @@ function SwipeableTextMobileStepper() {
           }
         )
         .then((response) => {
-          // console.log("TOKEN", response);
-          // console.log("connection id : " + response.data.id);
           setMyConnectionId(response.data.id);
           //TODO: setMyConnectionId가 늦게 작동하는 문제 해결 필요
           //임시로 connectionId를 인자로 넘겨주어 해결
@@ -789,7 +861,12 @@ function SwipeableTextMobileStepper() {
       publisher?.publishAudio(!audiostate);
       setAudiostate(!audiostate);
     } else {
-      alert("출제자는 마이크를 켤 수 없습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 마이크를 켤 수 없습니다.",
+        timer: 1000,
+      });
     }
   }
 
@@ -798,7 +875,12 @@ function SwipeableTextMobileStepper() {
       publisher?.publishVideo(!videostate);
       setVideostate(!videostate);
     } else {
-      alert("출제자는 카메라를 끌 수 없습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 카메라를 끌 수 없습니다.",
+        timer: 1000,
+      });
     }
   }
   // game logics
@@ -807,12 +889,12 @@ function SwipeableTextMobileStepper() {
    문제집, 출제자 정보 받아오고
    */
   const initGame = () => {
-    isPlaying = true;
     setIsPlaying(true);
-
+    setTimer(INITIAL_TIME);
+    setCurrentRound(0);
     initExaminerAndScores().then(
       () => getSubjects().then(
-        () => giveWordToExaminer(0)
+        () => giveWordToExaminer(currentRound)
       )
     )
   }
@@ -859,7 +941,6 @@ function SwipeableTextMobileStepper() {
       })
       .then((response) => {
         subjects = [];
-        // console.log(response);
         for(let idx=0; idx<response.data.data.length; idx++) {
           subjects.push(response.data.data[idx].word);
         }
@@ -883,25 +964,15 @@ function SwipeableTextMobileStepper() {
 
    // idx번째 출제자에게 정답 알려줌
   const giveWordToExaminer = (idx: number) => {
-    return new Promise<void>((resolve) => {
+    console.log("send signal word to "+idx);
+    console.log(subjects);
+    console.log(examiners)
+    console.log(subjects[idx]+","+examiners[(idx+1)%examiners.length]);
       session?.signal({
         "to": [],
         "type": "word",
-        "data": subjects[idx]+","+examiners[idx]
+        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]
       })
-      resolve()
-    })
-  }
-
-  // 게임이 끝났는지 확인
-  const checkGameOver = () => {
-    return new Promise<boolean>((resolve) => {
-      if(round > 0) {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    })
   }
 
   return (
@@ -945,6 +1016,7 @@ function SwipeableTextMobileStepper() {
             <div key={index}>
               {activeStep < maxSteps - 1 ?
                 <Button
+                  disabled={index>0}
                   onClick={()=>{
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
@@ -1104,14 +1176,16 @@ function SwipeableTextMobileStepper() {
         height: '85%'
       }}>
         
-           <Box id='conference'
+        <Box id='conference'
           sx={{
             justifyContent: 'center',
             alignItems: 'center',
             flexDirection:'column',
             width: '75%',
             height: '100%',
-            display: 'flex'
+            display: 'flex',
+            margin: 2,
+            padding: 2
             }}>
             
           <Box id='cam' 
@@ -1149,17 +1223,58 @@ function SwipeableTextMobileStepper() {
             ) : null} */}
             {/* <div id="video-container" className="col-md-6"> */}
           <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-            {publisher !== undefined ? (
-                <Grid
-                item sm={4} md={4}
-                onClick={() =>
-                  handleMainVideoStream(publisher)
-                }
+            {/* {publisher !== undefined ? (
+              <Grid
+                item
+                sm={4}
+                md={4}
+                onClick={() => handleMainVideoStream(publisher)}
               >
                 <UserVideoComponent streamManager={publisher} />
               </Grid>
-              ) : null}
-             {subscribers.map((sub, i) => (
+            ) : null}
+            {subscribers.map((sub, i) => (
+              {isPlaying == true ?
+                <Grid
+                  item
+                  sm={4}
+                  md={4}
+                  key={i}
+                  // className="stream-container col-md-6 col-xs-6"
+                  onClick={() => handleMainVideoStream(sub)}
+                >
+                  <UserVideoComponent streamManager={sub} />
+                </Grid>
+              : null
+              }
+            ))} */}
+            {isPlaying == true ?         
+              streamManagers.map((sub: any, i: any) => (
+                sub.stream.connection.connectionId != examiners[0] ?
+                  <Grid
+                    item sm={4} md={4}
+                    key={i}
+                    onClick={() => handleMainVideoStream(sub)}>
+                    <UserVideoComponent streamManager={sub} />
+                  </Grid>
+                :       
+                  <Grid
+                    item sm={4} md={4}
+                    key={i}
+                    onClick={() => handleMainVideoStream(sub)}>
+                    <Box
+                      sx={{
+                        border: 6,
+                        borderColor: 'limegreen',
+                        height: '100.8%'
+                      }}>
+                      <UserVideoComponent
+                      style={{border: 'solid'}} streamManager={sub} />
+                    </Box>
+                  </Grid>
+                  ))
+              :
+              streamManagers.map((sub, i) => (
                 <Grid
                   item sm={4} md={4}
                   key={i}
@@ -1167,9 +1282,9 @@ function SwipeableTextMobileStepper() {
                 >
                   <UserVideoComponent streamManager={sub} />
                 </Grid>
-              ))}
-                </Grid>
-                </Box>
+              ))}               
+              </Grid>
+            </Box>
 
           <Box id='settings'
             sx={{
@@ -1214,22 +1329,41 @@ function SwipeableTextMobileStepper() {
           
           </Box>
         </Box>
-          <Box id='chat' 
+        <Box id='chat' 
           sx={{
           width: '25%',
           height: '100%'
           // margin: 10
         }}>
-          {/* <div className="chatbox__footer"> */}
-          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
-          <h3>채팅</h3>
-          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
-            <Messages messages={messages} />
+         
+          <Box className="chatspace" 
+          sx={{
+            backgroundColor: '#ddd', 
+            width: '100%', 
+            height: '70%', 
+            borderRadius: '20px'
+          }}
+        >
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
+          <Box 
+          className="chatbox__messages" 
+          sx={{
+            backgroundColor: '#A8C0D6', 
+            margin: 'auto', 
+            width: '90%', 
+            height: '75%', 
+            borderRadius: '20px', 
+            overflow: 'auto'
+            }}
+          >
+            <Messages messages={messages} myUserName={myUserName} />
+            {/*<div />
+           </div> */}
           </Box>
             <input
               id="chat_message"
               type="text"
-              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
+              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
               placeholder="Write a message..."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
@@ -1261,14 +1395,10 @@ function BasicSelect(props: any) {
     setCategory(event.target.value as string);
     console.log("event.target.value:"+event.target.value);
     if (props.index == 0) {
-      // props.setCategory(category) // 이전 코드는 선택하기 이전 값이 들어감
       props.setCategory(event.target.value)
-      console.log("category:" +event.target.value)
     }
     else {
-      // props.setRound(category) // 이전 코드는 선택하기 이전 값이 들어감
       props.setRound(event.target.value)
-      console.log("round: "+event.target.value)
     }
   };
 
