@@ -28,12 +28,10 @@ import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 
-import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
-import VideocamIcon from '@mui/icons-material/Videocam';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import userEvent from '@testing-library/user-event';
-import { Shuffle } from '@mui/icons-material';
+import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
@@ -43,7 +41,7 @@ const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
-const INITIAL_TIME = 5;
+const INITIAL_TIME = 60;
 
 const steps = [
   {
@@ -94,6 +92,7 @@ function SwipeableTextMobileStepper() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
+  
   const [myConnectionId, setMyConnectionId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
@@ -346,6 +345,15 @@ function SwipeableTextMobileStepper() {
     });
   }, [session, messages, isPlaying, currentRound, subjects, examiners, scores]);
 
+  // 게임 시작할 때 최대 라운드 수도 함께 
+  const sendSignalGameStart = () => {
+    session?.signal({
+      data: String(round),
+      to: [],
+      type: "gamestart"
+    })
+  }
+
   useEffect(() => {
     const mySession = session;
     mySession?.off("signal:word");
@@ -458,8 +466,20 @@ function SwipeableTextMobileStepper() {
   }, [session, isCorrect, currentRound, subjects, examiners])
 
   const sendSignalGameOver = () => {
+    let result: string = '';
+
+    for(let score in scores) {
+      result += score+","
+    }
+    result = result.slice(0, -1) + "|";
+
+    for(let conId in examiners) {
+      result += conId+","
+    }
+    result = result.slice(0, -1);
+
     session?.signal({
-      data: "game over",
+      data: result,
       to: [],
       type: "gameover"
     })
@@ -877,19 +897,20 @@ function SwipeableTextMobileStepper() {
     }
   }
   // game logics
-  /*
-   게임 시작하려면
-   문제집, 출제자 정보 받아오고
-   */
+  // 게임 시작 시그널 보내고 5초 대기 후 동작
   const initGame = () => {
-    setIsPlaying(true);
-    setTimer(INITIAL_TIME);
-    setCurrentRound(0);
-    initExaminerAndScores().then(
-      () => getSubjects().then(
-        () => giveWordToExaminer(currentRound)
+    sendSignalGameStart();
+
+    setTimeout(() => {
+      setIsPlaying(true);
+      setTimer(INITIAL_TIME);
+      setCurrentRound(0);
+      initExaminerAndScores().then(
+        () => getSubjects().then(
+          () => giveWordToExaminer(currentRound)
+        )
       )
-    )
+    }, 5000);
   }
 
   // 출제자 목록 받아오고 랜덤으로 출제자 순서 정함
@@ -957,14 +978,10 @@ function SwipeableTextMobileStepper() {
 
    // idx번째 출제자에게 정답 알려줌
   const giveWordToExaminer = (idx: number) => {
-    console.log("send signal word to "+idx);
-    console.log(subjects);
-    console.log(examiners)
-    console.log(subjects[idx]+","+examiners[(idx+1)%examiners.length]);
       session?.signal({
         "to": [],
         "type": "word",
-        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]
+        "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]+","+idx
       })
   }
 
@@ -1156,11 +1173,21 @@ function SwipeableTextMobileStepper() {
                   justifyContent: 'space-evenly',
                   alignItems: 'center',
               }}>
-          <Button
-          onClick={initGame}
-          >
-            게임 시작
-          </Button>
+                {
+                  isPlaying === false ? (
+                    <Button
+                      onClick={initGame}
+                    >
+                      게임 시작
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={sendSignalGameOver}
+                    >
+                      게임 종료
+                    </Button>
+                  )
+                }
           <BasicModal/>        
         </Box>
       </Box>
@@ -1354,7 +1381,8 @@ function SwipeableTextMobileStepper() {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            <div  ref ={scrollRef}/>
+            {/*<div />
+           </div> */}
           </Box>
             <input
               id="chat_message"
@@ -1384,12 +1412,8 @@ export default SwipeableTextMobileStepper;
 function BasicSelect(props: any) {
   const [category, setCategory] = useState(`${props.selectData[props.index][0].id}`);
 
-  // ISSUE 
-  // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
-  // 카테고리 초기값 화면에 바로 안뜸. 라운드는 아예 숫자가 안 뜸
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
-    console.log("event.target.value:"+event.target.value);
     if (props.index == 0) {
       props.setCategory(event.target.value)
     }
@@ -1444,7 +1468,6 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
 
 
 function BasicModal() {
