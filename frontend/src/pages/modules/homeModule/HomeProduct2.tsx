@@ -27,7 +27,7 @@ const HomeProduct = () => {
             <Typography
               color="black"
               align="center"
-              // variant="h5"
+              component="span"
               sx={{ mb: 1, mt: { sx: 2, sm: 5 } }}
             >
               <h5>

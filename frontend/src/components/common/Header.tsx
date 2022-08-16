@@ -68,9 +68,8 @@ const Header = () => {
               <Logo>
                 <LogoImg
                   src="/images/common/logo_A306.png"
-                  alt="A306 logo img"
+                  alt="SYNERGY logo img"
                 />
-              <LogoName>A306</LogoName>
               </Logo>
             </Brand>
           </BrandWrapper>
@@ -167,7 +166,6 @@ export const Logo = styled.div`
 `;
 
 export const LogoImg = styled.img`
-  width: 30px;
   height: 30px;
   // margin: 0 auto;
   margin-left: 20px;

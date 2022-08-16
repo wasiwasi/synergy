@@ -332,12 +332,12 @@ const Signup = () => {
             <SignupHead>회원 가입</SignupHead>
 
             <SignupMsg>
-              이미 Brand 회원이신가요?
+              이미 SYNERGY 회원이신가요?
               <LinkLogin to="/login"> 로그인</LinkLogin>
             </SignupMsg>
 
             <SignupInput>
-              <Grid container xs={12} spacing={1}>
+              <Grid item container xs={12} spacing={1}>
                 <Grid item xs={12} sm={8}>
                   <FormControl variant="standard" fullWidth>
                     <InputLabel htmlFor="component-helper" shrink>
@@ -368,7 +368,7 @@ const Signup = () => {
             </SignupInput>
 
             <SignupInput>
-              <Grid container xs={12} spacing={1}>
+              <Grid item container xs={12} spacing={1}>
                 <Grid item xs={12} sm={8}>
                   <FormControl variant="standard" fullWidth>
                     <InputLabel htmlFor="component-helper" shrink>
