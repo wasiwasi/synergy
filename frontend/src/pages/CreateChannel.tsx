@@ -3,7 +3,7 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
@@ -146,6 +146,8 @@ function SwipeableTextMobileStepper() {
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
   
   const didMount = useRef(false);
+  const scrollRef = useRef<null|HTMLDivElement>(null);
+
 
   useEffect(() => {
     let token = localStorage.getItem("access-token");
@@ -966,6 +968,10 @@ function SwipeableTextMobileStepper() {
       })
   }
 
+  useEffect(()=>{
+    scrollRef.current?.scrollIntoView();
+  },[messages]);
+
   return (
   <Container>
     {session === undefined ? (
@@ -1348,8 +1354,7 @@ function SwipeableTextMobileStepper() {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"
@@ -1439,6 +1444,7 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
 
 
 function BasicModal() {

@@ -179,6 +179,8 @@ const InvitePage = () => {
   
   const didMount = useRef(false);
 
+  const scrollRef = useRef<null|HTMLDivElement>(null);
+
   // URL에서 방 코드를 가져옴
   useEffect(() => {
     const sch = location.search;
@@ -844,6 +846,9 @@ const InvitePage = () => {
     setVideostate(!videostate);
   };
 
+  useEffect(()=>{
+    scrollRef.current?.scrollIntoView();
+  },[messages]);
   return (
     <Container>
       <Wrapper>
@@ -1156,8 +1161,7 @@ const InvitePage = () => {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"
