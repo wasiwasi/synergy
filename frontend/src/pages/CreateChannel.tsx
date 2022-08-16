@@ -44,7 +44,7 @@ const INITIAL_TIME = 5;
 const steps = [
   {
     label: '게임을 선택해주세요',
-    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '준비 중']
+    choice: ['몸으로 말해요', '골든벨', '고요 속의 외침', '라이어 게임']
   },
   {
     label: '개인전/팀전을 선택해주세요',
@@ -597,6 +597,7 @@ function SwipeableTextMobileStepper() {
       })
       .finally(() => {
         deleteSession();
+        navigate("/")
       });
     
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
@@ -813,7 +814,12 @@ function SwipeableTextMobileStepper() {
       publisher?.publishAudio(!audiostate);
       setAudiostate(!audiostate);
     } else {
-      alert("출제자는 마이크를 켤 수 없습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 마이크를 켤 수 없습니다.",
+        timer: 1000,
+      });
     }
   }
 
@@ -822,7 +828,13 @@ function SwipeableTextMobileStepper() {
       publisher?.publishVideo(!videostate);
       setVideostate(!videostate);
     } else {
-      alert("출제자는 카메라를 끌 수 없습니다.");
+
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 카메라를 끌 수 없습니다.",
+        timer: 1000,
+      });
     }
   }
   // game logics
@@ -958,6 +970,7 @@ function SwipeableTextMobileStepper() {
             <div key={index}>
               {activeStep < maxSteps - 1 ?
                 <Button
+                  disabled={index>0}
                   onClick={()=>{
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
