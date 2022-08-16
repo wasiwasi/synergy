@@ -1,6 +1,6 @@
 import React from "react";
 import HomeProductLayout from "./HomeProudctLayOut";
-import img from "../images/mafia.png";
+import img from "../images/game-console (1).png";
 import { Button, Container, Grid, Link, Typography } from "@mui/material";
 
 import blue from "@mui/material/colors/blue";
@@ -22,7 +22,7 @@ const HomeProduct = () => {
               variant="h3"
               sx={{ mb: 2, mt: { sx: 4, sm: 10 } }}
             >
-              비대면 술자리 이용하기
+              아이스 브레이킹을 위한 다양한 게임 기능
             </Typography>
             <Typography
               color="black"
@@ -31,11 +31,11 @@ const HomeProduct = () => {
               sx={{ mb: 1, mt: { sx: 2, sm: 5 } }}
             >
               <h5>
-                온라인 술자리도 오프라인 술자리처럼 느낄 수 있는 공간, 사람들과
-                바로 옆에 있는 듯한 느낌을 주는 우리만의 공간. 더 쉽게 어울리고
-                즐겁게 술 마실 수 있는 그런 공간 말이에요. 혹은 새로운 사람들을
-                만나고 싶을 때는 랜덤 입장을 이용해보세요! 새로운 사람들과
-                새로운 경험을 쌓을 수 있답니다.
+                친구들과 이야기도 하고 게임을 하며 놀고 싶을 때,<br/>
+                또는 서로 만난 지 얼마 안되어 어색하고 낯선 사이일 때,<br/>
+                SYNERGY의 다양한 게임 기능을 이용해 보세요! 🙂<br/>
+                채널을 손쉽게 생성해 게임을 즐기고,<br/> 
+                더욱 친밀한 사이가 될 수 있습니다.
               </h5>
             </Typography>
           </Grid>
