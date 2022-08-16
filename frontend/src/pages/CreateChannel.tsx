@@ -170,7 +170,7 @@ function SwipeableTextMobileStepper() {
       
       // category, round에 기본 값 부여
       setCategory(copy[0][0].id);
-      setCatagoryName(copy[0][0].name);
+      setCategoryName(copy[0][0].name);
       setRound(copy[1][0].id);
     });
     //닉네임 가져와서 세팅
