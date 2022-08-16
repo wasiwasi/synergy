@@ -137,10 +137,10 @@ function SwipeableTextMobileStepper() {
 
   const [hostName, sethostName] = useState<string>("");
 
-  const [gamestart, setGamestart] = useState<boolean>(false);
-  const [gameover, setGameover] = useState<boolean>(false);
-  const [correct, setCorrect] = useState<boolean>(false);
-  const [roundover, setRoundover] = useState<boolean>(false);
+  const [isGamestart, setIsGamestart] = useState<boolean>(false);
+  const [isGameover, setIsGameover] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [isRoundover, setIsRoundover] = useState<boolean>(false);
   
   const didMount = useRef(false);
 
@@ -290,18 +290,18 @@ function SwipeableTextMobileStepper() {
     mySession?.off("signal:gamestart");
     mySession?.on("signal:gamestart", (event: any) => {
       setIsPlaying(true);
-      setGamestart(true);
+      setIsGamestart(true);
       setTimeout(() => {
-        setGamestart(false);
+        setIsGamestart(false);
       }, 5000);
     })
 
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
       setIsPlaying(false);
-      setGameover(true);
+      setIsGameover(true);
       setTimeout(() => {
-        setGameover(false);
+        setIsGameover(false);
       }, 5000);
     })
 
@@ -312,17 +312,17 @@ function SwipeableTextMobileStepper() {
 
     mySession?.off("signal:correct");
     mySession?.on("signal:correct", (event: any) => {
-      setCorrect(true);
+      setIsCorrect(true);
       setTimeout(() => {
-        setCorrect(false);
+        setIsCorrect(false);
       }, 5000);
     });
 
     mySession?.off("signal:roundover");
     mySession?.on("signal:roundover", (event: any) => {
-      setRoundover(true);
+      setIsRoundover(true);
       setTimeout(() => {
-        setRoundover(false);
+        setIsRoundover(false);
       }, 5000);
     });
 
@@ -1122,14 +1122,14 @@ function SwipeableTextMobileStepper() {
             height: '90%',
             // margin: 10
             }}>
-            {gamestart === true ? (
+            {isGamestart === true ? (
                   <GamestartMain></GamestartMain>
             ) : null}
-            {correct ? (
+            {isCorrect ? (
               <AlertPage text={"정답"}></AlertPage>
-            ) : roundover ? (
+            ) : isRoundover ? (
               <AlertPage text={"시간초과"}></AlertPage>
-            ) : gameover ? (
+            ) : isGameover ? (
               <AlertPage text={"게임종료"}></AlertPage>
             ) : null}
             {/* 큰 화면 카메라 */}
