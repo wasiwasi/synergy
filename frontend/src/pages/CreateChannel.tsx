@@ -48,7 +48,7 @@ const BE_URL = process.env.REACT_APP_BACKEND_URL;
 const steps = [
   {
     label: "게임을 선택해주세요",
-    choice: ["몸으로 말해요", "골든벨", "고요 속의 외침", "준비 중"],
+    choice: ["몸으로 말해요", "골든벨", "고요 속의 외침", "라이어 게임"],
   },
   {
     label: "개인전/팀전을 선택해주세요",
@@ -468,6 +468,7 @@ function SwipeableTextMobileStepper() {
       })
       .finally(() => {
         deleteSession();
+        navigate("/");
       });
 
     // --- 7) Leave the session by calling 'disconnect' method over the Session object ---
@@ -676,7 +677,7 @@ function SwipeableTextMobileStepper() {
   //방생성 요청
   const handleCreateRoom = (event: any) => {
     event.preventDefault();
-
+    
     createRandomSessionId().then(() => {
       joinSession();
     });
@@ -773,6 +774,7 @@ function SwipeableTextMobileStepper() {
               <div key={index}>
                 {activeStep < maxSteps - 1 ? (
                   <Button
+                  disabled= {index>0}
                     onClick={() => {
                       activeStep < maxSteps - 1
                         ? choice(steps[activeStep].choice[index])
