@@ -88,8 +88,8 @@ function SwipeableTextMobileStepper() {
   const [mainStreamManager, setMainStreamManager] = useState<Publisher | undefined>(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
-  
   const [myConnectionId, setMyConnectionId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
@@ -117,6 +117,7 @@ function SwipeableTextMobileStepper() {
     setOV(null);
     setSession(undefined);
     setSubscribers([]);
+    setStreamManagers([]);
     setMySessionId("");
     setMyUserName("");
     setMainStreamManager(undefined);
@@ -198,6 +199,8 @@ function SwipeableTextMobileStepper() {
       // Update the state with the new subscribers
       subscribers.push(subscriber);
       setSubscribers([...subscribers]);
+      streamManagers.push(subscriber);
+      setStreamManagers([...streamManagers]);
     });
 
     // On every Stream destroyed...
@@ -265,6 +268,8 @@ function SwipeableTextMobileStepper() {
           // Set the main video in the page to display our webcam and store our Publisher
           setMainStreamManager(publisher);
           setPublisher(publisher);
+          streamManagers.push(publisher as StreamManager)
+          setStreamManagers([...streamManagers])
         })
         .catch((error: any) => {
           console.log(
@@ -547,6 +552,12 @@ function SwipeableTextMobileStepper() {
     if (index > -1) {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
+    }
+    let varStreamMangers = streamManagers;
+    let index2 = varStreamMangers.indexOf(streamManager, 0);
+    if (index2 > -1) {
+      varStreamMangers.splice(index2, 1);
+      setStreamManagers(varStreamMangers);
     }
   }
   // 호스트 백엔드에 등록
@@ -848,7 +859,6 @@ function SwipeableTextMobileStepper() {
         // shuffle using lambda
         examiners.sort(() => Math.random() - 0.5);
         setExaminers(examiners);
-        console.log(examiners);
 
         scores = [];
         for(let idx=0; idx<response.data.content.length; idx++) {
@@ -880,7 +890,8 @@ function SwipeableTextMobileStepper() {
         
         // shuffle using lambda
         subjects.sort(() => Math.random() - 0.5);
-        console.log(subjects);
+
+        // console.log(subjects);
         resolve();
       })
     })
@@ -1106,14 +1117,16 @@ function SwipeableTextMobileStepper() {
         height: '85%'
       }}>
         
-           <Box id='conference'
+        <Box id='conference'
           sx={{
             justifyContent: 'center',
             alignItems: 'center',
             flexDirection:'column',
             width: '75%',
             height: '100%',
-            display: 'flex'
+            display: 'flex',
+            margin: 2,
+            padding: 2
             }}>
             
           <Box id='cam' 
@@ -1141,17 +1154,58 @@ function SwipeableTextMobileStepper() {
             ) : null} */}
             {/* <div id="video-container" className="col-md-6"> */}
           <Grid container spacing={{ xs: 1, md: 1 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-            {publisher !== undefined ? (
-                <Grid
-                item sm={4} md={4}
-                onClick={() =>
-                  handleMainVideoStream(publisher)
-                }
+            {/* {publisher !== undefined ? (
+              <Grid
+                item
+                sm={4}
+                md={4}
+                onClick={() => handleMainVideoStream(publisher)}
               >
                 <UserVideoComponent streamManager={publisher} />
               </Grid>
-              ) : null}
-             {subscribers.map((sub, i) => (
+            ) : null}
+            {subscribers.map((sub, i) => (
+              {isPlaying == true ?
+                <Grid
+                  item
+                  sm={4}
+                  md={4}
+                  key={i}
+                  // className="stream-container col-md-6 col-xs-6"
+                  onClick={() => handleMainVideoStream(sub)}
+                >
+                  <UserVideoComponent streamManager={sub} />
+                </Grid>
+              : null
+              }
+            ))} */}
+            {isPlaying == true ?         
+              streamManagers.map((sub: any, i: any) => (
+                sub.stream.connection.connectionId != examiners[0] ?
+                  <Grid
+                    item sm={4} md={4}
+                    key={i}
+                    onClick={() => handleMainVideoStream(sub)}>
+                    <UserVideoComponent streamManager={sub} />
+                  </Grid>
+                :       
+                  <Grid
+                    item sm={4} md={4}
+                    key={i}
+                    onClick={() => handleMainVideoStream(sub)}>
+                    <Box
+                      sx={{
+                        border: 6,
+                        borderColor: 'limegreen',
+                        height: '100.8%'
+                      }}>
+                      <UserVideoComponent
+                      style={{border: 'solid'}} streamManager={sub} />
+                    </Box>
+                  </Grid>
+                  ))
+              :
+              streamManagers.map((sub, i) => (
                 <Grid
                   item sm={4} md={4}
                   key={i}
@@ -1159,9 +1213,9 @@ function SwipeableTextMobileStepper() {
                 >
                   <UserVideoComponent streamManager={sub} />
                 </Grid>
-              ))}
-                </Grid>
-                </Box>
+              ))}               
+              </Grid>
+            </Box>
 
           <Box id='settings'
             sx={{
@@ -1206,22 +1260,41 @@ function SwipeableTextMobileStepper() {
           
           </Box>
         </Box>
-          <Box id='chat' 
+        <Box id='chat' 
           sx={{
           width: '25%',
           height: '100%'
           // margin: 10
         }}>
-          {/* <div className="chatbox__footer"> */}
-          <Box className="chatspace" sx={{backgroundColor: '#85B6FF', width: '100%', height: '400px', borderRadius: '20px'}}>
-          <h3>채팅</h3>
-          <Box className="chatbox__messages" sx={{backgroundColor: 'white', margin: '10px', width: '80%', height: '300px', borderRadius: '20px', overflow: 'auto'}}>
-            <Messages messages={messages} />
+         
+          <Box className="chatspace" 
+          sx={{
+            backgroundColor: '#ddd', 
+            width: '100%', 
+            height: '70%', 
+            borderRadius: '20px'
+          }}
+        >
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
+          <Box 
+          className="chatbox__messages" 
+          sx={{
+            backgroundColor: '#A8C0D6', 
+            margin: 'auto', 
+            width: '90%', 
+            height: '75%', 
+            borderRadius: '20px', 
+            overflow: 'auto'
+            }}
+          >
+            <Messages messages={messages} myUserName={myUserName} />
+            {/*<div />
+           </div> */}
           </Box>
             <input
               id="chat_message"
               type="text"
-              style={{margin: '10px', width:'70%', borderRadius: '20px', border: 'none'}}
+              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
               placeholder="Write a message..."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
