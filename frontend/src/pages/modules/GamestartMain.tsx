@@ -15,24 +15,13 @@ function Main() {
 
 
   return (
-    <>
-
-    <div className="App">
     
-      
-        <div className="chbox">
-            <div className="zoom-in-out-box">
-            {open === true
-                ? <Timeout />
-                : <AlertPage text={"게임 시작"} />
-            }
-            </div>
-        </div>
-    </div>
-
-   
-
-    </>
+      <div className="zoom-in-out-box">
+      {open === true
+          ? <Timeout />
+          : <AlertPage text={"게임 시작"} />
+      }
+      </div>
     
   );
 }
