@@ -1115,14 +1115,14 @@ function SwipeableTextMobileStepper() {
                   </Grid>
                 :       
                   <Grid
-                    item sm={4} md={4} borderColor={'red'}
+                    item sm={4} md={4}
                     key={i}
                     onClick={() => handleMainVideoStream(sub)}>
                     <Box
                       sx={{
-                        border: 'solid',
+                        border: 6,
                         borderColor: 'limegreen',
-                        height: '100.5%'
+                        height: '100.8%'
                       }}>
                       <UserVideoComponent
                       style={{border: 'solid'}} streamManager={sub} />
