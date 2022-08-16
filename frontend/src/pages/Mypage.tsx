@@ -33,6 +33,8 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import Swal from "sweetalert2";
 import { Label } from "@mui/icons-material";
+import ScoreRate from "./modules/ScoreRate";
+import { Table, TableCell } from "@mui/material";
 
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -85,6 +87,7 @@ const Mypage = () => {
   ]);
   const [gameTitle, setGameTitle] = useState("");
   const [wordList, setWordList] = useState([{ id: 1, word: "" }]);
+
 
   const handletWordAdd = () => {
     let list = [...wordList];
@@ -195,6 +198,7 @@ const Mypage = () => {
   };
 
   const getMypage = () => {
+
     let token = localStorage.getItem("access-token");
     axios
       .get(`${BE_URL}/users`, {
@@ -291,6 +295,20 @@ const Mypage = () => {
     });
   };
 
+  const addWordByEnter =(e:any)=>{
+    if(e.key==="Enter"){
+    let list = [...wordList];
+    let len = list.length + 1;
+    list.push({ id: len, word: "" });
+    setWordList(list);
+    }
+  }
+  // const [marks, setMarks] = useState("100, 200, 10, 1");
+    
+  //   const [examiners, setExaminers] = useState(
+  //     "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
+  //   );
+
   // constMypage HomePage: React.FC = () => {
   return (
     <Container>
@@ -370,12 +388,15 @@ const Mypage = () => {
             <Box
               sx={{ width: "100%", height: 400, bgcolor: "background.paper" }}
             >
-              <Dialog open={dialogOpen} onClose={handleClose}>
-                <DialogTitle>문제집 작성하기</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
+              <SubjectDialog open={dialogOpen} onClose={handleClose}>
+                <SubjectDialogTitle>
+                  <Title>
+                  문제집 작성하기
+                  </Title></SubjectDialogTitle>
+                <SubjectDialogContent>
+                  <SubjectDialogContentText>
                     원하는 문제를 작성하세요.
-                  </DialogContentText>
+                  </SubjectDialogContentText>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -386,7 +407,9 @@ const Mypage = () => {
                     variant="standard"
                     onChange={handleSubjectName}
                   />
-                  <FormControl sx={{ m: 1, minWidth: 150 }}>
+                  <FormControl 
+                  // sx={{ m: 1, minWidth: 150 }}
+                  >
                     <InputLabel>GameTitle</InputLabel>
                     <Select
                       labelId="demo-simple-select-label"
@@ -402,44 +425,49 @@ const Mypage = () => {
                       <MenuItem disabled value={"goldenball"}>
                         라이어게임
                       </MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        고요속의 외침
+                      </MenuItem>
                     </Select>
                   </FormControl>
 
                   {wordList.map((singleWord, idx) => (
                     <div key={singleWord.id}>
                       <Grid container spacing={1}>
-                        <Grid item xs={12} md={8}>
+                        <Grid item xs={8} >
                           <Input
                             name="word"
                             id="word"
                             required
                             onChange={handleWordChange(singleWord.id)}
                             fullWidth
+                            onKeyPress={addWordByEnter}
                           />
                         </Grid>
-                        <Grid item md={4}>
+                        <Grid item xs={4}>
                           {wordList.length > 1 && (
-                            <Button
+                            <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
                             >
                               delete
-                            </Button>
+                            </SubjectButton>
                           )}
                         </Grid>
                       </Grid>
                       <br />
 
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <Button onClick={handletWordAdd}>add word</Button>
+                        <SubjectButton onClick={handletWordAdd}>add word</SubjectButton>
                       )}
                     </div>
                   ))}
-                </DialogContent>
                 <DialogActions>
-                  <Button onClick={handleClose}>취소하기</Button>
-                  <Button onClick={createSubject}>생성하기</Button>
+                  <SubjectButton onClick={handleClose}>취소하기</SubjectButton>
+                  <SubjectButton onClick={createSubject}>생성하기</SubjectButton>
                 </DialogActions>
-              </Dialog>
+
+                </SubjectDialogContent>
+              </SubjectDialog>
               {mypage[0].length === 0 ? (
                 <Input
                   value="내가 만든 문제집이없습니다! 생성해주세요!"
@@ -458,6 +486,7 @@ const Mypage = () => {
             </Box>
           </ProfileForm>
         </ThemeProvider>
+        {/* <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" /> */}
       </Wrapper>
     </Container>
   );
@@ -474,12 +503,6 @@ const ProfileHead = styled.h3`
   margin: 40px;
 `;
 
-const LoginMsg = styled.h5`
-  color: #000000;
-  margin: 40px;
-  font-size: 16px;
-`;
-
 const ProfileForm = styled.div`
   width: 500px;
   display: inline-block;
@@ -488,5 +511,55 @@ const ProfileForm = styled.div`
 const ProfileInput = styled.div`
   margin: 15px 0px;
 `;
+
+const SubjectDialogContent = styled(DialogContent)`
+  display: flex;
+  color: white;
+  flex-direction: column;
+  background-color: rgba(106, 96, 169, 0.5);
+`;
+
+const SubjectDialogContentText = styled(DialogContentText)`
+
+  color:white
+
+`;
+
+// modal
+const SubjectDialog = styled(Dialog)`
+  & .MuiPaper-rounded {
+    border-radius: 15px;
+  }
+`;
+
+const SubjectDialogTitle = styled(DialogTitle)`
+  display: flex;
+  justify-content: center;
+  background-color: rgba(106, 96, 169, 0.5);
+  padding-bottom: 0;
+  & > .MuiTypography-root {
+    display: flex;
+    align-items: center;
+  }
+`;
+
+const Title = styled.p`
+  font-weight: bold;
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 40px;
+`;
+
+const SubjectButton = styled(Button)`
+&.MuiButton-text{
+  color:white
+}
+`
+
+
+const SubjectDialogActions = styled(DialogActions)`
+  flex-direction: row;
+`;
+
 
 export default Mypage;
