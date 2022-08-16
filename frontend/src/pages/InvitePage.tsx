@@ -799,23 +799,28 @@ const InvitePage = () => {
               </InvitePageMsg>
 
               <InvitePageInput>
-                <FormControl variant="standard" fullWidth>
-                  <InputLabel htmlFor="component-helper" shrink>
-                    Nick Name
-                  </InputLabel>
-                  <Input
-                    id="component-helper-nickname"
-                    placeholder="닉네임을 입력해 주세요."
-                    // value={nickName}
-                    onChange={onChangeNickName}
-                    required
-                    aria-describedby="component-helper-text"
-                  />
-                </FormControl>
-                <NickNameButton onClick={nickNameCheck}>
-                  닉네임 중복체크
-                </NickNameButton>
-
+                <Grid container spacing={2}>
+                  <Grid item  xs={8} >
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                  </Grid>
+                  <Grid item  xs={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
+                  </Grid>
+                  </Grid>
                 {nickName.length > 0 && (
                   <div className={`${isNickName ? "success" : "error"}`}>
                     {nickNameError}
