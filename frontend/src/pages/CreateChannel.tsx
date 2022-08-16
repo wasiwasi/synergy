@@ -305,6 +305,8 @@ function SwipeableTextMobileStepper() {
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
       setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
       setIsGameover(true);
       setTimeout(() => {
         setIsGameover(false);
@@ -340,12 +342,14 @@ function SwipeableTextMobileStepper() {
         );
       }
     });
-  }, [session, messages]);
+  }, [session, messages, isPlaying, currentRound, subjects, examiners, scores]);
 
   useEffect(() => {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
       handleSignalWord(event)
     })
   // }, [session, myConnectionId, audiostate, videostate, isPlaying])
@@ -382,7 +386,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:time")
     session?.on("signal:time", (event: any) => {
-      setTimer(event.data);
+      //host는 time시그널을 받았을 때 동작 없음
     })
   }, [session])
 
@@ -399,9 +403,6 @@ function SwipeableTextMobileStepper() {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
       setIsCorrect(true);
-      setTimeout(() => {
-        setIsCorrect(false);
-      }, 5000)
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         setTimeout(() => {
@@ -410,7 +411,9 @@ function SwipeableTextMobileStepper() {
         }, 3000);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
-        sendSignalGameOver(); // 게임 종료됐다는 시그널
+        setTimeout(() => {
+          sendSignalGameOver(); // 게임 종료됐다는 시그널
+        }, 3000);
         setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
@@ -435,9 +438,6 @@ function SwipeableTextMobileStepper() {
       }
 
       setIsRoundover(true);
-      setTimeout(() => {
-        setIsRoundover(false);
-      }, 5000);
       
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
@@ -482,15 +482,6 @@ function SwipeableTextMobileStepper() {
       console.log("I'm not examiner")
     }
   }
-
-  useEffect(() => {
-    const mySession = session;
-    mySession?.off("signal:word");
-    mySession?.on("signal:word", (event: any) => {
-      setTimer(0);
-      handleSignalWord(event)
-    })
-  }, [session, myConnectionId, audiostate, videostate, isPlaying])
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -1197,14 +1188,14 @@ function SwipeableTextMobileStepper() {
             // margin: 10
             }}>
             {isGamestart === true ? (
-                  <GamestartMain></GamestartMain>
+              <GamestartMain></GamestartMain>
             ) : null}
-            {isCorrect ? (
-              <AlertPage text={"정답"}></AlertPage>
-            ) : isRoundover ? (
+            {isGameover ? (
+            <AlertPage text={"게임종료"}></AlertPage>
+            ) : isCorrect ? (
+            <AlertPage text={"정답"}></AlertPage>
+            ): isRoundover ? (
               <AlertPage text={"시간초과"}></AlertPage>
-            ) : isGameover ? (
-              <AlertPage text={"게임종료"}></AlertPage>
             ) : null}
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
