@@ -21,7 +21,8 @@ import styled from "@emotion/styled";
 import {Button, Grid} from "@mui/material/";
 
 import "./Signup.css";
-
+import "./modules/Gamestart.css";
+  
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Connection, OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
 import "../components/openvidu/App.css";
@@ -36,6 +37,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
 import AlertPage from "./modules/AlertPage";
+import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -147,7 +149,10 @@ function SwipeableTextMobileStepper() {
   const [isGameover, setIsGameover] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
-  
+  const [scoreMarks, setScoreMarks] = useState<string>("");
+  const [scoreExaminers, setScoreExaminers] = useState<string>("");
+
+
   const didMount = useRef(false);
   const scrollRef = useRef<null|HTMLDivElement>(null);
 
@@ -313,6 +318,9 @@ function SwipeableTextMobileStepper() {
 
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
       setIsPlaying(false);
       setIsCorrect(false);
       setIsRoundover(false);
@@ -476,12 +484,12 @@ function SwipeableTextMobileStepper() {
   const sendSignalGameOver = () => {
     let result: string = '';
 
-    for(let score in scores) {
+    for(let score of scores) {
       result += score+","
     }
     result = result.slice(0, -1) + "|";
 
-    for(let conId in examiners) {
+    for(let conId of examiners) {
       result += conId+","
     }
     result = result.slice(0, -1);
@@ -652,12 +660,10 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
+      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
         {
-          data : {
-            nickName: myUserName,
-            connectionId: myConnectionId,
-          } 
+          nickName: myUserName,
+          connectionId: myConnectionId,
         })
       .then((res) => {
         console.log("방 나가기 성공");
@@ -1253,17 +1259,22 @@ function SwipeableTextMobileStepper() {
             width: '100%',
             height: '90%',
             // margin: 10
-            }}>
-            {isGamestart === true ? (
-              <GamestartMain></GamestartMain>
-            ) : null}
-            {isGameover ? (
-            <AlertPage text={"게임종료"}></AlertPage>
-            ) : isCorrect ? (
-            <AlertPage text={"정답"}></AlertPage>
-            ): isRoundover ? (
-              <AlertPage text={"시간초과"}></AlertPage>
-            ) : null}
+                }}>
+            <div className="chbox">
+              {isGamestart === true ? (
+                <GamestartMain></GamestartMain>
+              ) : null}
+              {isGameover ? (
+                <>
+                  <AlertPage text={"게임종료"}></AlertPage>
+                  <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                </>
+              ) : isCorrect ? (
+              <AlertPage text={"정답"}></AlertPage>
+              ): isRoundover ? (
+                <AlertPage text={"시간초과"}></AlertPage>
+                    ) : null}
+            </div>
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
@@ -1415,8 +1426,7 @@ function SwipeableTextMobileStepper() {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"
