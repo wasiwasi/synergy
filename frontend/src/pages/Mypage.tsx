@@ -144,7 +144,7 @@ const Mypage = () => {
           })
           .then(() => {
             localStorage.removeItem("access-token");
-            Swal.fire("탈퇴성공!", "Your file has been deleted.", "success");
+            Swal.fire("탈퇴성공!", "success");
             navigate("/");
           });
       }
@@ -501,10 +501,11 @@ const Wrapper = styled.div`
 const ProfileHead = styled.h3`
   color: #000000;
   margin: 40px;
+
 `;
 
 const ProfileForm = styled.div`
-  width: 500px;
+  width: 600px;
   display: inline-block;
 `;
 
