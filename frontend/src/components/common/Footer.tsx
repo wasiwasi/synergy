@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, Route, BrowserRouter } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, Route, BrowserRouter,useLocation } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
@@ -11,8 +11,15 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 
+
 const Footer = () => {
+
+  const location = useLocation();
+  useEffect(()=>{
+    
+  }, [location])
   if (window.location.pathname === '/join'||window.location.pathname === '/channel/createchannel') return null;
+  
   
   return (
     <Container>
