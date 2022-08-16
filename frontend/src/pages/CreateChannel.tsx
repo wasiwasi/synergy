@@ -28,12 +28,16 @@ import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 
-import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import SettingsIcon from "@mui/icons-material/Settings";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import userEvent from '@testing-library/user-event';
+import { Shuffle } from '@mui/icons-material';
 
 import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -109,7 +113,6 @@ function SwipeableTextMobileStepper() {
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
-  let [isCorrect, setIsCorrect] = useState<boolean>(false);
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
@@ -137,6 +140,11 @@ function SwipeableTextMobileStepper() {
 
   const [hostName, sethostName] = useState<string>("");
 
+  const [isGamestart, setIsGamestart] = useState<boolean>(false);
+  const [isGameover, setIsGameover] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [isRoundover, setIsRoundover] = useState<boolean>(false);
+  
   const didMount = useRef(false);
 
   useEffect(() => {
@@ -284,6 +292,32 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     const mySession = session;
+
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      setIsPlaying(true);
+      setIsGamestart(true);
+      setTimeout(() => {
+        setIsGamestart(false);
+      }, 5000);
+    })
+
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
+      setIsGameover(true);
+      setTimeout(() => {
+        setIsGameover(false);
+      }, 5000);
+    })
+
+  }, [session]);
+  
+  useEffect(() => {
+    const mySession = session;
+
     mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
@@ -292,7 +326,6 @@ function SwipeableTextMobileStepper() {
           scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
           console.log("Correct!!")
           setScores(scores); // scores 갱신
-          setIsCorrect(true);
           setTimer(-1);
           sendSignalCorrect(event.from.connectionId); // 맞췄다고 시그널
         }
@@ -309,12 +342,14 @@ function SwipeableTextMobileStepper() {
         );
       }
     });
-  }, [session, messages]);
+  }, [session, messages, isPlaying, currentRound, subjects, examiners, scores]);
 
   useEffect(() => {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
       handleSignalWord(event)
     })
   // }, [session, myConnectionId, audiostate, videostate, isPlaying])
@@ -351,9 +386,9 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:time")
     session?.on("signal:time", (event: any) => {
-      console.log(event.data);
+      //host는 time시그널을 받았을 때 동작 없음
     })
-  }, [session, timer])
+  }, [session])
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
@@ -367,9 +402,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
-
-      setIsCorrect(false);
-
+      setIsCorrect(true);
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         setTimeout(() => {
@@ -378,7 +411,9 @@ function SwipeableTextMobileStepper() {
         }, 3000);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
-        sendSignalGameOver(); // 게임 종료됐다는 시그널
+        setTimeout(() => {
+          sendSignalGameOver(); // 게임 종료됐다는 시그널
+        }, 3000);
         setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
@@ -401,6 +436,9 @@ function SwipeableTextMobileStepper() {
         setIsCorrect(false);
         return;
       }
+
+      setIsRoundover(true);
+      
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         console.log("round:"+currentRound);
@@ -828,7 +866,6 @@ function SwipeableTextMobileStepper() {
       publisher?.publishVideo(!videostate);
       setVideostate(!videostate);
     } else {
-
       Swal.fire({
         icon: "warning",
         title: "Sorry...",
@@ -1150,6 +1187,16 @@ function SwipeableTextMobileStepper() {
             height: '90%',
             // margin: 10
             }}>
+            {isGamestart === true ? (
+              <GamestartMain></GamestartMain>
+            ) : null}
+            {isGameover ? (
+            <AlertPage text={"게임종료"}></AlertPage>
+            ) : isCorrect ? (
+            <AlertPage text={"정답"}></AlertPage>
+            ): isRoundover ? (
+              <AlertPage text={"시간초과"}></AlertPage>
+            ) : null}
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
@@ -1332,8 +1379,12 @@ export default SwipeableTextMobileStepper;
 function BasicSelect(props: any) {
   const [category, setCategory] = useState(`${props.selectData[props.index][0].id}`);
 
+  // ISSUE 
+  // 값을 변경하면 category와 round가 잘 적용되지만 한 번도 변경하지 않고 바로 게임 생성을 누르면 빈 값이 들어옴.
+  // 카테고리 초기값 화면에 바로 안뜸. 라운드는 아예 숫자가 안 뜸
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
+    console.log("event.target.value:"+event.target.value);
     if (props.index == 0) {
       props.setCategory(event.target.value)
     }

@@ -337,7 +337,7 @@ const Signup = () => {
             </SignupMsg>
 
             <SignupInput>
-              <Grid container xs={12} spacing={1}>
+              <Grid item container xs={12} spacing={1}>
                 <Grid item xs={12} sm={8}>
                   <FormControl variant="standard" fullWidth>
                     <InputLabel htmlFor="component-helper" shrink>
@@ -368,7 +368,7 @@ const Signup = () => {
             </SignupInput>
 
             <SignupInput>
-              <Grid container xs={12} spacing={1}>
+              <Grid item container xs={12} spacing={1}>
                 <Grid item xs={12} sm={8}>
                   <FormControl variant="standard" fullWidth>
                     <InputLabel htmlFor="component-helper" shrink>
