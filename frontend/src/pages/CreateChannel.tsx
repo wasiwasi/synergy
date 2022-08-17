@@ -1092,7 +1092,7 @@ function SwipeableTextMobileStepper() {
           alignItems: 'center',
           justifyContent: 'center',
           width: 900,
-          height: 568
+          height: "100vh"
       }}>
           {steps[activeStep].choice.map((step, index) => (
             <div key={index}>

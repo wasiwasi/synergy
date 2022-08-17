@@ -36,13 +36,13 @@ const HomeProduct = () => {
           <div></div>
         </Typography>
         <Typography
-          color="white"
+          color="deepskyblue"
           align="center"
-          variant="h3"
+          variant="h1"
           sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
         >
           <br></br>
-          <div> Synergy</div>
+          <div>SYNERGY</div>
         </Typography>
         {/* <Link to="/meeting-main" style={{ textDecoration: "none" }}> */}
         <Button
@@ -52,16 +52,16 @@ const HomeProduct = () => {
           sx={{ minWidth: 200 }}
           onClick={handleClick}
         >
-          <div>아이스 브레이킹~</div>
+          <div>GAME START</div>
         </Button>
 
         <Typography variant="body2" color="inherit" sx={{ mt: 2 }}></Typography>
         <Container>
         <div className="chc">
-                <div className="ddddbox">
-                  <h5>아래로 스크롤 해보세요!~</h5>
-                </div>
-              </div>
+          <div className="ddddbox">
+            <h5>아래로 스크롤 해보세요~!</h5>
+          </div>
+        </div>
         </Container>
       </HomeProductLayout>
     </ThemeProvider>

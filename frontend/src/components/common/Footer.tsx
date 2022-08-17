@@ -57,7 +57,7 @@ const Footer = () => {
             <SnsIcon href="#" target="_blank" rel="noopener noreferrer">
               <InstagramIcon></InstagramIcon>
             </SnsIcon>
-            <TwitterIcon></TwitterIcon>
+            {/* <TwitterIcon></TwitterIcon> */}
           </SnsWrapper>
         </ServiceWrapper>
       </Wrapper>
@@ -73,7 +73,7 @@ const Container = styled.footer`
   // height: 100px;
   // width: 100%;
   // padding:150px 0;
-  // background-color: #39A2DB;
+  background-color: deepSkyBlue;
   // height: 100px;
   margin-top: auto;
 `;
@@ -157,6 +157,7 @@ const HeadMsg = styled.div`
 const ServiceWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  color: white;
 `;
 
 const ServiceMsg = styled.div`
@@ -174,13 +175,13 @@ const SnsWrapper = styled.div`
 
 const SnsIcon = styled.a`
   margin-left: 10px;
-  color: #000;
+  color: white;
 
   &:first-of-type {
     margin-left: 0;
   }
   &:hover {
-    color: #000;
+    color: #3396f4;
   }
 `;
 

@@ -22,7 +22,7 @@
 .chc{
   position: relative;
   animation-name: example;
-  animation-duration: 1s;
+  animation-duration: 0.8s;
   animation-iteration-count: infinite;
   /* 이거무제한키워드 */
   /* top:200px;
