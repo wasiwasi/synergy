@@ -33,6 +33,7 @@ import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import SendIcon from '@mui/icons-material/Send';
 
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
@@ -79,6 +80,7 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+  const colors = ['orange', 'green', 'yellow', 'red'];
 
   const [accessToken, setAccessToken] = useState<string>("");
 
@@ -335,6 +337,7 @@ function SwipeableTextMobileStepper() {
       setIsCorrect(false);
       setIsRoundover(false);
       setIsGameover(true);
+      setTimer(-1);
       setTimeout(() => {
         setIsGameover(false);
       }, 5000);
@@ -962,6 +965,7 @@ function SwipeableTextMobileStepper() {
 
     setTimeout(() => {
       setIsPlaying(true);
+      setIsGameover(false);
       setTimer(INITIAL_TIME);
       setCurrentRound(0);
       initExaminerAndScores().then(
@@ -1067,14 +1071,17 @@ function SwipeableTextMobileStepper() {
             justifyContent: 'center',
             height: 50,
             pl: 2,
-            bgcolor: 'background.default',
+            pt: 10,
+            pb: 3,
+            backgroundColor: 'lightCyan',
           }}
         >
           <Typography
           sx={{
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: 'deepSkyBlue',
           }}><div>{steps[activeStep].label}</div></Typography>
         </Paper>
         <div style={{ 
@@ -1094,7 +1101,7 @@ function SwipeableTextMobileStepper() {
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
                   sx={{
-                    bgcolor: 'info.main',
+                    bgcolor: colors[index],
                     color: 'white',
                     height: 300,
                     margin: 2,
@@ -1103,7 +1110,7 @@ function SwipeableTextMobileStepper() {
                     width: 400,
                     zIndex: 1,
                   }}>
-                  {steps[activeStep].choice[index]}
+                  <div>{steps[activeStep].choice[index]}</div>
                 </Button> : 
                 <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
                 setInfo = {setInfo}
@@ -1123,7 +1130,8 @@ function SwipeableTextMobileStepper() {
             display: 'flex',
             justifyContent: 'space-between',
             maxWidth: 1000,
-            width: '100%'
+            width: '100%',
+            backgroundColor: 'lightcyan'
           }}
           steps={maxSteps}
           position="static"
@@ -1134,7 +1142,7 @@ function SwipeableTextMobileStepper() {
                 size="small"
                 onClick={handleCreateRoom}
               >
-                게임 생성
+                <div>게임 생성</div>
                 {theme.direction === 'rtl' ? (
                   <KeyboardArrowLeft />
                 ) : (
@@ -1145,7 +1153,7 @@ function SwipeableTextMobileStepper() {
             size="small"
             disabled= {true}
             >
-            게임 생성
+            <div>게임 생성</div>
             {theme.direction === 'rtl' ? (
               <KeyboardArrowLeft />
             ) : (
@@ -1160,7 +1168,7 @@ function SwipeableTextMobileStepper() {
               ) : (
                 <KeyboardArrowLeft />
               )}
-              이전
+              <div>이전</div>
             </Button>
           }
         />
@@ -1308,13 +1316,13 @@ function SwipeableTextMobileStepper() {
                     <Button
                       onClick={initGame}
                     >
-                      게임 시작
+                      <div>게임 시작</div>
                     </Button>
                   ) : (
                     <Button
                       onClick={sendSignalGameOver}
                     >
-                      게임 종료
+                       <div>게임 종료</div>
                     </Button>
                   )
                 }
@@ -1423,6 +1431,7 @@ function SwipeableTextMobileStepper() {
                     <Box
                       sx={{
                         border: 6,
+                        borderRadius: 4,
                         borderColor: 'limegreen',
                         height: '100.8%'
                       }}>
@@ -1451,9 +1460,9 @@ function SwipeableTextMobileStepper() {
               height: '10%',
               display: 'flex',
               justifyContent: 'space-evenly',
-              alignItems: 'center'
+              alignItems: 'center',
+              marginTop: 3
             }}>
-           <Button><SettingsIcon /></Button>
             
             <Button
               onClick={reverseAudioState}>
@@ -1490,27 +1499,29 @@ function SwipeableTextMobileStepper() {
         <Box id='chat' 
           sx={{
           width: '25%',
-          height: '100%'
+          height: '95%',
+          paddingRight: 2
           // margin: 10
         }}>
          
           <Box className="chatspace" 
           sx={{
-            backgroundColor: '#ddd', 
+            backgroundColor: 'skyblue', 
             width: '100%', 
-            height: '70%', 
-            borderRadius: '20px'
+            height: '100%', 
+            borderRadius: 3
           }}
         >
           <h3 style={{paddingTop: '5px'}}>채팅</h3>
           <Box 
           className="chatbox__messages" 
           sx={{
-            backgroundColor: '#A8C0D6', 
+            backgroundColor: 'white',
+            boxShadow: 'inset 3px 3px 3px',
             margin: 'auto', 
             width: '90%', 
-            height: '75%', 
-            borderRadius: '20px', 
+            height: '80%', 
+            borderRadius: 3, 
             overflow: 'auto'
             }}
           >
@@ -1520,19 +1531,18 @@ function SwipeableTextMobileStepper() {
             <input
               id="chat_message"
               type="text"
-              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
-              placeholder="Write a message..."
+              style={{margin: '15px', width:'70%', borderRadius: 8, borderStyle: 'solid', borderColor: '#ddd'}}
+              placeholder="  메시지를 입력해주세요."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <Button
+            <Button><SendIcon
               className="chatbox__send--footer"
-              sx={{borderRadius: '20px', border: 'none'}}
+              // sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
-              Enter
-            </Button></Box>
+            </SendIcon></Button></Box>
           </Box>
           </Box></Box>
         ) : null}
@@ -1559,8 +1569,14 @@ function BasicSelect(props: any) {
     <Box sx={{ minWidth: 120,
     width: 560 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
+        <InputLabel id="demo-simple-select-label"
+          sx={{
+            fontWeight: 'bold',
+            }}>{steps[2].choice[props.index]}</InputLabel>
         <Select
+          sx={{
+            backgroundColor: 'white',
+          }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           value={category}
@@ -1586,7 +1602,12 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  background: lightCyan;
 `;
+
+// const Create = styled.div`
+//   padding: 3em 0 0;
+// `;
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -1652,7 +1673,7 @@ function BasicModal() {
 
   return (
     <div>
-      <Button onClick={handleOpen}>게임 방법</Button>
+      <Button onClick={handleOpen}><div>게임 방법</div></Button>
       <Modal
         open={open}
         onClose={handleClose}
