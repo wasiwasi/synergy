@@ -35,6 +35,8 @@ const HomePage = () => {
   );
 };
 
-const Container = styled.div``;
+const Container = styled.div`
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
 
 export default HomePage;

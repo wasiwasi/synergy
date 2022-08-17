@@ -80,6 +80,7 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+  const colors = ['orange', 'green', 'yellow', 'red'];
 
   const [accessToken, setAccessToken] = useState<string>("");
 
@@ -121,7 +122,19 @@ function SwipeableTextMobileStepper() {
   let [categoryName, setCategoryName] = useState<string>("");
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
+  const [participantList, setParticipantList] = useState(new Map());
+  const [correctorName, setCorrectorName] = useState<string>("");
 
+  const getParticipantList = (channelId: string) => {
+    axios.get(`${BE_URL}/api/channels/info/${channelId}`)
+    .then((res) => {
+      let temp = res.data.participantList;
+        
+      temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
+        setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
+      });
+    });
+  };
   const emptyAllOV = () => {
     setOV(null);
     setSession(undefined);
@@ -429,8 +442,11 @@ function SwipeableTextMobileStepper() {
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
+
+    const nickname = participantList.get(connectionId);
+
     session?.signal({
-      data: connectionId,
+      data: connectionId + "," + nickname,
       to: [],
       type: "correct"
     })
@@ -439,6 +455,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
+      setCorrectorName(event.data.split(",")[1]);
       setIsCorrect(true);
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
@@ -491,6 +508,17 @@ function SwipeableTextMobileStepper() {
       }
     })
   }, [session, isCorrect, currentRound, subjects, examiners])
+
+  useEffect(() => {
+    // 참가자 닉네임과 커넥션을 받아옴
+    if (streamManagers.length === 0) {
+      return;
+    }
+    // 서버와 동기되는 시간 유예
+    setTimeout(() => {
+      getParticipantList(mySessionId as string);
+    }, 1000);
+  }, [streamManagers])
 
   const sendSignalGameOver = () => {
     let result: string = '';
@@ -1043,15 +1071,18 @@ function SwipeableTextMobileStepper() {
             justifyContent: 'center',
             height: 50,
             pl: 2,
-            bgcolor: 'background.default',
+            pt: 10,
+            pb: 3,
+            backgroundColor: 'lightCyan',
           }}
         >
           <Typography
           sx={{
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
-          }}>{steps[activeStep].label}</Typography>
+            fontWeight: 'bold',
+            color: 'deepSkyBlue',
+          }}><div>{steps[activeStep].label}</div></Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
@@ -1070,7 +1101,7 @@ function SwipeableTextMobileStepper() {
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
                   sx={{
-                    bgcolor: 'info.main',
+                    bgcolor: colors[index],
                     color: 'white',
                     height: 300,
                     margin: 2,
@@ -1079,7 +1110,7 @@ function SwipeableTextMobileStepper() {
                     width: 400,
                     zIndex: 1,
                   }}>
-                  {steps[activeStep].choice[index]}
+                  <div>{steps[activeStep].choice[index]}</div>
                 </Button> : 
                 <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
                 setInfo = {setInfo}
@@ -1099,7 +1130,8 @@ function SwipeableTextMobileStepper() {
             display: 'flex',
             justifyContent: 'space-between',
             maxWidth: 1000,
-            width: '100%'
+            width: '100%',
+            backgroundColor: 'lightcyan'
           }}
           steps={maxSteps}
           position="static"
@@ -1110,7 +1142,7 @@ function SwipeableTextMobileStepper() {
                 size="small"
                 onClick={handleCreateRoom}
               >
-                게임 생성
+                <div>게임 생성</div>
                 {theme.direction === 'rtl' ? (
                   <KeyboardArrowLeft />
                 ) : (
@@ -1121,7 +1153,7 @@ function SwipeableTextMobileStepper() {
             size="small"
             disabled= {true}
             >
-            게임 생성
+            <div>게임 생성</div>
             {theme.direction === 'rtl' ? (
               <KeyboardArrowLeft />
             ) : (
@@ -1136,7 +1168,7 @@ function SwipeableTextMobileStepper() {
               ) : (
                 <KeyboardArrowLeft />
               )}
-              이전
+              <div>이전</div>
             </Button>
           }
         />
@@ -1335,7 +1367,7 @@ function SwipeableTextMobileStepper() {
                 ) : isRank ? (
                 <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
                 ):isCorrect ? (
-                <AlertPage text={"정답"}></AlertPage>
+                <AlertPage text={correctorName + "님 정답"}></AlertPage>
                 ): isRoundover ? (
                 <AlertPage text={"시간초과"}></AlertPage>
                     ) : null}
@@ -1399,6 +1431,7 @@ function SwipeableTextMobileStepper() {
                     <Box
                       sx={{
                         border: 6,
+                        borderRadius: 4,
                         borderColor: 'limegreen',
                         height: '100.8%'
                       }}>
@@ -1473,8 +1506,7 @@ function SwipeableTextMobileStepper() {
          
           <Box className="chatspace" 
           sx={{
-            borderStyle: 'solid',
-            borderColor: '#ddd', 
+            backgroundColor: 'skyblue', 
             width: '100%', 
             height: '100%', 
             borderRadius: 3
@@ -1484,7 +1516,8 @@ function SwipeableTextMobileStepper() {
           <Box 
           className="chatbox__messages" 
           sx={{
-            backgroundColor: '#A8C0D6', 
+            backgroundColor: 'white',
+            boxShadow: 'inset 3px 3px 3px',
             margin: 'auto', 
             width: '90%', 
             height: '80%', 
@@ -1536,8 +1569,14 @@ function BasicSelect(props: any) {
     <Box sx={{ minWidth: 120,
     width: 560 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
+        <InputLabel id="demo-simple-select-label"
+          sx={{
+            fontWeight: 'bold',
+            }}>{steps[2].choice[props.index]}</InputLabel>
         <Select
+          sx={{
+            backgroundColor: 'white',
+          }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           value={category}
@@ -1563,7 +1602,12 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  background: lightCyan;
 `;
+
+// const Create = styled.div`
+//   padding: 3em 0 0;
+// `;
 
 const style = {
   position: 'absolute' as 'absolute',
