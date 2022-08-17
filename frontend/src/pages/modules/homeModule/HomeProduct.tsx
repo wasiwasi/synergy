@@ -33,16 +33,16 @@ const HomeProduct = () => {
       >
         <img style={{ display: "none" }} src={img} alt="increase priority" />
         <Typography color="inherit" align="center" variant="h1">
-          <div>Synergy</div>
+          <div></div>
         </Typography>
         <Typography
-          color="black"
+          color="white"
           align="center"
           variant="h3"
           sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
         >
           <br></br>
-          <div>우리함께 즐겨봐요!</div>
+          <div> Synergy</div>
         </Typography>
         {/* <Link to="/meeting-main" style={{ textDecoration: "none" }}> */}
         <Button
@@ -54,10 +54,15 @@ const HomeProduct = () => {
         >
           <div>아이스 브레이킹~</div>
         </Button>
-        {/* </Link> */}
 
         <Typography variant="body2" color="inherit" sx={{ mt: 2 }}></Typography>
-        <Container></Container>
+        <Container>
+        <div className="chc">
+                <div className="ddddbox">
+                  <h5>아래로 스크롤 해보세요!~</h5>
+                </div>
+              </div>
+        </Container>
       </HomeProductLayout>
     </ThemeProvider>
   );
