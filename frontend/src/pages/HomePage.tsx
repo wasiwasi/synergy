@@ -10,7 +10,7 @@ import HomeProduct from "./modules/homeModule/HomeProduct";
 import HomeProduct2 from "./modules/homeModule/HomeProduct2";
 import HomeProduct3 from "./modules/homeModule/HomeProduct3";
 import ScrollToTopButton from "./modules/homeModule/ScrollToTop";
-// import "./modules/homeModule/Home.css";
+import "./modules/homeModule/HomeProduct.css";
 
 const HomePage = () => {
   AOS.init();
