@@ -1084,7 +1084,7 @@ function SwipeableTextMobileStepper() {
             fontSize: 'h4.fontSize',
             fontWeight: 'bold',
             color: 'deepSkyBlue',
-          }}><>{steps[activeStep].label}</></Typography>
+          }}><span>{steps[activeStep].label}</span></Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
@@ -1092,7 +1092,7 @@ function SwipeableTextMobileStepper() {
           alignItems: 'center',
           justifyContent: 'center',
           width: 900,
-          height: 568
+          height: "80vh",
       }}>
           {steps[activeStep].choice.map((step, index) => (
             <div key={index}>
@@ -1635,7 +1635,7 @@ const Container = styled.div`
   // align-self: center;
   // top: 0;
   // left: 0;
-  // height: 60px;
+  height: 100vh;
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
