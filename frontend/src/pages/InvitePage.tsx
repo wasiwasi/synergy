@@ -536,29 +536,15 @@ const InvitePage = () => {
   };
 
   const sendMessageByClick = () => {
-    if (message !== "") {
-      setMessages([
-        ...messages,
-        {
-          userName: myUserName,
-          text: message,
-          boxClass: "messages__box--operator",
-        },
-      ]);
-      setMessage("");
-      const mySession = session;
-
-      mySession?.signal({
-        data: `${myUserName},${message}`,
-        to: [],
-        type: "chat",
+    if(isExaminer === true) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
       });
-    }
-  };
-
-  const sendMessageByEnter = (e: any) => {
-    if (e.key === "Enter") {
-      if (message !== "") { 
+    } else {
+      if (message !== "") {
         setMessages([
           ...messages,
           {
@@ -575,6 +561,38 @@ const InvitePage = () => {
           to: [],
           type: "chat",
         });
+      }
+    }
+  };
+
+  const sendMessageByEnter = (e: any) => {
+    if(isExaminer === true) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
+      });
+    } else {
+      if (e.key === "Enter") {
+        if (message !== "") { 
+          setMessages([
+            ...messages,
+            {
+              userName: myUserName,
+              text: message,
+              boxClass: "messages__box--operator",
+            },
+          ]);
+          setMessage("");
+          const mySession = session;
+
+          mySession?.signal({
+            data: `${myUserName},${message}`,
+            to: [],
+            type: "chat",
+          });
+        }
       }
     }
   };
@@ -1331,7 +1349,7 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <Container>
+    <div>
       <Button onClick={handleOpen}><span>게임 방법</span></Button>
       <Dialog
         open={open}
@@ -1340,14 +1358,14 @@ function BasicModal() {
         aria-describedby="modal-modal-description"
       >
           <DialogTitle>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography id="modal-modal-title" variant="h6" component="span">
             <div>
             몸으로 말해요
             </div>
           </Typography>
           </DialogTitle>
           <DialogContent>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }} component="span">
             <div>            
               1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
             2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
@@ -1360,7 +1378,7 @@ function BasicModal() {
 
           </DialogContent>
       </Dialog>
-    </Container>
+    </div>
   );
 }
 
