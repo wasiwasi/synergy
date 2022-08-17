@@ -80,6 +80,7 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+  const colors = ['orange', 'green', 'yellow', 'red'];
 
   const [accessToken, setAccessToken] = useState<string>("");
 
@@ -1043,14 +1044,17 @@ function SwipeableTextMobileStepper() {
             justifyContent: 'center',
             height: 50,
             pl: 2,
-            bgcolor: 'background.default',
+            pt: 10,
+            pb: 3,
+            backgroundColor: 'lightCyan',
           }}
         >
           <Typography
           sx={{
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            color: 'deepSkyBlue',
           }}>{steps[activeStep].label}</Typography>
         </Paper>
         <div style={{ 
@@ -1070,7 +1074,7 @@ function SwipeableTextMobileStepper() {
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
                   sx={{
-                    bgcolor: 'info.main',
+                    bgcolor: colors[index],
                     color: 'white',
                     height: 300,
                     margin: 2,
@@ -1099,7 +1103,8 @@ function SwipeableTextMobileStepper() {
             display: 'flex',
             justifyContent: 'space-between',
             maxWidth: 1000,
-            width: '100%'
+            width: '100%',
+            backgroundColor: 'lightcyan'
           }}
           steps={maxSteps}
           position="static"
@@ -1399,6 +1404,7 @@ function SwipeableTextMobileStepper() {
                     <Box
                       sx={{
                         border: 6,
+                        borderRadius: 4,
                         borderColor: 'limegreen',
                         height: '100.8%'
                       }}>
@@ -1473,8 +1479,7 @@ function SwipeableTextMobileStepper() {
          
           <Box className="chatspace" 
           sx={{
-            borderStyle: 'solid',
-            borderColor: '#ddd', 
+            backgroundColor: 'skyblue', 
             width: '100%', 
             height: '100%', 
             borderRadius: 3
@@ -1484,7 +1489,8 @@ function SwipeableTextMobileStepper() {
           <Box 
           className="chatbox__messages" 
           sx={{
-            backgroundColor: '#A8C0D6', 
+            backgroundColor: 'white',
+            boxShadow: 'inset 3px 3px 3px',
             margin: 'auto', 
             width: '90%', 
             height: '80%', 
@@ -1536,8 +1542,14 @@ function BasicSelect(props: any) {
     <Box sx={{ minWidth: 120,
     width: 560 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
+        <InputLabel id="demo-simple-select-label"
+          sx={{
+            fontWeight: 'bold',
+            }}>{steps[2].choice[props.index]}</InputLabel>
         <Select
+          sx={{
+            backgroundColor: 'white',
+          }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           value={category}
@@ -1563,7 +1575,12 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  background: lightCyan;
 `;
+
+// const Create = styled.div`
+//   padding: 3em 0 0;
+// `;
 
 const style = {
   position: 'absolute' as 'absolute',
