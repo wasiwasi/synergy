@@ -12,17 +12,16 @@
   /* top: 0; */
   /* left: 50px; */
   text-align: center;
-  width: 100%;
   position: relative;
 }
 
 .chbox {
-  width: 100vw;
+  width: 50%;
   height: 10vh;
   position: absolute;
   top: 40%;
   left: 30%;
-
+  z-index: 999;
   /* background-color: blue; */
   /* text-align: center; */
   /* margin: auto; */
