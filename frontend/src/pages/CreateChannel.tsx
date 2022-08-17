@@ -1083,7 +1083,7 @@ function SwipeableTextMobileStepper() {
                     width: 400,
                     zIndex: 1,
                   }}>
-                  {steps[activeStep].choice[index]}
+                  <div>{steps[activeStep].choice[index]}</div>
                 </Button> : 
                 <BasicSelect index = { index } steps = { steps } activeStep = {activeStep}
                 setInfo = {setInfo}
@@ -1115,7 +1115,7 @@ function SwipeableTextMobileStepper() {
                 size="small"
                 onClick={handleCreateRoom}
               >
-                게임 생성
+                <div>게임 생성</div>
                 {theme.direction === 'rtl' ? (
                   <KeyboardArrowLeft />
                 ) : (
@@ -1126,7 +1126,7 @@ function SwipeableTextMobileStepper() {
             size="small"
             disabled= {true}
             >
-            게임 생성
+            <div>게임 생성</div>
             {theme.direction === 'rtl' ? (
               <KeyboardArrowLeft />
             ) : (
@@ -1141,7 +1141,7 @@ function SwipeableTextMobileStepper() {
               ) : (
                 <KeyboardArrowLeft />
               )}
-              이전
+              <div>이전</div>
             </Button>
           }
         />
