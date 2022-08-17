@@ -323,6 +323,7 @@ function SwipeableTextMobileStepper() {
       setIsCorrect(false);
       setIsRoundover(false);
       setIsGameover(true);
+      setTimer(-1);
       setTimeout(() => {
         setIsGameover(false);
       }, 5000);
@@ -935,6 +936,7 @@ function SwipeableTextMobileStepper() {
 
     setTimeout(() => {
       setIsPlaying(true);
+      setIsGameover(false);
       setTimer(INITIAL_TIME);
       setCurrentRound(0);
       initExaminerAndScores().then(
