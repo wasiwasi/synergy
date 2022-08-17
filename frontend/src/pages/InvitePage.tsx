@@ -873,7 +873,7 @@ const InvitePage = () => {
         <ThemeProvider theme={themeA306}>
           {session === undefined ? (
             <InvitePageForm>
-              <InvitePageHead>Brand</InvitePageHead>
+              <InvitePageHead>SYNERGY</InvitePageHead>
 
               <InvitePageMsg>
                 {hostName} 님의 방에 입장하시겠습니까?

@@ -1,19 +1,11 @@
-// import { log } from "console";
 
 import styled from "@emotion/styled";
-import { Preview } from "@mui/icons-material";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Input,
-  List,
-  ListItem,
-  Modal,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -60,8 +52,7 @@ function ScoreRate(props: {
   channelId: string;
 }) {
   const [participantList, setParticipantList] = useState(new Map());
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
   const [orderList, setOrderList] = useState<string[]>([]);
   const [examinerList, setExaminerList] = useState<string[]>([]);
@@ -143,7 +134,6 @@ function ScoreRate(props: {
 
   return (
     <Container>
-      <Button onClick={handleOpen}>랭크 오픈</Button>
       <RankDialog
           fullWidth
           open={open}
@@ -201,33 +191,6 @@ function ScoreRate(props: {
             </RankDialogActions>
           </RankDialogContent>
         </RankDialog>
-      {/* <Modal open={open} onClose={handleClose}>
-        <TableContainer component={Paper}>
-          <Table sx={style} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>등수</TableCell>
-                <TableCell>점수</TableCell>
-                <TableCell>nickname</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {result.map((val, idx) => (
-                <TableRow
-                  key={val.index}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {idx + 1}
-                  </TableCell>
-                  <TableCell>{val.score}</TableCell>
-                  <TableCell >{orderList[val.index]}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Modal> */}
     </Container>
   );
 }
