@@ -33,6 +33,7 @@ import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import SendIcon from '@mui/icons-material/Send';
 
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
@@ -1171,7 +1172,7 @@ function SwipeableTextMobileStepper() {
           <div id="session-header"> */}
               <h1 id="session-title">{mySessionId}</h1>
               <div>
-                <Button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</Button>
+                <Button onClick={handleCopyClipBoard}><div>초대 링크 복사하기 📋</div></Button>
               </div>
               </Box>
               <Paper id='info'
@@ -1236,13 +1237,13 @@ function SwipeableTextMobileStepper() {
                     <Button
                       onClick={initGame}
                     >
-                      게임 시작
+                      <div>게임 시작</div>
                     </Button>
                   ) : (
                     <Button
                       onClick={sendSignalGameOver}
                     >
-                      게임 종료
+                       <div>게임 종료</div>
                     </Button>
                   )
                 }
@@ -1379,9 +1380,9 @@ function SwipeableTextMobileStepper() {
               height: '10%',
               display: 'flex',
               justifyContent: 'space-evenly',
-              alignItems: 'center'
+              alignItems: 'center',
+              marginTop: 3
             }}>
-           <Button><SettingsIcon /></Button>
             
             <Button
               onClick={reverseAudioState}>
@@ -1418,16 +1419,18 @@ function SwipeableTextMobileStepper() {
         <Box id='chat' 
           sx={{
           width: '25%',
-          height: '100%'
+          height: '95%',
+          paddingRight: 2
           // margin: 10
         }}>
          
           <Box className="chatspace" 
           sx={{
-            backgroundColor: '#ddd', 
+            borderStyle: 'solid',
+            borderColor: '#ddd', 
             width: '100%', 
-            height: '70%', 
-            borderRadius: '20px'
+            height: '100%', 
+            borderRadius: 3
           }}
         >
           <h3 style={{paddingTop: '5px'}}>채팅</h3>
@@ -1437,8 +1440,8 @@ function SwipeableTextMobileStepper() {
             backgroundColor: '#A8C0D6', 
             margin: 'auto', 
             width: '90%', 
-            height: '75%', 
-            borderRadius: '20px', 
+            height: '80%', 
+            borderRadius: 3, 
             overflow: 'auto'
             }}
           >
@@ -1448,19 +1451,18 @@ function SwipeableTextMobileStepper() {
             <input
               id="chat_message"
               type="text"
-              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
-              placeholder="Write a message..."
+              style={{margin: '15px', width:'70%', borderRadius: 8, borderStyle: 'solid', borderColor: '#ddd'}}
+              placeholder="  메시지를 입력해주세요."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <Button
+            <Button><SendIcon
               className="chatbox__send--footer"
-              sx={{borderRadius: '20px', border: 'none'}}
+              // sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
-              Enter
-            </Button></Box>
+            </SendIcon></Button></Box>
           </Box>
           </Box></Box>
         ) : null}
@@ -1538,7 +1540,7 @@ function BasicModal() {
 
   return (
     <div>
-      <Button onClick={handleOpen}>게임 방법</Button>
+      <Button onClick={handleOpen}><div>게임 방법</div></Button>
       <Modal
         open={open}
         onClose={handleClose}

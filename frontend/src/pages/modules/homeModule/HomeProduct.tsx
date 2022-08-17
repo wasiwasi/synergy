@@ -32,8 +32,8 @@ const HomeProduct = () => {
         }}
       >
         <img style={{ display: "none" }} src={img} alt="increase priority" />
-        <Typography color="black" align="center" variant="h1">
-          Synergy
+        <Typography color="inherit" align="center" variant="h1">
+          <div>Synergy</div>
         </Typography>
         <Typography
           color="black"
@@ -42,7 +42,7 @@ const HomeProduct = () => {
           sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
         >
           <br></br>
-          우리함께 즐겨봐요!
+          <div>우리함께 즐겨봐요!</div>
         </Typography>
         {/* <Link to="/meeting-main" style={{ textDecoration: "none" }}> */}
         <Button
@@ -52,7 +52,7 @@ const HomeProduct = () => {
           sx={{ minWidth: 200 }}
           onClick={handleClick}
         >
-          아이스 브레이킹~
+          <div>아이스 브레이킹~</div>
         </Button>
         {/* </Link> */}
 
