@@ -199,9 +199,9 @@ const Container = styled.div``;
 
 const RankDialogContent = styled(DialogContent)`
   display: flex;
-  color: white;
+  color: black;
   flex-direction: column;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: white;
 `;
 
 const RankDialogContentText = styled(DialogContentText)``;
@@ -211,7 +211,7 @@ const RankDialogActions = styled(DialogActions)`
 `;
 
 const RankRecordContainer = styled(Table)`
-  color: white;
+  color: black;
   display: flex;
 `;
 // modal
@@ -226,7 +226,7 @@ const RankDialog = styled(Dialog)`
 const RankDialogTitle = styled(DialogTitle)`
   display: flex;
   justify-content: center;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: #white;
   padding-bottom: 0;
   & > .MuiTypography-root {
     display: flex;
@@ -238,7 +238,7 @@ const CustomTableCell = styled(TableCell)`
 `;
 const CancelButton = styled(CloseIcon)`
   cursor: pointer;
-  color: white;
+  color: black;
   justify-self: flex-end;
 `;
 const BodyTableCell = styled(TableCell)`
@@ -248,7 +248,7 @@ const BodyTableCell = styled(TableCell)`
 const Title = styled.p`
   font-weight: bold;
   font-size: 2rem;
-  color: white;
+  color: black;
   margin-bottom: 40px;
 `;
 
