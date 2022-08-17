@@ -30,7 +30,9 @@ import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 
 import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import SendIcon from '@mui/icons-material/Send';
@@ -1464,33 +1466,61 @@ function SwipeableTextMobileStepper() {
               marginTop: 3
             }}>
             
-            <Button
-              onClick={reverseAudioState}>
-                  {audiostate ? (
-                    <MicOutlinedIcon
-                      color='success' />
-                  ) : (
-                    <MicOutlinedIcon
-                      color='disabled' />
-                  )}
-            </Button>
-            <Button
+            
+            {audiostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOutlinedIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>끄기</p> */}
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>켜기</p> */}
+              </Button>
+            )}
+            {videostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
                 onClick={reverseVideoState}>
-                {videostate ? (
-                  <VideocamIcon 
-                  color='success'
-                  />
-                ) : (
-                  <VideocamIcon 
-                  color='disabled'
-                  />
-                )}
-            </Button>                                    
+                <VideocamIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseVideoState}>
+                <VideocamOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            )}                                  
           <Button
+            variant='contained'
+            color='error'
           onClick={leaveSession}>
             <ExitToAppIcon
-              color='error' 
+              sx={{
+                color: 'white'
+              }} 
             />
+            <p style={{ color: 'white' }}>나가기</p>
           </Button>
 
           
