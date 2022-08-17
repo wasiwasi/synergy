@@ -26,7 +26,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { constants } from "buffer";
 
 import Grid from "@mui/material/Grid"; // Grid version 1
-import Grid2 from "@mui/material/Unstable_Grid2"; // Grid version 2
+
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+
+import Swal from "sweetalert2";
+import { Label } from "@mui/icons-material";
+import ScoreRate from "./modules/ScoreRate";
+import { Table, TableCell } from "@mui/material";
 
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -77,7 +85,9 @@ const Mypage = () => {
       bodytalkList: [],
     },
   ]);
+  const [gameTitle, setGameTitle] = useState("");
   const [wordList, setWordList] = useState([{ id: 1, word: "" }]);
+
 
   const handletWordAdd = () => {
     let list = [...wordList];
@@ -91,17 +101,15 @@ const Mypage = () => {
 
     setWordList(newlist);
   };
-  const handleWordChange = (
-    id: number,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    // const idx = wordList.findIndex((w) => w.word === word);
-    let list = [...wordList] as any;
-    const idx = wordList.findIndex((w) => w.id === id);
-    const { name, value } = event.target;
-    list[idx][name] = value;
-    setWordList(list);
-  };
+  const handleWordChange =
+    (id: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      // const idx = wordList.findIndex((w) => w.word === word);
+      let list = [...wordList] as any;
+      const idx = wordList.findIndex((w) => w.id === id);
+      const { name, value } = event.target;
+      list[idx][name] = value;
+      setWordList(list);
+    };
 
   const handleSubjectName = (event: React.ChangeEvent<HTMLInputElement>) => {
     const sj = {
@@ -116,23 +124,36 @@ const Mypage = () => {
 
   const onUserDelete = () => {
     let token = localStorage.getItem("access-token");
-    if (window.confirm("정말 탈퇴하시겠습니까?")) {
-      axios
-        .delete(`${BE_URL}/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(() => {
-          localStorage.removeItem("access-token");
-          navigate("/");
-        });
-    }
+
+    Swal.fire({
+      title: "정말 탈퇴하시겠습니까?",
+      text: "탈퇴하면 되돌릴 수 없습니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "취소하기",
+      confirmButtonText: "예, 탈퇴 하겠습니다",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/users`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(() => {
+            localStorage.removeItem("access-token");
+            Swal.fire("탈퇴성공!", "success");
+            navigate("/");
+          });
+      }
+    });
   };
 
   const createSubject = () => {
     const st = subjectSet.subjectName;
-    const gameTitle = "bodytalk";
+    // const gameTitle = "bodytalk";
     let wordSet = [...wordList];
     let bodyTalk = subjectSet.bodytalkList;
     wordSet.map((word, idx) => {
@@ -141,7 +162,7 @@ const Mypage = () => {
 
     const sj = {
       subjectName: st,
-      gameTitle: "bodytalk",
+      gameTitle: gameTitle,
       bodytalkList: bodyTalk,
     };
 
@@ -153,7 +174,7 @@ const Mypage = () => {
         `${BE_URL}/subjects/create`,
         {
           subjectName: subjectSet.subjectName,
-          gameTitle: "bodytalk",
+          gameTitle: gameTitle,
           bodytalkList: subjectSet.bodytalkList,
         },
         {
@@ -177,6 +198,7 @@ const Mypage = () => {
   };
 
   const getMypage = () => {
+
     let token = localStorage.getItem("access-token");
     axios
       .get(`${BE_URL}/users`, {
@@ -199,18 +221,33 @@ const Mypage = () => {
   };
 
   const removeSubject = (id: number) => {
-    // console.log(id);
-
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+
+    Swal.fire({
+      title: `${id} 번 문제집을 정말 삭제하시겠습니까?`,
+      text: "문제집을 한번 삭제하면 취소 할 수 없습니다!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예 삭제하겠습니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "문제집이 삭제되었습니다.", "success");
+      }
+    });
+
+    //삭제 로직 추가하기 -- 0813 ming
   };
 
   useEffect(() => {
@@ -227,19 +264,50 @@ const Mypage = () => {
     setWordList([{ id: 1, word: "" }]);
     setDialogOpen(false);
   };
+  const handleGameTitle = (event: SelectChangeEvent) => {
+    setGameTitle(event.target.value);
+  };
 
   const handelDelteAllSubject = () => {
     let token = localStorage.getItem("access-token");
-    axios
-      .delete(`${BE_URL}/subjects`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        getMypage();
-      });
+    Swal.fire({
+      title: "모든 문제집을 삭제하시겠습니까?",
+      text: "한번 삭제한 문제집들은 복구가 불가능합니다",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "예, 전부 삭제합니다",
+      cancelButtonText: "취소하기",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`${BE_URL}/subjects`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((res) => {
+            getMypage();
+          });
+        Swal.fire("Deleted!", "전부다 삭제하였습니다!", "success");
+      }
+    });
   };
+
+  const addWordByEnter =(e:any)=>{
+    if(e.key==="Enter"){
+    let list = [...wordList];
+    let len = list.length + 1;
+    list.push({ id: len, word: "" });
+    setWordList(list);
+    }
+  }
+  // const [marks, setMarks] = useState("100, 200, 10, 1");
+    
+  //   const [examiners, setExaminers] = useState(
+  //     "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
+  //   );
 
   // constMypage HomePage: React.FC = () => {
   return (
@@ -260,6 +328,9 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
@@ -273,12 +344,15 @@ const Mypage = () => {
                 inputProps={{
                   readOnly: true,
                 }}
+                sx={{
+                  minWidth: 250,
+                }}
                 aria-describedby="component-helper-text"
               />
             </ProfileInput>
             <br />
-            <Grid container spacing={3}>
-              <Grid xs={4}>
+            <Grid container spacing={2}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
@@ -289,24 +363,24 @@ const Mypage = () => {
                 </Button>
               </Grid>
 
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handleClickOpen}
                 >
-                  문제집 생성하기
+                  문제집 생성
                 </Button>
               </Grid>
-              <Grid xs={4}>
+              <Grid item sm={4}>
                 <Button
                   variant="contained"
                   size="medium"
                   fullWidth
                   onClick={handelDelteAllSubject}
                 >
-                  문제집 전부 삭제하기
+                  문제집 전부 삭제
                 </Button>
               </Grid>
             </Grid>
@@ -314,12 +388,15 @@ const Mypage = () => {
             <Box
               sx={{ width: "100%", height: 400, bgcolor: "background.paper" }}
             >
-              <Dialog open={dialogOpen} onClose={handleClose}>
-                <DialogTitle>문제집 작성하기</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
+              <SubjectDialog open={dialogOpen} onClose={handleClose}>
+                <SubjectDialogTitle>
+                  <Title>
+                  문제집 작성하기
+                  </Title></SubjectDialogTitle>
+                <SubjectDialogContent>
+                  <SubjectDialogContentText>
                     원하는 문제를 작성하세요.
-                  </DialogContentText>
+                  </SubjectDialogContentText>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -330,32 +407,67 @@ const Mypage = () => {
                     variant="standard"
                     onChange={handleSubjectName}
                   />
+                  <FormControl 
+                  // sx={{ m: 1, minWidth: 150 }}
+                  >
+                    <InputLabel>GameTitle</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple"
+                      label="GameTitle"
+                      value={gameTitle}
+                      onChange={handleGameTitle}
+                    >
+                      <MenuItem value={"bodytalk"}>몸으로 말해요</MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        골든벨
+                      </MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        라이어게임
+                      </MenuItem>
+                      <MenuItem disabled value={"goldenball"}>
+                        고요속의 외침
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+
                   {wordList.map((singleWord, idx) => (
                     <div key={singleWord.id}>
-                      <input
-                        name="word"
-                        id="word"
-                        required
-                        onChange={(e) => handleWordChange(singleWord.id, e)}
-                      />
-
-                      {wordList.length > 1 && (
-                        <Button onClick={() => handleWordRemove(singleWord.id)}>
-                          delete
-                        </Button>
-                      )}
+                      <Grid container spacing={1}>
+                        <Grid item xs={8} >
+                          <Input
+                            name="word"
+                            id="word"
+                            required
+                            onChange={handleWordChange(singleWord.id)}
+                            fullWidth
+                            onKeyPress={addWordByEnter}
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          {wordList.length > 1 && (
+                            <SubjectButton
+                              onClick={() => handleWordRemove(singleWord.id)}
+                            >
+                              delete
+                            </SubjectButton>
+                          )}
+                        </Grid>
+                      </Grid>
                       <br />
+
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <Button onClick={handletWordAdd}>add word</Button>
+                        <SubjectButton onClick={handletWordAdd}>add word</SubjectButton>
                       )}
                     </div>
                   ))}
-                </DialogContent>
                 <DialogActions>
-                  <Button onClick={handleClose}>취소하기</Button>
-                  <Button onClick={createSubject}>생성하기</Button>
+                  <SubjectButton onClick={handleClose}>취소하기</SubjectButton>
+                  <SubjectButton onClick={createSubject}>생성하기</SubjectButton>
                 </DialogActions>
-              </Dialog>
+
+                </SubjectDialogContent>
+              </SubjectDialog>
               {mypage[0].length === 0 ? (
                 <Input
                   value="내가 만든 문제집이없습니다! 생성해주세요!"
@@ -374,6 +486,7 @@ const Mypage = () => {
             </Box>
           </ProfileForm>
         </ThemeProvider>
+        {/* <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" /> */}
       </Wrapper>
     </Container>
   );
@@ -388,21 +501,66 @@ const Wrapper = styled.div`
 const ProfileHead = styled.h3`
   color: #000000;
   margin: 40px;
-`;
 
-const LoginMsg = styled.h5`
-  color: #000000;
-  margin: 40px;
-  font-size: 16px;
 `;
 
 const ProfileForm = styled.div`
-  width: 500px;
+  width: 600px;
   display: inline-block;
 `;
 
 const ProfileInput = styled.div`
   margin: 15px 0px;
 `;
+
+const SubjectDialogContent = styled(DialogContent)`
+  display: flex;
+  color: white;
+  flex-direction: column;
+  background-color: rgba(106, 96, 169, 0.5);
+`;
+
+const SubjectDialogContentText = styled(DialogContentText)`
+
+  color:white
+
+`;
+
+// modal
+const SubjectDialog = styled(Dialog)`
+  & .MuiPaper-rounded {
+    border-radius: 15px;
+  }
+`;
+
+const SubjectDialogTitle = styled(DialogTitle)`
+  display: flex;
+  justify-content: center;
+  background-color: rgba(106, 96, 169, 0.5);
+  padding-bottom: 0;
+  & > .MuiTypography-root {
+    display: flex;
+    align-items: center;
+  }
+`;
+
+const Title = styled.p`
+  font-weight: bold;
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 40px;
+`;
+
+const SubjectButton = styled(Button)`
+&.MuiButton-text{
+  color:white
+}
+`
+
+
+const SubjectDialogActions = styled(DialogActions)`
+  flex-direction: row;
+`;
+
 
 export default Mypage;
