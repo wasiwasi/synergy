@@ -983,14 +983,69 @@ const InvitePage = () => {
                     </Brand>
                   </BrandWrapper>
                 </Box>
-                <Paper
-                  id="info"
+                {isPlaying ? (
+                  <Paper
+                    id="info"
+                    sx={{
+                      // position: 'sticky',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+    
+                      width: '60%',
+                      height: '100%',
+                      // bgcolor: 'orange',
+                      borderTopLeftRadius: 0,
+                      borderTopRightRadius: 0,
+                      borderBottomLeftRadius: 20,
+                      borderBottomRightRadius: 20,
+                      boxShadow: 4,
+                      display: 'flex',
+                      justifyContent: 'space-evenly',
+                      alignItems: 'center',
+                    }}>
+                    <Box id='round'>
+                      <span>{round} 라운드 중</span>
+                      <h1 style={{
+                        color: 'indigo',
+                        fontWeight: 'bold'
+                      }}>{Number(currentRound)+1}라운드</h1>
+                    </Box>
+                    <Box id='category'>
+                      {isExaminer === true ?
+                      <Box>
+                        <h3 style={{
+                          color: 'skyblue',
+                          fontWeight: 'bold'}}>{subjectName}</h3>
+                        <h1 style={{
+                          color: 'skyblue',
+                          fontWeight: 'bold'
+                        }}>{answer}</h1>
+                      </Box>
+                      :
+                        <h1 style={{
+                          color: 'skyblue',
+                          fontWeight: 'bold'
+                        }}>{subjectName}</h1>}
+                    </Box>
+                    <Box id='category'>
+                      {timer === -1 ? 
+                        <h1> -</h1>
+                        : (
+                          <>
+                            <span>남은 시간</span>
+                            <h1>{timer}초</h1>
+                          </>
+                        )}
+                    </Box>
+                  </Paper>)
+                  : (<Paper id='info'
                   sx={{
                     // position: 'sticky',
                     top: 0,
                     left: 0,
                     right: 0,
-  
+
                     width: '60%',
                     height: '100%',
                     // bgcolor: 'orange',
@@ -1000,38 +1055,14 @@ const InvitePage = () => {
                     borderBottomRightRadius: 20,
                     boxShadow: 4,
                     display: 'flex',
-                    justifyContent: 'space-evenly',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                  }}>
-                  <Box id='round'>
-                    <span>{round} 라운드 중</span>
-                    <h1 style={{
-                      color: 'indigo',
-                      fontWeight: 'bold'
-                    }}>{Number(currentRound)+1}라운드</h1>
-                  </Box>
-                  <Box id='category'>
-                    {isExaminer === true ?
-                    <Box>
-                      <h3 style={{
-                        color: 'skyblue',
-                        fontWeight: 'bold'}}>{subjectName}</h3>
-                      <h1 style={{
-                        color: 'skyblue',
-                        fontWeight: 'bold'
-                      }}>{answer}</h1>
+                    padding: 2,
+                    }}>
+                    <Box id='category'>
+                      <h1>몸으로 말해요</h1>
                     </Box>
-                    :
-                      <h1 style={{
-                        color: 'skyblue',
-                        fontWeight: 'bold'
-                      }}>{subjectName}</h1>}
-                  </Box>
-                  <Box id='category'>
-                    <span>남은 시간</span>
-                    <h1>{timer}초</h1>
-                  </Box>
-                </Paper>
+                </Paper>)}
                 <Box
                   id="buttons"
                   sx={{
