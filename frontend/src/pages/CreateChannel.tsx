@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* eslint-disable */
 // import BasicSelect from '../components/common/Select';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
