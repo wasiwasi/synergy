@@ -22,7 +22,7 @@ const HomeProduct = () => {
               variant="h3"
               sx={{ mb: 2, mt: { sx: 4, sm: 10 } }}
             >
-              우리만의 문제집 만들기
+              <div>우리만의 문제집 만들기</div>
             </Typography>
             <Typography
               color="black"

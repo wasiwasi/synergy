@@ -359,7 +359,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={onUserDelete}
                 >
-                  회원 탈퇴
+                  <div>회원 탈퇴</div>
                 </Button>
               </Grid>
 
@@ -370,7 +370,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={handleClickOpen}
                 >
-                  문제집 생성
+                  <div>문제집 생성</div>
                 </Button>
               </Grid>
               <Grid item sm={4}>
@@ -380,7 +380,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={handelDelteAllSubject}
                 >
-                  문제집 전부 삭제
+                  <div>문제집 전부 삭제</div>
                 </Button>
               </Grid>
             </Grid>
@@ -395,7 +395,7 @@ const Mypage = () => {
                   </Title></SubjectDialogTitle>
                 <SubjectDialogContent>
                   <SubjectDialogContentText>
-                    원하는 문제를 작성하세요.
+                    <div>원하는 문제를 작성하세요.</div>
                   </SubjectDialogContentText>
                   <TextField
                     autoFocus
@@ -418,15 +418,15 @@ const Mypage = () => {
                       value={gameTitle}
                       onChange={handleGameTitle}
                     >
-                      <MenuItem value={"bodytalk"}>몸으로 말해요</MenuItem>
+                      <MenuItem value={"bodytalk"}><div>몸으로 말해요</div></MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        골든벨
+                        <div>골든벨</div>
                       </MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        라이어게임
+                      <div>라이어게임</div>
                       </MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        고요속의 외침
+                      <div>고요속의 외침</div>
                       </MenuItem>
                     </Select>
                   </FormControl>
@@ -457,13 +457,13 @@ const Mypage = () => {
                       <br />
 
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <SubjectButton onClick={handletWordAdd}>add word</SubjectButton>
+                        <SubjectButton onClick={handletWordAdd}><span>add word</span></SubjectButton>
                       )}
                     </div>
                   ))}
                 <DialogActions>
-                  <SubjectButton onClick={handleClose}>취소하기</SubjectButton>
-                  <SubjectButton onClick={createSubject}>생성하기</SubjectButton>
+                  <SubjectButton onClick={handleClose}><span>취소하기</span></SubjectButton>
+                  <SubjectButton onClick={createSubject}><span>생성하기</span></SubjectButton>
                 </DialogActions>
 
                 </SubjectDialogContent>
