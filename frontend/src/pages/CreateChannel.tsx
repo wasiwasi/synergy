@@ -98,7 +98,6 @@ function SwipeableTextMobileStepper() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
-  
   const [myConnectionId, setMyConnectionId] = useState<string>("");
   const [examinerId, setExaminerId] = useState<string>("");
    
@@ -438,7 +437,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:time")
     session?.on("signal:time", (event: any) => {
-      //host는 time시그널을 받았을 때 동작 없음
+      console.log(event.data);
     })
   }, [session])
 
@@ -594,32 +593,17 @@ function SwipeableTextMobileStepper() {
   }
 
   const sendMessageByClick = () => {
-    if (message !== "") {
-      setMessages(
-        [
-          ...messages,
-          {
-            userName: myUserName,
-            text: message,
-            boxClass: "messages__box--operator",
-          },
-        ],
-      );
-      setMessage("");
-      const mySession = session;
-
-      mySession?.signal({
-        data: `${myUserName},${message}`,
-        to: [],
-        type: "chat",
+    if(isExaminer) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
       });
-    }
-  }
-
-  const sendMessageByEnter = (e : any) => {
-    if (e.key === "Enter") {
+    } else {
       if (message !== "") {
-        setMessages([
+        setMessages(
+          [
             ...messages,
             {
               userName: myUserName,
@@ -636,10 +620,44 @@ function SwipeableTextMobileStepper() {
           to: [],
           type: "chat",
         });
-
       }
     }
   }
+
+  const sendMessageByEnter = (e : any) => {
+    if(isExaminer) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
+      });
+    } else {
+      if (e.key === "Enter") {
+        if (message !== "") {
+          setMessages([
+              ...messages,
+              {
+                userName: myUserName,
+                text: message,
+                boxClass: "messages__box--operator",
+              },
+            ],
+          );
+          setMessage("");
+          const mySession = session;
+
+          mySession?.signal({
+            data: `${myUserName},${message}`,
+            to: [],
+            type: "chat",
+          });
+
+        }
+      }
+  }
+  }
+
 
   const handleChatMessageChange = (e : any) => {
     setMessage(e.target.value);
