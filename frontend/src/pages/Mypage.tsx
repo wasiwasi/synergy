@@ -449,8 +449,9 @@ const Mypage = () => {
                           {wordList.length > 1 && (
                             <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
-                            >
+                            ><span>
                               삭제하기
+                              </span>
                             </SubjectButton>
                           )}
                         </Grid>
