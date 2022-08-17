@@ -1303,7 +1303,7 @@ function SwipeableTextMobileStepper() {
                   <h1>몸으로 말해요</h1>
                 </Box>
                 <Box id='link'>
-                  <Button onClick={handleCopyClipBoard}>초대 링크 📋</Button>
+                  <Button onClick={handleCopyClipBoard}><span>초대 링크 📋</span></Button>
               </Box>
             </Paper>)}
               <Box id='buttons'

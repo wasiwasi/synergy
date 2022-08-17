@@ -12,9 +12,12 @@ import Header from "../components/common/Header";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 
 import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+
 
 import styled from "@emotion/styled";
 
@@ -1197,34 +1200,67 @@ const InvitePage = () => {
                       marginTop: 3
                     }}
                   >
-                    <Button
-                      onClick={reverseAudioState}>
-                          {audiostate ? (
-                            <MicOutlinedIcon
-                              color='success' />
-                          ) : (
-                            <MicOutlinedIcon
-                              color='disabled' />
-                          )}
-                    </Button>
-                    <Button
-                        onClick={reverseVideoState}>
-                        {videostate ? (
-                          <VideocamIcon 
-                          color='success'
-                          />
-                        ) : (
-                          <VideocamIcon 
-                          color='disabled'
-                          />
-                        )}
-                    </Button>
-                    <Button onClick={leaveSession}>
-                      <ExitToAppIcon color="error" />
-                    </Button>
-                  </Box>
-                </Box>
-                <Box id='chat' 
+                    {audiostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOutlinedIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>끄기</p> */}
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>켜기</p> */}
+              </Button>
+            )}
+            {videostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
+                onClick={reverseVideoState}>
+                <VideocamIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseVideoState}>
+                <VideocamOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            )}                                  
+          <Button
+            variant='contained'
+            color='error'
+          onClick={leaveSession}>
+            <ExitToAppIcon
+              sx={{
+                color: 'white'
+              }} 
+            />
+            <p style={{ color: 'white' }}>나가기</p>
+          </Button>
+
+          
+          </Box>
+        </Box>
+
+        <Box id='chat' 
           sx={{
           width: '25%',
           height: '95%',
@@ -1234,8 +1270,7 @@ const InvitePage = () => {
          
           <Box className="chatspace" 
           sx={{
-            borderStyle: 'solid',
-            borderColor: '#ddd', 
+            backgroundColor: 'skyblue', 
             width: '100%', 
             height: '100%', 
             borderRadius: 3
@@ -1245,7 +1280,8 @@ const InvitePage = () => {
           <Box 
           className="chatbox__messages" 
           sx={{
-            backgroundColor: '#A8C0D6', 
+            backgroundColor: 'white',
+            boxShadow: 'inset 3px 3px 3px',
             margin: 'auto', 
             width: '90%', 
             height: '80%', 
@@ -1254,8 +1290,7 @@ const InvitePage = () => {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"
@@ -1274,6 +1309,7 @@ const InvitePage = () => {
             </SendIcon></Button></Box>
           </Box>
           </Box></Box>
+
           ) : null}
         </ThemeProvider>
       </Wrapper>
@@ -1337,6 +1373,15 @@ const style = {
 };
 
 const Container = styled.div`
+  // position: sticky;
+  // align-self: center;
+  // top: 0;
+  // left: 0;
+  height: 100vh;
+  // width: 100%;
+  // // padding:150px 0;
+  // background-color: #D7D7D7;
+  background: lightCyan;
 `;
 
 const Wrapper = styled.div`
