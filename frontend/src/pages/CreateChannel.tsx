@@ -1727,7 +1727,7 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <Container>
+    <div>
       <Button onClick={handleOpen}><span>게임 방법</span></Button>
       <Dialog
         open={open}
@@ -1736,14 +1736,14 @@ function BasicModal() {
         aria-describedby="modal-modal-description"
       >
           <DialogTitle>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography id="modal-modal-title" variant="h6" component="span">
             <div>
             몸으로 말해요
             </div>
           </Typography>
           </DialogTitle>
           <DialogContent>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }} component="span">
             <div>            
               1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
             2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
@@ -1756,6 +1756,6 @@ function BasicModal() {
 
           </DialogContent>
       </Dialog>
-    </Container>
+    </div>
   );
 }
