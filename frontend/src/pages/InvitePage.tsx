@@ -185,6 +185,7 @@ const InvitePage = () => {
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
   const [scoreMarks, setScoreMarks] = useState<string>("");
   const [scoreExaminers, setScoreExaminers] = useState<string>("");
+  const [isRank, setIsRank] = useState<boolean>(false);
   const [round, setRound] = useState(0)
 
   const didMount = useRef(false);
@@ -369,9 +370,6 @@ const InvitePage = () => {
 
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
-      let parsedData = event.data.split('|');
-      setScoreMarks(parsedData[0]);
-      setScoreExaminers(parsedData[1]);
       setIsPlaying(false);
       setIsCorrect(false);
       setIsRoundover(false);
@@ -381,6 +379,16 @@ const InvitePage = () => {
       }, 5000);
     })
 
+    mySession?.off("signal:rank");
+    mySession?.on("signal:rank", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
+      setIsRank(true);
+      setTimeout(() => {
+        setIsRank(false);
+      }, 10000);
+    })
     mySession?.off("signal:time");
     mySession?.on("signal:time", (event: any) => {
       setTimer(event.data);
@@ -1080,15 +1088,14 @@ const InvitePage = () => {
                       <GamestartMain></GamestartMain>
                     ) : null}
                     {isGameover ? (
-                      <>
-                        <AlertPage text={"게임종료"}></AlertPage>
-                        <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
-                      </>
-                    ) : isCorrect ? (
-                    <AlertPage text={"정답"}></AlertPage>
-                    ): isRoundover ? (
+                      <AlertPage text={"게임종료"}></AlertPage>
+                      ) : isRank ? (
+                      <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                      ):isCorrect ? (
+                      <AlertPage text={"정답"}></AlertPage>
+                      ): isRoundover ? (
                       <AlertPage text={"시간초과"}></AlertPage>
-                          ) : null}
+                    ) : null}
                   </div>
                   {/* 큰 화면 카메라 */}
                   {/* {mainStreamManager !== undefined ? (
