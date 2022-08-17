@@ -401,16 +401,17 @@ const Mypage = () => {
                     autoFocus
                     margin="dense"
                     id="subjectTitle"
-                    label="subjectTitle"
+                    label="문제집 제목"
                     type="text"
                     fullWidth
                     variant="standard"
                     onChange={handleSubjectName}
                   />
+                  <br/>
                   <FormControl 
                   // sx={{ m: 1, minWidth: 150 }}
                   >
-                    <InputLabel>GameTitle</InputLabel>
+                    <InputLabel>게임 종류</InputLabel>
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple"
@@ -449,7 +450,7 @@ const Mypage = () => {
                             <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
                             >
-                              delete
+                              삭제하기
                             </SubjectButton>
                           )}
                         </Grid>
@@ -457,7 +458,7 @@ const Mypage = () => {
                       <br />
 
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <SubjectButton onClick={handletWordAdd}><span>add word</span></SubjectButton>
+                        <SubjectButton onClick={handletWordAdd}><span>단어 추가하기</span></SubjectButton>
                       )}
                     </div>
                   ))}
@@ -491,11 +492,23 @@ const Mypage = () => {
     </Container>
   );
 };
-const Container = styled.div``;
-
-const Wrapper = styled.div`
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const Wrapper = styled.div`
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const ProfileHead = styled.h3`
@@ -515,14 +528,15 @@ const ProfileInput = styled.div`
 
 const SubjectDialogContent = styled(DialogContent)`
   display: flex;
-  color: white;
+  color: black;
   flex-direction: column;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: white;
+  width:500px;
 `;
 
 const SubjectDialogContentText = styled(DialogContentText)`
 
-  color:white
+  color:black;
 
 `;
 
@@ -536,7 +550,7 @@ const SubjectDialog = styled(Dialog)`
 const SubjectDialogTitle = styled(DialogTitle)`
   display: flex;
   justify-content: center;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: white;
   padding-bottom: 0;
   & > .MuiTypography-root {
     display: flex;
@@ -547,13 +561,13 @@ const SubjectDialogTitle = styled(DialogTitle)`
 const Title = styled.p`
   font-weight: bold;
   font-size: 2rem;
-  color: white;
+  color: black;
   margin-bottom: 40px;
 `;
 
 const SubjectButton = styled(Button)`
 &.MuiButton-text{
-  color:white
+  color:black
 }
 `
 
