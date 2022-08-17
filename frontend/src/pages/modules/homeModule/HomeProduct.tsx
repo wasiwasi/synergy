@@ -1,6 +1,6 @@
 import React from "react";
 import HomeProductLayout from "./HomeProudctLayOut";
-import img from "../images/homeImage.png";
+import img from "../images/logo_A306_2.png";
 import { Button, Container, Link, Typography } from "@mui/material";
 import {   useNavigate } from "react-router-dom";
 
@@ -28,16 +28,15 @@ const HomeProduct = () => {
       <HomeProductLayout
         sxBackground={{
           backgroundImage: `url(${img})`,
-          backgroundColor: "rgb(200,232,228)",
           backgroundPosition: "center",
         }}
       >
         <img style={{ display: "none" }} src={img} alt="increase priority" />
-        <Typography color="inherit" align="center" variant="h1">
+        <Typography color="black" align="center" variant="h1">
           Synergy
         </Typography>
         <Typography
-          color="inherit"
+          color="black"
           align="center"
           variant="h3"
           sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
