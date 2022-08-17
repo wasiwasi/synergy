@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
-import {Paper, Modal} from '@mui/material';
+import {Paper, Modal, DialogTitle, Dialog, DialogContent, DialogActions} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -1672,26 +1672,35 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <div>
-      <Button onClick={handleOpen}><div>게임 방법</div></Button>
-      <Modal
+    <Container>
+      <Button onClick={handleOpen}><span>게임 방법</span></Button>
+      <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+          <DialogTitle>
           <Typography id="modal-modal-title" variant="h6" component="h2">
+            <div>
             몸으로 말해요
+            </div>
           </Typography>
+          </DialogTitle>
+          <DialogContent>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
-            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
-            3. 참여자는 채팅으로 정답을 맞춥니다.
+            <div>            
+              1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
+            3. 참여자는 채팅으로 정답을 맞춥니다.</div>
+
           </Typography>
-          <Button onClick={handleClose}>닫기</Button>
-        </Box>
-      </Modal>
-    </div>
+          <DialogActions>
+          <Button onClick={handleClose}><span>닫기</span></Button>
+          </DialogActions>
+
+          </DialogContent>
+      </Dialog>
+    </Container>
   );
 }
