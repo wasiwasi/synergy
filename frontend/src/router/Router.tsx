@@ -10,11 +10,9 @@ import Logout from "../pages/Logout";
 import Signup from "../pages/Signup";
 import Mypage from "../pages/Mypage";
 import CreateChannel from "../pages/CreateChannel";
-import GameChannel from "../pages/GameChannel";
 import HomePage from "../pages/HomePage";
 import EmailAUth from "../pages/EmailAuth";
 import InvitePage from "../pages/InvitePage";
-import OpenviduJoin from "../components/openvidu/OpenviduJoin";
 
 const Router = () => {
   // const HomePage: React.FC = () => {
@@ -27,9 +25,7 @@ const Router = () => {
       <Route path="/EmailAuth" element={<EmailAUth />} />
       <Route path="/users/mypage" element={<Mypage />} />
       <Route path="/channel/createchannel" element={<CreateChannel />} />
-      <Route path="/channel/gamechannel" element={<GameChannel />} />
       <Route path="/join" element={<InvitePage />} />
-      <Route path="/test" element={<OpenviduJoin />} />
     </Routes>
   );
 };
