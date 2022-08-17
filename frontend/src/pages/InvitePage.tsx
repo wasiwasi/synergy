@@ -52,7 +52,7 @@ import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 import Swal from "sweetalert2";
-import GamestartMain from "./modules/GamestartMain";
+import GamestartMain from "./modules/GamestartMain"
 import AlertPage from "./modules/AlertPage";
 import ScoreRate from "./modules/ScoreRate";
 
@@ -170,7 +170,7 @@ const InvitePage = () => {
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
   //게임관련
-
+  
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
@@ -185,11 +185,11 @@ const InvitePage = () => {
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
   const [scoreMarks, setScoreMarks] = useState<string>("");
   const [scoreExaminers, setScoreExaminers] = useState<string>("");
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(0)
 
   const didMount = useRef(false);
 
-  const scrollRef = useRef<null | HTMLDivElement>(null);
+  const scrollRef = useRef<null|HTMLDivElement>(null);
 
   // URL에서 방 코드를 가져옴
   useEffect(() => {
@@ -312,8 +312,8 @@ const InvitePage = () => {
           // Set the main video in the page to display our webcam and store our Publisher
           setMainStreamManager(publisher);
           setPublisher(publisher);
-          streamManagers.push(publisher as StreamManager);
-          setStreamManagers([...streamManagers]);
+          streamManagers.push(publisher as StreamManager)
+          setStreamManagers([...streamManagers])
         })
         .catch((error: any) => {
           console.log(
@@ -357,7 +357,7 @@ const InvitePage = () => {
     const mySession = session;
     mySession?.off("signal:gamestart");
     mySession?.on("signal:gamestart", (event: any) => {
-      let parsedData = event.data.split(",");
+      let parsedData = event.data.split(',');
       setSubjectName(parsedData[1]);
       setRound(parsedData[0]);
       setIsPlaying(true);
@@ -365,11 +365,11 @@ const InvitePage = () => {
       setTimeout(() => {
         setIsGamestart(false);
       }, 5000);
-    });
+    })
 
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
-      let parsedData = event.data.split("|");
+      let parsedData = event.data.split('|');
       setScoreMarks(parsedData[0]);
       setScoreExaminers(parsedData[1]);
       setIsPlaying(false);
@@ -379,7 +379,7 @@ const InvitePage = () => {
       setTimeout(() => {
         setIsGameover(false);
       }, 5000);
-    });
+    })
 
     mySession?.off("signal:time");
     mySession?.on("signal:time", (event: any) => {
@@ -395,6 +395,7 @@ const InvitePage = () => {
     mySession?.on("signal:roundover", (event: any) => {
       setIsRoundover(true);
     });
+
   }, [session]);
 
   useEffect(() => {
@@ -403,48 +404,48 @@ const InvitePage = () => {
     mySession?.on("signal:word", (event: any) => {
       setIsCorrect(false);
       setIsRoundover(false);
-      handleSignalWord(event);
-    });
+      handleSignalWord(event)
+    })
   }, [session, myConnectionId, audiostate, videostate, isPlaying]);
 
   const handleSignalWord = (event: any) => {
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-    setAnswer(answer);
-    setCurrentRound(event.data.split(",")[2]);
-    setExaminerId(examinerId);
-    if (examinerId === myConnectionId) {
-      // 내가 출제자라면
+    setAnswer(answer)
+    setCurrentRound(event.data.split(",")[2])
+    setExaminerId(examinerId)
+    if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
-      if (!videostate) {
-        reverseVideoState();
+      if(!videostate) {
+        reverseVideoState()
       }
       // 마이크를 끄고 마이크를 키지 못하도록.
-      if (audiostate) {
-        reverseAudioState();
+      if(audiostate) {
+        reverseAudioState()
       }
       setIsExaminer(true);
-    } else {
-      // 내가 출제자가 아니라면
+    } else { // 내가 출제자가 아니라면
       setIsExaminer(false);
-      console.log("I'm not examiner");
+      console.log("I'm not examiner")
     }
-  };
+  }
 
   const onEnter = () => {
-    axios.get(`${BE_URL}/api/channels/info/${mySessionId}`).then((response) => {
-      if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "참여하려는 채널이 꽉 찼습니다.",
-          timer: 1000,
-        });
-        navigate("/");
-        return;
-      }
-      joinSession();
-    });
+    axios
+      .get(`${BE_URL}/api/channels/info/${mySessionId}`)
+      .then((response) => {
+        if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "참여하려는 채널이 꽉 찼습니다.",
+            timer: 1000,
+          });
+          navigate("/");
+          return;
+        }
+        joinSession();
+    })
   };
 
   // 닉네임
@@ -539,7 +540,7 @@ const InvitePage = () => {
 
   const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
-      if (message !== "") {
+      if (message !== "") { 
         setMessages([
           ...messages,
           {
@@ -676,8 +677,9 @@ const InvitePage = () => {
       .catch((e: any) => {
         console.log("방 삭제 실패");
       });
-
-    axios.delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
       headers: {
         Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
         "Content-Type": "application/json",
@@ -862,9 +864,9 @@ const InvitePage = () => {
     setVideostate(!videostate);
   };
 
-  useEffect(() => {
+  useEffect(()=>{
     scrollRef.current?.scrollIntoView();
-  }, [messages]);
+  },[messages]);
   return (
     <Container>
       <Wrapper>
@@ -879,27 +881,27 @@ const InvitePage = () => {
 
               <InvitePageInput>
                 <Grid container spacing={2}>
-                  <Grid item xs={8}>
-                    <FormControl variant="standard" fullWidth>
-                      <InputLabel htmlFor="component-helper" shrink>
-                        Nick Name
-                      </InputLabel>
-                      <Input
-                        id="component-helper-nickname"
-                        placeholder="닉네임을 입력해 주세요."
-                        // value={nickName}
-                        onChange={onChangeNickName}
-                        required
-                        aria-describedby="component-helper-text"
-                      />
-                    </FormControl>
+                  <Grid item  xs={8} >
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
                   </Grid>
-                  <Grid item xs={4}>
-                    <NickNameButton onClick={nickNameCheck}>
-                      닉네임 중복체크
-                    </NickNameButton>
+                  <Grid item  xs={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
                   </Grid>
-                </Grid>
+                  </Grid>
                 {nickName.length > 0 && (
                   <div className={`${isNickName ? "success" : "error"}`}>
                     {nickNameError}
@@ -980,63 +982,44 @@ const InvitePage = () => {
                     top: 0,
                     left: 0,
                     right: 0,
-
-                    width: "60%",
-                    height: "100%",
+  
+                    width: '60%',
+                    height: '100%',
                     // bgcolor: 'orange',
                     borderTopLeftRadius: 0,
                     borderTopRightRadius: 0,
                     borderBottomLeftRadius: 20,
                     borderBottomRightRadius: 20,
                     boxShadow: 4,
-                    display: "flex",
-                    justifyContent: "space-evenly",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box id="round">
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                  }}>
+                  <Box id='round'>
                     <span>{round} 라운드 중</span>
-                    <h1
-                      style={{
-                        color: "indigo",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {Number(currentRound) + 1}라운드
-                    </h1>
+                    <h1 style={{
+                      color: 'indigo',
+                      fontWeight: 'bold'
+                    }}>{Number(currentRound)+1}라운드</h1>
                   </Box>
-                  <Box id="category">
-                    {isExaminer === true ? (
-                      <Box>
-                        <h3
-                          style={{
-                            color: "skyblue",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {subjectName}
-                        </h3>
-                        <h1
-                          style={{
-                            color: "skyblue",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {answer}
-                        </h1>
-                      </Box>
-                    ) : (
-                      <h1
-                        style={{
-                          color: "skyblue",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {subjectName}
-                      </h1>
-                    )}
+                  <Box id='category'>
+                    {isExaminer === true ?
+                    <Box>
+                      <h3 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'}}>{subjectName}</h3>
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{answer}</h1>
+                    </Box>
+                    :
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h1>}
                   </Box>
-                  <Box id="category">
+                  <Box id='category'>
                     <span>남은 시간</span>
                     <h1>{timer}초</h1>
                   </Box>
@@ -1073,50 +1056,42 @@ const InvitePage = () => {
                   height: "85%",
                 }}
               >
-                <Box
-                  id="conference"
+                <Box id='conference'
                   sx={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    width: "75%",
-                    height: "100%",
-                    display: "flex",
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection:'column',
+                    width: '75%',
+                    height: '100%',
+                    display: 'flex',
                     margin: 2,
-                    padding: 2,
-                  }}
-                >
-                  <Box
-                    id="cam"
-                    sx={{
-                      // display: 'flex',
-                      // backgroundColor: 'powderblue',
-                      width: "100%",
-                      height: "90%",
-                      // margin: 10
-                    }}
-                  >
-                    <div className="chbox">
-                      {isGamestart === true ? (
-                        <GamestartMain></GamestartMain>
-                      ) : null}
-                      {isGameover ? (
-                        <>
-                          <AlertPage text={"게임종료"}></AlertPage>
-                          <ScoreRate
-                            mark={scoreMarks}
-                            examiners={scoreExaminers}
-                            channelId={mySessionId as string}
-                          ></ScoreRate>
-                        </>
-                      ) : isCorrect ? (
-                        <AlertPage text={"정답"}></AlertPage>
-                      ) : isRoundover ? (
-                        <AlertPage text={"시간초과"}></AlertPage>
-                      ) : null}
-                    </div>
-                    {/* 큰 화면 카메라 */}
-                    {/* {mainStreamManager !== undefined ? (
+                    padding: 2
+                    }}>
+                   <Box id='cam' 
+                    sx={{ 
+                    // display: 'flex',
+                    // backgroundColor: 'powderblue',
+                    width: '100%',
+                    height: '90%',
+                    // margin: 10
+                        }}>
+                  <div className="chbox">
+                    {isGamestart === true ? (
+                      <GamestartMain></GamestartMain>
+                    ) : null}
+                    {isGameover ? (
+                      <>
+                        <AlertPage text={"게임종료"}></AlertPage>
+                        <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                      </>
+                    ) : isCorrect ? (
+                    <AlertPage text={"정답"}></AlertPage>
+                    ): isRoundover ? (
+                      <AlertPage text={"시간초과"}></AlertPage>
+                          ) : null}
+                  </div>
+                  {/* 큰 화면 카메라 */}
+                  {/* {mainStreamManager !== undefined ? (
                   <div id="main-video" className="col-md-6">
                     <UserVideoComponent
                       streamManager={mainStreamManager}
@@ -1136,54 +1111,43 @@ const InvitePage = () => {
                       spacing={{ xs: 1, md: 1 }}
                       columns={{ xs: 4, sm: 8, md: 12 }}
                     >
-                      {isPlaying == true
-                        ? streamManagers.map((sub: any, i: any) =>
-                            sub.stream.connection.connectionId != examinerId ? (
-                              <Grid
-                                item
-                                sm={4}
-                                md={4}
-                                key={i}
-                                onClick={() => handleMainVideoStream(sub)}
-                              >
-                                <UserVideoComponent streamManager={sub} />
-                              </Grid>
-                            ) : (
-                              <Grid
-                                item
-                                sm={4}
-                                md={4}
-                                key={i}
-                                onClick={() => handleMainVideoStream(sub)}
-                              >
-                                <Box
-                                  sx={{
-                                    border: 6,
-                                    borderColor: "limegreen",
-                                    height: "100.8%",
-                                  }}
-                                >
-                                  <UserVideoComponent
-                                    style={{ border: "solid" }}
-                                    streamManager={sub}
-                                  />
-                                </Box>
-                              </Grid>
-                            )
-                          )
-                        : streamManagers.map((sub, i) => (
+                      {isPlaying == true ?         
+                        streamManagers.map((sub: any, i: any) => (
+                          sub.stream.connection.connectionId != examinerId ?
                             <Grid
-                              item
-                              sm={4}
-                              md={4}
+                              item sm={4} md={4}
                               key={i}
-                              onClick={() => handleMainVideoStream(sub)}
-                            >
+                              onClick={() => handleMainVideoStream(sub)}>
                               <UserVideoComponent streamManager={sub} />
                             </Grid>
-                          ))}
-                    </Grid>
-                  </Box>
+                          :       
+                            <Grid
+                              item sm={4} md={4}
+                              key={i}
+                              onClick={() => handleMainVideoStream(sub)}>
+                              <Box
+                                sx={{
+                                  border: 6,
+                                  borderColor: 'limegreen',
+                                  height: '100.8%'
+                                }}>
+                                <UserVideoComponent
+                                style={{border: 'solid'}} streamManager={sub} />
+                              </Box>
+                            </Grid>
+                            ))
+                        :
+                        streamManagers.map((sub, i) => (
+                          <Grid
+                            item sm={4} md={4}
+                            key={i}
+                            onClick={() => handleMainVideoStream(sub)}
+                          >
+                            <UserVideoComponent streamManager={sub} />
+                          </Grid>
+                        ))}               
+                        </Grid>
+                      </Box>
                   <Box
                     id="settings"
                     sx={{
@@ -1195,82 +1159,81 @@ const InvitePage = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Button onClick={reverseAudioState}>
-                      {audiostate ? (
-                        <MicOutlinedIcon color="success" />
-                      ) : (
-                        <MicOutlinedIcon color="disabled" />
-                      )}
+                    <Button
+                      onClick={reverseAudioState}>
+                          {audiostate ? (
+                            <MicOutlinedIcon
+                              color='success' />
+                          ) : (
+                            <MicOutlinedIcon
+                              color='disabled' />
+                          )}
                     </Button>
-                    <Button onClick={reverseVideoState}>
-                      {videostate ? (
-                        <VideocamIcon color="success" />
-                      ) : (
-                        <VideocamIcon color="disabled" />
-                      )}
+                    <Button
+                        onClick={reverseVideoState}>
+                        {videostate ? (
+                          <VideocamIcon 
+                          color='success'
+                          />
+                        ) : (
+                          <VideocamIcon 
+                          color='disabled'
+                          />
+                        )}
                     </Button>
                     <Button onClick={leaveSession}>
                       <ExitToAppIcon color="error" />
                     </Button>
                   </Box>
                 </Box>
-                <Box
-                  id="chat"
-                  sx={{
-                    width: "25%",
-                    height: "100%",
-                    // margin: 10
-                  }}
-                >
-                  <Box
-                    className="chatspace"
-                    sx={{
-                      backgroundColor: "#ddd",
-                      width: "100%",
-                      height: "70%",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <h3 style={{ paddingTop: "5px" }}>채팅</h3>
-                    <Box
-                      className="chatbox__messages"
-                      sx={{
-                        backgroundColor: "#A8C0D6",
-                        margin: "auto",
-                        width: "90%",
-                        height: "75%",
-                        borderRadius: "20px",
-                        overflow: "auto",
-                      }}
-                    >
-                      <Messages messages={messages} myUserName={myUserName} />
-                      <div ref={scrollRef} />
-                    </Box>
-                    <input
-                      id="chat_message"
-                      type="text"
-                      style={{
-                        margin: "15px",
-                        width: "70%",
-                        borderRadius: "20px",
-                        border: "none",
-                      }}
-                      placeholder="Write a message..."
-                      onChange={handleChatMessageChange}
-                      onKeyPress={sendMessageByEnter}
-                      value={message}
-                    />
-                    <Button
-                      className="chatbox__send--footer"
-                      sx={{ borderRadius: "20px", border: "none" }}
-                      onClick={sendMessageByClick}
-                    >
-                      Enter
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
+                <Box id='chat' 
+          sx={{
+          width: '25%',
+          height: '100%'
+          // margin: 10
+        }}>
+         
+          <Box className="chatspace" 
+          sx={{
+            backgroundColor: '#ddd', 
+            width: '100%', 
+            height: '70%', 
+            borderRadius: '20px'
+          }}
+        >
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
+          <Box 
+          className="chatbox__messages" 
+          sx={{
+            backgroundColor: '#A8C0D6', 
+            margin: 'auto', 
+            width: '90%', 
+            height: '75%', 
+            borderRadius: '20px', 
+            overflow: 'auto'
+            }}
+          >
+            <Messages messages={messages} myUserName={myUserName} />
+            <div  ref ={scrollRef}/>
+          </Box>
+            <input
+              id="chat_message"
+              type="text"
+              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
+              placeholder="Write a message..."
+              onChange={handleChatMessageChange}
+              onKeyPress={sendMessageByEnter}
+              value={message}
+            />
+            <Button
+              className="chatbox__send--footer"
+              sx={{borderRadius: '20px', border: 'none'}}
+              onClick={sendMessageByClick}
+            >
+              Enter
+            </Button></Box>
+          </Box>
+          </Box></Box>
           ) : null}
         </ThemeProvider>
       </Wrapper>
