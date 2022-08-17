@@ -24,28 +24,6 @@ interface GameResult {
   score: number;
 }
 
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "30%",
-  height: "75%",
-  bgcolor: "white",
-  border: "2px solid #000",
-  borderRadius: 3,
-  boxShadow: 24,
-  p: 4,
-};
-// 아래와 같은 형태로 호출해야함.
-    //점수 테스트를 위한거 0815
-    // const [marks, setMarks] = useState("100, 200, 10, 1");
-    // 
-    // const [examiners, setExaminers] = useState(
-    //   "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
-    // );
-  
-    // <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" />
 function ScoreRate(props: {
   mark: string;
   examiners: string;
@@ -143,7 +121,9 @@ function ScoreRate(props: {
         >
           <RankDialogTitle id="form-dialog-title">
             <Title>
+              <span>
             랭킹
+            </span>
             </Title>
           </RankDialogTitle>
           <RankDialogContent>
@@ -151,9 +131,9 @@ function ScoreRate(props: {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <CustomTableCell align="center"> 순위 </CustomTableCell>
-                    <CustomTableCell align="center"> 닉네임 </CustomTableCell>
-                    <CustomTableCell align="center"> 개수 </CustomTableCell>
+                    <CustomTableCell align="center"> <span>순위 </span></CustomTableCell>
+                    <CustomTableCell align="center"> <span>닉네임 </span></CustomTableCell>
+                    <CustomTableCell align="center"> <span>개수 </span></CustomTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -168,13 +148,19 @@ function ScoreRate(props: {
                           {idx + 1 === 1 && '🥇'}
                           {idx + 1 === 2 && '🥈'}
                           {idx + 1 === 3 && '🥉'}
+                          <span>
                           {idx + 1 >= 4 && idx + 1}
+                          </span>
                         </BodyTableCell>
                         <BodyTableCell align="center">
+                          <span>
                           {orderList[val.index]}
+                          </span>
                         </BodyTableCell>
                         <BodyTableCell align="center">
+                          <span>
                           {val.score}
+                          </span>
                         </BodyTableCell>
                       </TableRow>
                     );
