@@ -45,7 +45,7 @@ function ScrollToTopButton() {
   );
 }
 export const Button = styled.div`
-  bottom: 5%;
+  bottom: 10%;
   border: 0px;
   cursor: pointer;
   padding: 0px;
