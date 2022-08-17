@@ -359,7 +359,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={onUserDelete}
                 >
-                  회원 탈퇴
+                  <div>회원 탈퇴</div>
                 </Button>
               </Grid>
 
@@ -370,7 +370,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={handleClickOpen}
                 >
-                  문제집 생성
+                  <div>문제집 생성</div>
                 </Button>
               </Grid>
               <Grid item sm={4}>
@@ -380,7 +380,7 @@ const Mypage = () => {
                   fullWidth
                   onClick={handelDelteAllSubject}
                 >
-                  문제집 전부 삭제
+                  <div>문제집 전부 삭제</div>
                 </Button>
               </Grid>
             </Grid>
@@ -395,22 +395,23 @@ const Mypage = () => {
                   </Title></SubjectDialogTitle>
                 <SubjectDialogContent>
                   <SubjectDialogContentText>
-                    원하는 문제를 작성하세요.
+                    <div>원하는 문제를 작성하세요.</div>
                   </SubjectDialogContentText>
                   <TextField
                     autoFocus
                     margin="dense"
                     id="subjectTitle"
-                    label="subjectTitle"
+                    label="문제집 제목"
                     type="text"
                     fullWidth
                     variant="standard"
                     onChange={handleSubjectName}
                   />
+                  <br/>
                   <FormControl 
                   // sx={{ m: 1, minWidth: 150 }}
                   >
-                    <InputLabel>GameTitle</InputLabel>
+                    <InputLabel>게임 종류</InputLabel>
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple"
@@ -418,15 +419,15 @@ const Mypage = () => {
                       value={gameTitle}
                       onChange={handleGameTitle}
                     >
-                      <MenuItem value={"bodytalk"}>몸으로 말해요</MenuItem>
+                      <MenuItem value={"bodytalk"}><div>몸으로 말해요</div></MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        골든벨
+                        <div>골든벨</div>
                       </MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        라이어게임
+                      <div>라이어게임</div>
                       </MenuItem>
                       <MenuItem disabled value={"goldenball"}>
-                        고요속의 외침
+                      <div>고요속의 외침</div>
                       </MenuItem>
                     </Select>
                   </FormControl>
@@ -449,7 +450,7 @@ const Mypage = () => {
                             <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
                             >
-                              delete
+                              삭제하기
                             </SubjectButton>
                           )}
                         </Grid>
@@ -457,13 +458,13 @@ const Mypage = () => {
                       <br />
 
                       {wordList.length - 1 === idx && wordList.length < 30 && (
-                        <SubjectButton onClick={handletWordAdd}>add word</SubjectButton>
+                        <SubjectButton onClick={handletWordAdd}><span>단어 추가하기</span></SubjectButton>
                       )}
                     </div>
                   ))}
                 <DialogActions>
-                  <SubjectButton onClick={handleClose}>취소하기</SubjectButton>
-                  <SubjectButton onClick={createSubject}>생성하기</SubjectButton>
+                  <SubjectButton onClick={handleClose}><span>취소하기</span></SubjectButton>
+                  <SubjectButton onClick={createSubject}><span>생성하기</span></SubjectButton>
                 </DialogActions>
 
                 </SubjectDialogContent>
@@ -491,11 +492,23 @@ const Mypage = () => {
     </Container>
   );
 };
-const Container = styled.div``;
-
-const Wrapper = styled.div`
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const Wrapper = styled.div`
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const ProfileHead = styled.h3`
@@ -515,14 +528,15 @@ const ProfileInput = styled.div`
 
 const SubjectDialogContent = styled(DialogContent)`
   display: flex;
-  color: white;
+  color: black;
   flex-direction: column;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: white;
+  width:500px;
 `;
 
 const SubjectDialogContentText = styled(DialogContentText)`
 
-  color:white
+  color:black;
 
 `;
 
@@ -536,7 +550,7 @@ const SubjectDialog = styled(Dialog)`
 const SubjectDialogTitle = styled(DialogTitle)`
   display: flex;
   justify-content: center;
-  background-color: rgba(106, 96, 169, 0.5);
+  background-color: white;
   padding-bottom: 0;
   & > .MuiTypography-root {
     display: flex;
@@ -547,13 +561,13 @@ const SubjectDialogTitle = styled(DialogTitle)`
 const Title = styled.p`
   font-weight: bold;
   font-size: 2rem;
-  color: white;
+  color: black;
   margin-bottom: 40px;
 `;
 
 const SubjectButton = styled(Button)`
 &.MuiButton-text{
-  color:white
+  color:black
 }
 `
 
