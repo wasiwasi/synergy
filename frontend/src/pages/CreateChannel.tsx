@@ -1075,7 +1075,7 @@ function SwipeableTextMobileStepper() {
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
             fontWeight: 'bold'
-          }}>{steps[activeStep].label}</Typography>
+          }}><div>{steps[activeStep].label}</div></Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
