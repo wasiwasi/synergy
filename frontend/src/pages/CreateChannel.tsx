@@ -593,7 +593,7 @@ function SwipeableTextMobileStepper() {
   }
 
   const sendMessageByClick = () => {
-    if(isExaminer) {
+    if(isExaminer === true) {
       Swal.fire({
         icon: "warning",
         title: "Sorry...",
@@ -625,7 +625,7 @@ function SwipeableTextMobileStepper() {
   }
 
   const sendMessageByEnter = (e : any) => {
-    if(isExaminer) {
+    if(isExaminer === true) {
       Swal.fire({
         icon: "warning",
         title: "Sorry...",
@@ -655,7 +655,7 @@ function SwipeableTextMobileStepper() {
 
         }
       }
-  }
+    }
   }
 
 
