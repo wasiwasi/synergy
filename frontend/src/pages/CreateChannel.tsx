@@ -120,7 +120,19 @@ function SwipeableTextMobileStepper() {
   let [categoryName, setCategoryName] = useState<string>("");
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
+  const [participantList, setParticipantList] = useState(new Map());
+  const [correctorName, setCorrectorName] = useState<string>("");
 
+  const getParticipantList = (channelId: string) => {
+    axios.get(`${BE_URL}/api/channels/info/${channelId}`)
+    .then((res) => {
+      let temp = res.data.participantList;
+        
+      temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
+        setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
+      });
+    });
+  };
   const emptyAllOV = () => {
     setOV(null);
     setSession(undefined);
@@ -427,8 +439,11 @@ function SwipeableTextMobileStepper() {
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
+
+    const nickname = participantList.get(connectionId);
+
     session?.signal({
-      data: connectionId,
+      data: connectionId + "," + nickname,
       to: [],
       type: "correct"
     })
@@ -437,6 +452,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
+      setCorrectorName(event.data.split(",")[1]);
       setIsCorrect(true);
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
@@ -489,6 +505,17 @@ function SwipeableTextMobileStepper() {
       }
     })
   }, [session, isCorrect, currentRound, subjects, examiners])
+
+  useEffect(() => {
+    // 참가자 닉네임과 커넥션을 받아옴
+    if (streamManagers.length === 0) {
+      return;
+    }
+    // 서버와 동기되는 시간 유예
+    setTimeout(() => {
+      getParticipantList(mySessionId as string);
+    }, 1000);
+  }, [streamManagers])
 
   const sendSignalGameOver = () => {
     let result: string = '';
@@ -1332,7 +1359,7 @@ function SwipeableTextMobileStepper() {
                 ) : isRank ? (
                 <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
                 ):isCorrect ? (
-                <AlertPage text={"정답"}></AlertPage>
+                <AlertPage text={correctorName + "님 정답"}></AlertPage>
                 ): isRoundover ? (
                 <AlertPage text={"시간초과"}></AlertPage>
                     ) : null}
