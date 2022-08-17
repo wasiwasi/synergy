@@ -17,7 +17,7 @@ const HomePage = () => {
 
   // const HomePage: React.FC = () => {
   return (
-    <Container style={{ backgroundColor: "rgb(200, 232, 228)" }}>
+    <Container>
       <div data-aos="zoom-in" data-aos-duration="2000">
         <HomeProduct />
       </div>
