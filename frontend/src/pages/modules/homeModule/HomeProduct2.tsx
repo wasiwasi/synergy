@@ -22,7 +22,7 @@ const HomeProduct = () => {
               variant="h3"
               sx={{ mb: 2, mt: { sx: 4, sm: 10 } }}
             >
-              아이스 브레이킹을 위한 다양한 게임 기능
+              <div>아이스 브레이킹을 위한<br/> 다양한 게임 기능</div>
             </Typography>
             <Typography
               color="black"
