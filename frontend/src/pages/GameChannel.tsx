@@ -1,9 +1,11 @@
 import { Link, Outlet } from 'react-router-dom';
 import { bgcolor, Box, display, flexbox, height, width } from '@mui/system';
-import { Paper, Button, Modal, Typography } from '@mui/material';
+import { Paper, Button, Modal, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 import { useState } from 'react';
 import{ Brand, Logo, LogoImg, LogoName, BrandWrapper } from '../components/common/Header';
+
+import styled from '@emotion/styled';
 
 const GameChannel = () => {
   
@@ -137,19 +139,7 @@ const GameChannel = () => {
 
 export default GameChannel;
 
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '40%',
-  height: '75%',
-  bgcolor: 'white',
-  border: '2px solid #000',
-  borderRadius: 3,
-  boxShadow: 24,
-  p: 4,
-};
+
 
 function BasicModal() {
   const [open, setOpen] = useState(false);
@@ -157,26 +147,38 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <div>
+    <Container>
       <Button onClick={handleOpen}>게임 방법</Button>
-      <Modal
+      <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        {/* <Box sx={style}> */}
+          <DialogTitle>
           <Typography id="modal-modal-title" variant="h6" component="h2">
+            <div>
             몸으로 말해요
+            </div>
           </Typography>
+          </DialogTitle>
+          <DialogContent>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
-            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
-            3. 참여자는 채팅으로 정답을 맞춥니다.
+            <div>            
+              1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
+            3. 참여자는 채팅으로 정답을 맞춥니다.</div>
+
           </Typography>
-          <Button onClick={handleClose}>닫기</Button>
-        </Box>
-      </Modal>
-    </div>
+          <DialogActions>
+          <Button onClick={handleClose}><span>닫기</span></Button>
+          </DialogActions>
+
+          </DialogContent>
+        {/* </Box> */}
+      </Dialog>
+    </Container>
   );
 }
+const Container = styled.div``;
