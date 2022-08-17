@@ -54,6 +54,7 @@ import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
 import AlertPage from "./modules/AlertPage";
+import SendIcon from '@mui/icons-material/Send';
 import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
@@ -1195,6 +1196,7 @@ const InvitePage = () => {
                       display: "flex",
                       justifyContent: "space-evenly",
                       alignItems: "center",
+                      marginTop: 3
                     }}
                   >
                     <Button
@@ -1227,16 +1229,18 @@ const InvitePage = () => {
                 <Box id='chat' 
           sx={{
           width: '25%',
-          height: '100%'
+          height: '95%',
+          paddingRight: 2
           // margin: 10
         }}>
          
           <Box className="chatspace" 
           sx={{
-            backgroundColor: '#ddd', 
+            borderStyle: 'solid',
+            borderColor: '#ddd', 
             width: '100%', 
-            height: '70%', 
-            borderRadius: '20px'
+            height: '100%', 
+            borderRadius: 3
           }}
         >
           <h3 style={{paddingTop: '5px'}}>채팅</h3>
@@ -1246,30 +1250,30 @@ const InvitePage = () => {
             backgroundColor: '#A8C0D6', 
             margin: 'auto', 
             width: '90%', 
-            height: '75%', 
-            borderRadius: '20px', 
+            height: '80%', 
+            borderRadius: 3, 
             overflow: 'auto'
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            <div  ref ={scrollRef}/>
+            {/*<div />
+           </div> */}
           </Box>
             <input
               id="chat_message"
               type="text"
-              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
-              placeholder="Write a message..."
+              style={{margin: '15px', width:'70%', borderRadius: 8, borderStyle: 'solid', borderColor: '#ddd'}}
+              placeholder="  메시지를 입력해주세요."
               onChange={handleChatMessageChange}
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <Button
+            <Button><SendIcon
               className="chatbox__send--footer"
-              sx={{borderRadius: '20px', border: 'none'}}
+              // sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
             >
-              Enter
-            </Button></Box>
+            </SendIcon></Button></Box>
           </Box>
           </Box></Box>
           ) : null}
