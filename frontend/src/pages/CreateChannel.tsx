@@ -1558,7 +1558,8 @@ function SwipeableTextMobileStepper() {
             backgroundColor: 'skyblue', 
             width: '100%', 
             height: '100%', 
-            borderRadius: 3
+            borderRadius: 3,
+            boxShadow: '3px 3px 3px',
           }}
         >
           <h3 style={{paddingTop: '5px'}}>채팅</h3>
@@ -1586,7 +1587,12 @@ function SwipeableTextMobileStepper() {
               onKeyPress={sendMessageByEnter}
               value={message}
             />
-            <Button><SendIcon
+            <Button
+              variant='contained'
+              sx={{
+                paddingRight: '12px'
+              }}>
+              <SendIcon
               className="chatbox__send--footer"
               // sx={{borderRadius: '20px', border: 'none'}}
               onClick={sendMessageByClick}
