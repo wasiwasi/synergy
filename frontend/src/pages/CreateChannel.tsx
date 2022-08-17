@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
-import {Paper, Modal} from '@mui/material';
+import {Paper, Modal, DialogTitle, Dialog, DialogContent, DialogActions} from '@mui/material';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -30,7 +30,9 @@ import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
 
 import MicOutlinedIcon from "@mui/icons-material/MicOutlined";
+import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import SendIcon from '@mui/icons-material/Send';
@@ -122,7 +124,19 @@ function SwipeableTextMobileStepper() {
   let [categoryName, setCategoryName] = useState<string>("");
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
+  const [participantList, setParticipantList] = useState(new Map());
+  const [correctorName, setCorrectorName] = useState<string>("");
 
+  const getParticipantList = (channelId: string) => {
+    axios.get(`${BE_URL}/api/channels/info/${channelId}`)
+    .then((res) => {
+      let temp = res.data.participantList;
+        
+      temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
+        setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
+      });
+    });
+  };
   const emptyAllOV = () => {
     setOV(null);
     setSession(undefined);
@@ -430,8 +444,11 @@ function SwipeableTextMobileStepper() {
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
+
+    const nickname = participantList.get(connectionId);
+
     session?.signal({
-      data: connectionId,
+      data: connectionId + "," + nickname,
       to: [],
       type: "correct"
     })
@@ -440,6 +457,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
+      setCorrectorName(event.data.split(",")[1]);
       setIsCorrect(true);
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
@@ -492,6 +510,17 @@ function SwipeableTextMobileStepper() {
       }
     })
   }, [session, isCorrect, currentRound, subjects, examiners])
+
+  useEffect(() => {
+    // 참가자 닉네임과 커넥션을 받아옴
+    if (streamManagers.length === 0) {
+      return;
+    }
+    // 서버와 동기되는 시간 유예
+    setTimeout(() => {
+      getParticipantList(mySessionId as string);
+    }, 1000);
+  }, [streamManagers])
 
   const sendSignalGameOver = () => {
     let result: string = '';
@@ -1055,15 +1084,15 @@ function SwipeableTextMobileStepper() {
             fontSize: 'h4.fontSize',
             fontWeight: 'bold',
             color: 'deepSkyBlue',
-          }}>{steps[activeStep].label}</Typography>
+          }}><span>{steps[activeStep].label}</span></Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 1100,
-          height: 700
+          width: 900,
+          height: "80vh",
       }}>
           {steps[activeStep].choice.map((step, index) => (
             <div key={index}>
@@ -1076,11 +1105,11 @@ function SwipeableTextMobileStepper() {
                   sx={{
                     bgcolor: colors[index],
                     color: 'white',
-                    height: 300,
+                    height: 250,
                     margin: 2,
                     marginBottom: 0,
                     fontSize: 25,
-                    width: 400,
+                    width: 300,
                     zIndex: 1,
                   }}>
                   <div>{steps[activeStep].choice[index]}</div>
@@ -1092,6 +1121,7 @@ function SwipeableTextMobileStepper() {
                 category = {category}
                 round = {round}
                 setCategory = {setCategory}
+                setCategoryName = {setCategoryName}
                 setRound = {setRound}
                 />
               }
@@ -1340,7 +1370,7 @@ function SwipeableTextMobileStepper() {
                 ) : isRank ? (
                 <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
                 ):isCorrect ? (
-                <AlertPage text={"정답"}></AlertPage>
+                <AlertPage text={correctorName + "님 정답"}></AlertPage>
                 ): isRoundover ? (
                 <AlertPage text={"시간초과"}></AlertPage>
                     ) : null}
@@ -1437,33 +1467,61 @@ function SwipeableTextMobileStepper() {
               marginTop: 3
             }}>
             
-            <Button
-              onClick={reverseAudioState}>
-                  {audiostate ? (
-                    <MicOutlinedIcon
-                      color='success' />
-                  ) : (
-                    <MicOutlinedIcon
-                      color='disabled' />
-                  )}
-            </Button>
-            <Button
+            
+            {audiostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOutlinedIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>끄기</p> */}
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseAudioState}>
+                <MicOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+                {/* <p style={{ color: 'white' }}>켜기</p> */}
+              </Button>
+            )}
+            {videostate ? (
+              <Button
+                color = 'success'
+                variant='contained'
                 onClick={reverseVideoState}>
-                {videostate ? (
-                  <VideocamIcon 
-                  color='success'
-                  />
-                ) : (
-                  <VideocamIcon 
-                  color='disabled'
-                  />
-                )}
-            </Button>                                    
+                <VideocamIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            ) : (
+              <Button
+                color = 'warning'
+                variant='contained'
+                onClick={reverseVideoState}>
+                <VideocamOffIcon
+                  sx={{
+                    color: 'white'
+                  }} />
+              </Button>
+            )}                                  
           <Button
+            variant='contained'
+            color='error'
           onClick={leaveSession}>
             <ExitToAppIcon
-              color='error' 
+              sx={{
+                color: 'white'
+              }} 
             />
+            <p style={{ color: 'white' }}>나가기</p>
           </Button>
 
           
@@ -1531,7 +1589,13 @@ function BasicSelect(props: any) {
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
     if (props.index == 0) {
+      console.log("setCategdt)")
       props.setCategory(event.target.value)
+      props.selectData[props.index].map((d: any, i: any) => {
+        if (d.id === event.target.value) {
+          props.setCategoryName(d.name);
+        }
+      });
     }
     else {
       props.setRound(event.target.value)
@@ -1571,7 +1635,7 @@ const Container = styled.div`
   // align-self: center;
   // top: 0;
   // left: 0;
-  // height: 60px;
+  height: 100vh;
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
@@ -1645,26 +1709,35 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <div>
-      <Button onClick={handleOpen}><div>게임 방법</div></Button>
-      <Modal
+    <Container>
+      <Button onClick={handleOpen}><span>게임 방법</span></Button>
+      <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+          <DialogTitle>
           <Typography id="modal-modal-title" variant="h6" component="h2">
+            <div>
             몸으로 말해요
+            </div>
           </Typography>
+          </DialogTitle>
+          <DialogContent>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
-            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br/>  
-            3. 참여자는 채팅으로 정답을 맞춥니다.
+            <div>            
+              1. 출제자는 몸짓으로만 제시어를 묘사합니다. <br />
+            2. 참여자는 출제자의 묘사를 통해 정답을 유추합니다. <br />
+            3. 참여자는 채팅으로 정답을 맞춥니다.</div>
+
           </Typography>
-          <Button onClick={handleClose}>닫기</Button>
-        </Box>
-      </Modal>
-    </div>
+          <DialogActions>
+          <Button onClick={handleClose}><span>닫기</span></Button>
+          </DialogActions>
+
+          </DialogContent>
+      </Dialog>
+    </Container>
   );
 }

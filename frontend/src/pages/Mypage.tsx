@@ -319,7 +319,7 @@ const Mypage = () => {
             <ProfileHead>{mypage[1]} 님의 마이페이지입니다</ProfileHead>
 
             <ProfileInput>
-              <InputLabel htmlFor="component-helper" shrink>
+              <InputLabel htmlFor="component-helper" shrink >
                 Email
               </InputLabel>
               <Input
@@ -449,8 +449,9 @@ const Mypage = () => {
                           {wordList.length > 1 && (
                             <SubjectButton
                               onClick={() => handleWordRemove(singleWord.id)}
-                            >
+                            ><span>
                               삭제하기
+                              </span>
                             </SubjectButton>
                           )}
                         </Grid>
@@ -524,6 +525,7 @@ const ProfileForm = styled.div`
 
 const ProfileInput = styled.div`
   margin: 15px 0px;
+  font-familu:"Jua"
 `;
 
 const SubjectDialogContent = styled(DialogContent)`
