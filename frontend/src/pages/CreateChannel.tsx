@@ -1084,7 +1084,7 @@ function SwipeableTextMobileStepper() {
             fontSize: 'h4.fontSize',
             fontWeight: 'bold',
             color: 'deepSkyBlue',
-          }}><div>{steps[activeStep].label}</div></Typography>
+          }}><>{steps[activeStep].label}</></Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
@@ -1121,6 +1121,7 @@ function SwipeableTextMobileStepper() {
                 category = {category}
                 round = {round}
                 setCategory = {setCategory}
+                setCategoryName = {setCategoryName}
                 setRound = {setRound}
                 />
               }
@@ -1588,7 +1589,13 @@ function BasicSelect(props: any) {
   const handleChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
     if (props.index == 0) {
+      console.log("setCategdt)")
       props.setCategory(event.target.value)
+      props.selectData[props.index].map((d: any, i: any) => {
+        if (d.id === event.target.value) {
+          props.setCategoryName(d.name);
+        }
+      });
     }
     else {
       props.setRound(event.target.value)
