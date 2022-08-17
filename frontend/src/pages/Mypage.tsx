@@ -491,11 +491,23 @@ const Mypage = () => {
     </Container>
   );
 };
-const Container = styled.div``;
-
-const Wrapper = styled.div`
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
   display: flex;
   justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const Wrapper = styled.div`
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const ProfileHead = styled.h3`
@@ -518,6 +530,7 @@ const SubjectDialogContent = styled(DialogContent)`
   color: white;
   flex-direction: column;
   background-color: rgba(106, 96, 169, 0.5);
+  width: 500px;
 `;
 
 const SubjectDialogContentText = styled(DialogContentText)`
