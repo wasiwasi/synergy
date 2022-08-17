@@ -55,6 +55,7 @@ import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
 import AlertPage from "./modules/AlertPage";
 import SendIcon from '@mui/icons-material/Send';
+import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -127,6 +128,7 @@ const InvitePage = () => {
   >(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
 
   const [myConnectionId, setMyConnectionId] = useState<string>("");
 
@@ -145,6 +147,7 @@ const InvitePage = () => {
     setMainStreamManager(undefined);
     setPublisher(undefined);
     setSubscribers([]);
+    setStreamManagers([]);
     setMyConnectionId("");
     setAudiostate(true);
     setAudioallowed(false);
@@ -168,16 +171,24 @@ const InvitePage = () => {
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
   //게임관련
+  
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
+  let [categoryName, setCategoryName] = useState<string>("");
+  let [subjectName, setSubjectName] = useState<string>("");
+  let [answer, setAnswer] = useState<string[]>([]);
+  const [examinerId, setExaminerId] = useState<string>("");
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
-
   const [isGamestart, setIsGamestart] = useState<boolean>(false);
   const [isGameover, setIsGameover] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
-  
+  const [scoreMarks, setScoreMarks] = useState<string>("");
+  const [scoreExaminers, setScoreExaminers] = useState<string>("");
+  const [isRank, setIsRank] = useState<boolean>(false);
+  const [round, setRound] = useState(0)
+
   const didMount = useRef(false);
 
   const scrollRef = useRef<null|HTMLDivElement>(null);
@@ -228,6 +239,8 @@ const InvitePage = () => {
       // Update the state with the new subscribers
       subscribers.push(subscriber);
       setSubscribers([...subscribers]);
+      streamManagers.push(subscriber);
+      setStreamManagers([...streamManagers]);
     });
 
     // On every Stream destroyed...
@@ -301,6 +314,8 @@ const InvitePage = () => {
           // Set the main video in the page to display our webcam and store our Publisher
           setMainStreamManager(publisher);
           setPublisher(publisher);
+          streamManagers.push(publisher as StreamManager)
+          setStreamManagers([...streamManagers])
         })
         .catch((error: any) => {
           console.log(
@@ -344,6 +359,9 @@ const InvitePage = () => {
     const mySession = session;
     mySession?.off("signal:gamestart");
     mySession?.on("signal:gamestart", (event: any) => {
+      let parsedData = event.data.split(',');
+      setSubjectName(parsedData[1]);
+      setRound(parsedData[0]);
       setIsPlaying(true);
       setIsGamestart(true);
       setTimeout(() => {
@@ -362,6 +380,16 @@ const InvitePage = () => {
       }, 5000);
     })
 
+    mySession?.off("signal:rank");
+    mySession?.on("signal:rank", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
+      setIsRank(true);
+      setTimeout(() => {
+        setIsRank(false);
+      }, 10000);
+    })
     mySession?.off("signal:time");
     mySession?.on("signal:time", (event: any) => {
       setTimer(event.data);
@@ -389,20 +417,12 @@ const InvitePage = () => {
     })
   }, [session, myConnectionId, audiostate, videostate, isPlaying]);
 
-  useEffect(() => {
-    console.log(timer);
-  }, [timer]);
-
   const handleSignalWord = (event: any) => {
-    // if(!isPlaying) return
-    // subjects[idx]+","+examiners[idx]
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-    // console.log("catch signal:word")
-    console.log("examinerId:"+examinerId);
-    console.log("connection:"+myConnectionId);
-    console.log("videoState:"+videostate);
-    console.log("audioState:" + audiostate);
+    setAnswer(answer)
+    setCurrentRound(event.data.split(",")[2])
+    setExaminerId(examinerId)
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
@@ -587,6 +607,12 @@ const InvitePage = () => {
     if (index > -1) {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
+    }
+    let varStreamMangers = streamManagers;
+    let index2 = varStreamMangers.indexOf(streamManager, 0);
+    if (index2 > -1) {
+      varStreamMangers.splice(index2, 1);
+      setStreamManagers(varStreamMangers);
     }
   };
   // 참가자 백엔드에 등록
@@ -856,7 +882,7 @@ const InvitePage = () => {
         <ThemeProvider theme={themeA306}>
           {session === undefined ? (
             <InvitePageForm>
-              <InvitePageHead>Brand</InvitePageHead>
+              <InvitePageHead>SYNERGY</InvitePageHead>
 
               <InvitePageMsg>
                 {hostName} 님의 방에 입장하시겠습니까?
@@ -954,7 +980,6 @@ const InvitePage = () => {
                           src="/images/common/logo_A306.png"
                           alt="SYNERGY logo img"
                         />
-                        <LogoName>SYNERGY</LogoName>
                       </Logo>
                     </Brand>
                   </BrandWrapper>
@@ -966,27 +991,47 @@ const InvitePage = () => {
                     top: 0,
                     left: 0,
                     right: 0,
-
-                    width: "60%",
-                    height: "100%",
+  
+                    width: '60%',
+                    height: '100%',
+                    // bgcolor: 'orange',
                     borderTopLeftRadius: 0,
                     borderTopRightRadius: 0,
                     borderBottomLeftRadius: 20,
                     borderBottomRightRadius: 20,
                     boxShadow: 4,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <h1
-                    style={{
-                      color: "skyblue",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    게임 종류
-                  </h1>
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                  }}>
+                  <Box id='round'>
+                    <span>{round} 라운드 중</span>
+                    <h1 style={{
+                      color: 'indigo',
+                      fontWeight: 'bold'
+                    }}>{Number(currentRound)+1}라운드</h1>
+                  </Box>
+                  <Box id='category'>
+                    {isExaminer === true ?
+                    <Box>
+                      <h3 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'}}>{subjectName}</h3>
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{answer}</h1>
+                    </Box>
+                    :
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h1>}
+                  </Box>
+                  <Box id='category'>
+                    <span>남은 시간</span>
+                    <h1>{timer}초</h1>
+                  </Box>
                 </Paper>
                 <Box
                   id="buttons"
@@ -1020,38 +1065,39 @@ const InvitePage = () => {
                   height: "85%",
                 }}
               >
-                <Box
-                  id="conference"
+                <Box id='conference'
                   sx={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    width: "75%",
-                    height: "100%",
-                    display: "flex",
-                  }}
-                >
-                  <Box
-                    id="cam"
-                    sx={{
-                      // display: 'flex',
-                      // backgroundColor: 'powderblue',
-                      flexGrow: 1,
-                      width: "100%",
-                      height: "90%",
-                      // margin: 10
-                    }}
-                  >
-                  {isGamestart === true ? (
-                    <GamestartMain></GamestartMain>
-                  ) : null}
-                  {isGameover ? (
-                  <AlertPage text={"게임종료"}></AlertPage>
-                  ) : isCorrect ? (
-                  <AlertPage text={"정답"}></AlertPage>
-                  ): isRoundover ? (
-                    <AlertPage text={"시간초과"}></AlertPage>
-                  ) : null}
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection:'column',
+                    width: '75%',
+                    height: '100%',
+                    display: 'flex',
+                    margin: 2,
+                    padding: 2
+                    }}>
+                   <Box id='cam' 
+                    sx={{ 
+                    // display: 'flex',
+                    // backgroundColor: 'powderblue',
+                    width: '100%',
+                    height: '90%',
+                    // margin: 10
+                        }}>
+                  <div className="chbox">
+                    {isGamestart === true ? (
+                      <GamestartMain></GamestartMain>
+                    ) : null}
+                    {isGameover ? (
+                      <AlertPage text={"게임종료"}></AlertPage>
+                      ) : isRank ? (
+                      <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                      ):isCorrect ? (
+                      <AlertPage text={"정답"}></AlertPage>
+                      ): isRoundover ? (
+                      <AlertPage text={"시간초과"}></AlertPage>
+                    ) : null}
+                  </div>
                   {/* 큰 화면 카메라 */}
                   {/* {mainStreamManager !== undefined ? (
                   <div id="main-video" className="col-md-6">
@@ -1073,30 +1119,43 @@ const InvitePage = () => {
                       spacing={{ xs: 1, md: 1 }}
                       columns={{ xs: 4, sm: 8, md: 12 }}
                     >
-                      {publisher !== undefined ? (
-                        <Grid
-                          item
-                          sm={4}
-                          md={4}
-                          onClick={() => handleMainVideoStream(publisher)}
-                        >
-                          <UserVideoComponent streamManager={publisher} />
+                      {isPlaying == true ?         
+                        streamManagers.map((sub: any, i: any) => (
+                          sub.stream.connection.connectionId != examinerId ?
+                            <Grid
+                              item sm={4} md={4}
+                              key={i}
+                              onClick={() => handleMainVideoStream(sub)}>
+                              <UserVideoComponent streamManager={sub} />
+                            </Grid>
+                          :       
+                            <Grid
+                              item sm={4} md={4}
+                              key={i}
+                              onClick={() => handleMainVideoStream(sub)}>
+                              <Box
+                                sx={{
+                                  border: 6,
+                                  borderColor: 'limegreen',
+                                  height: '100.8%'
+                                }}>
+                                <UserVideoComponent
+                                style={{border: 'solid'}} streamManager={sub} />
+                              </Box>
+                            </Grid>
+                            ))
+                        :
+                        streamManagers.map((sub, i) => (
+                          <Grid
+                            item sm={4} md={4}
+                            key={i}
+                            onClick={() => handleMainVideoStream(sub)}
+                          >
+                            <UserVideoComponent streamManager={sub} />
+                          </Grid>
+                        ))}               
                         </Grid>
-                      ) : null}
-                      {subscribers.map((sub, i) => (
-                        <Grid
-                          item
-                          sm={4}
-                          md={4}
-                          key={i}
-                          // className="stream-container col-md-6 col-xs-6"
-                          onClick={() => handleMainVideoStream(sub)}
-                        >
-                          <UserVideoComponent streamManager={sub} />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
+                      </Box>
                   <Box
                     id="settings"
                     sx={{
@@ -1109,27 +1168,28 @@ const InvitePage = () => {
                       marginTop: 3
                     }}
                   >
-                    <Button>
-                      <SettingsIcon />
+                    <Button
+                      onClick={reverseAudioState}>
+                          {audiostate ? (
+                            <MicOutlinedIcon
+                              color='success' />
+                          ) : (
+                            <MicOutlinedIcon
+                              color='disabled' />
+                          )}
                     </Button>
-                    {audiostate ? (
-                      <Button onClick={reverseAudioState}>
-                        <MicOutlinedIcon color="success" />
-                      </Button>
-                    ) : (
-                      <Button onClick={reverseAudioState}>
-                        <MicOutlinedIcon color="disabled" />
-                      </Button>
-                    )}
-                    {videostate ? (
-                      <Button onClick={reverseVideoState}>
-                        <VideocamIcon color="success" />
-                      </Button>
-                    ) : (
-                      <Button onClick={reverseVideoState}>
-                        <VideocamIcon color="disabled" />
-                      </Button>
-                    )}
+                    <Button
+                        onClick={reverseVideoState}>
+                        {videostate ? (
+                          <VideocamIcon 
+                          color='success'
+                          />
+                        ) : (
+                          <VideocamIcon 
+                          color='disabled'
+                          />
+                        )}
+                    </Button>
                     <Button onClick={leaveSession}>
                       <ExitToAppIcon color="error" />
                     </Button>
