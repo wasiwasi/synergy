@@ -1089,8 +1089,8 @@ function SwipeableTextMobileStepper() {
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 1100,
-          height: 700
+          width: 900,
+          height: 568
       }}>
           {steps[activeStep].choice.map((step, index) => (
             <div key={index}>
@@ -1103,11 +1103,11 @@ function SwipeableTextMobileStepper() {
                   sx={{
                     bgcolor: colors[index],
                     color: 'white',
-                    height: 300,
+                    height: 250,
                     margin: 2,
                     marginBottom: 0,
                     fontSize: 25,
-                    width: 400,
+                    width: 300,
                     zIndex: 1,
                   }}>
                   <div>{steps[activeStep].choice[index]}</div>
