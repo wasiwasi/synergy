@@ -80,6 +80,7 @@ function SwipeableTextMobileStepper() {
   const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = steps.length;
+  const colors = ['orange', 'green', 'yellow', 'red'];
 
   const [accessToken, setAccessToken] = useState<string>("");
 
@@ -1043,15 +1044,18 @@ function SwipeableTextMobileStepper() {
             justifyContent: 'center',
             height: 50,
             pl: 2,
-            bgcolor: 'background.default',
+            pt: 10,
+            pb: 3,
+            backgroundColor: 'lightCyan',
           }}
         >
           <Typography
           sx={{
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
-            fontWeight: 'bold'
-          }}><div>{steps[activeStep].label}</div></Typography>
+            fontWeight: 'bold',
+            color: 'deepSkyBlue',
+          }}>{steps[activeStep].label}</Typography>
         </Paper>
         <div style={{ 
           display: 'flex',
@@ -1070,7 +1074,7 @@ function SwipeableTextMobileStepper() {
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
                   sx={{
-                    bgcolor: 'info.main',
+                    bgcolor: colors[index],
                     color: 'white',
                     height: 300,
                     margin: 2,
@@ -1099,7 +1103,8 @@ function SwipeableTextMobileStepper() {
             display: 'flex',
             justifyContent: 'space-between',
             maxWidth: 1000,
-            width: '100%'
+            width: '100%',
+            backgroundColor: 'lightcyan'
           }}
           steps={maxSteps}
           position="static"
@@ -1170,11 +1175,28 @@ function SwipeableTextMobileStepper() {
           }}>
           {/* <div id="session">
           <div id="session-header"> */}
-              <h1 id="session-title">{mySessionId}</h1>
-              <div>
-                <Button onClick={handleCopyClipBoard}><div>초대 링크 복사하기 📋</div></Button>
-              </div>
-              </Box>
+              <BrandWrapper
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Brand to="/">
+                      <Logo>
+                        <LogoImg
+                          style={{
+                            margin: 0,
+                          }}
+                          src="/images/common/logo_A306.png"
+                          alt="SYNERGY logo img"
+                        />
+                      </Logo>
+                    </Brand>
+                  </BrandWrapper>
+            </Box>
+            {isPlaying ? (
               <Paper id='info'
                 sx={{
                   // position: 'sticky',
@@ -1194,36 +1216,66 @@ function SwipeableTextMobileStepper() {
                   justifyContent: 'space-evenly',
                   alignItems: 'center',
                 }}>
-                  <Box id='round'>
-                    <span>{round} 라운드 중</span>
-                    <h1 style={{
-                      color: 'indigo',
-                      fontWeight: 'bold'
-                    }}>{Number(currentRound)+1}라운드</h1>
-                  </Box>
-                  <Box id='category'>
-                    {isExaminer === true ?
+                <Box id='round'>
+                  <span>{round} 라운드 중</span>
+                  <h1 style={{
+                    color: 'indigo',
+                    fontWeight: 'bold'
+                  }}>{Number(currentRound) + 1}라운드</h1>
+                </Box>
+                <Box id='category'>
+                  {isExaminer === true ?
                     <Box>
                       <h3 style={{
                         color: 'skyblue',
-                        fontWeight: 'bold'}}>{subjectName}</h3>
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h3>
                       <h1 style={{
                         color: 'skyblue',
                         fontWeight: 'bold'
                       }}>{answer}</h1>
                     </Box>
                     :
-                      <h1 style={{
-                        color: 'skyblue',
-                        fontWeight: 'bold'
-                      }}>{subjectName}</h1>}
-                  </Box>
-                  <Box id='category'>
-                    <span>남은 시간</span>
-                    <h1>{timer}초</h1>
-                  </Box>
+                    <h1 style={{
+                      color: 'skyblue',
+                      fontWeight: 'bold'
+                    }}>{subjectName}</h1>}
+                </Box>
+                <Box id='category'>
+                  <span>남은 시간</span>
+                  <h1>{timer}초</h1>
+                </Box>
+              </Paper>)
+              : (<Paper id='info'
+              sx={{
+                // position: 'sticky',
+                top: 0,
+                left: 0,
+                right: 0,
 
-              </Paper>
+                width: '60%',
+                height: '100%',
+                // bgcolor: 'orange',
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20,
+                boxShadow: 4,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 2,
+                }}>
+                <Box sx={{
+                  width:"82px"
+                }}></Box>
+                <Box id='category'>
+                  <h1>몸으로 말해요</h1>
+                </Box>
+                <Box id='link'>
+                  <Button onClick={handleCopyClipBoard}>초대 링크 📋</Button>
+              </Box>
+            </Paper>)}
               <Box id='buttons'
                 sx={{
                   width: '20%',
@@ -1352,6 +1404,7 @@ function SwipeableTextMobileStepper() {
                     <Box
                       sx={{
                         border: 6,
+                        borderRadius: 4,
                         borderColor: 'limegreen',
                         height: '100.8%'
                       }}>
@@ -1426,8 +1479,7 @@ function SwipeableTextMobileStepper() {
          
           <Box className="chatspace" 
           sx={{
-            borderStyle: 'solid',
-            borderColor: '#ddd', 
+            backgroundColor: 'skyblue', 
             width: '100%', 
             height: '100%', 
             borderRadius: 3
@@ -1437,7 +1489,8 @@ function SwipeableTextMobileStepper() {
           <Box 
           className="chatbox__messages" 
           sx={{
-            backgroundColor: '#A8C0D6', 
+            backgroundColor: 'white',
+            boxShadow: 'inset 3px 3px 3px',
             margin: 'auto', 
             width: '90%', 
             height: '80%', 
@@ -1489,8 +1542,14 @@ function BasicSelect(props: any) {
     <Box sx={{ minWidth: 120,
     width: 560 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">{steps[2].choice[props.index]}</InputLabel>
+        <InputLabel id="demo-simple-select-label"
+          sx={{
+            fontWeight: 'bold',
+            }}>{steps[2].choice[props.index]}</InputLabel>
         <Select
+          sx={{
+            backgroundColor: 'white',
+          }}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           value={category}
@@ -1516,7 +1575,12 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  background: lightCyan;
 `;
+
+// const Create = styled.div`
+//   padding: 3em 0 0;
+// `;
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -1532,6 +1596,48 @@ const style = {
   p: 4,
 };
 
+export const BrandWrapper = styled.div`
+  // position: relative;
+  // margin: 100px 100px
+  align-items: center;
+  display: flex;
+  // align-text: center;
+  align-self: center;
+`;
+
+export const Brand = styled(Link)`
+  // position: absolute;
+  // display: flex;
+  text-decoration: none;
+`;
+
+export const Logo = styled.div`
+  // position: absolute; 
+  display: flex;
+`;
+
+export const LogoImg = styled.img`
+  height: 30px;
+  // margin: 0 auto;
+  margin-left: 20px;
+  margin-right: 10px;
+`;
+
+export const LogoName = styled.span`
+  margin-left: 6px;
+  // padding-top: 1px;
+  font-size: 20px;
+  font-weight: 700;
+  // align-items: center;
+  // align-self: center;
+  display: flex;
+  color: #000;
+  
+  &:hover {
+    color: #000;
+  }
+
+`;
 
 function BasicModal() {
   const [open, setOpen] = useState(false);
