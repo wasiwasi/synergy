@@ -1186,6 +1186,7 @@ const InvitePage = () => {
                               <Box
                                 sx={{
                                   border: 6,
+                                  borderRadius: 4,
                                   borderColor: 'limegreen',
                                   height: '100.8%'
                                 }}>
