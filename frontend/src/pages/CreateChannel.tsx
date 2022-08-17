@@ -151,7 +151,8 @@ function SwipeableTextMobileStepper() {
   const [isRoundover, setIsRoundover] = useState<boolean>(false);
   const [scoreMarks, setScoreMarks] = useState<string>("");
   const [scoreExaminers, setScoreExaminers] = useState<string>("");
-
+  const [isRank, setIsRank] = useState<boolean>(false);
+  
 
   const didMount = useRef(false);
   const scrollRef = useRef<null|HTMLDivElement>(null);
@@ -318,9 +319,6 @@ function SwipeableTextMobileStepper() {
 
     mySession?.off("signal:gameover");
     mySession?.on("signal:gameover", (event: any) => {
-      let parsedData = event.data.split('|');
-      setScoreMarks(parsedData[0]);
-      setScoreExaminers(parsedData[1]);
       setIsPlaying(false);
       setIsCorrect(false);
       setIsRoundover(false);
@@ -330,8 +328,19 @@ function SwipeableTextMobileStepper() {
       }, 5000);
     })
 
+    mySession?.off("signal:rank");
+    mySession?.on("signal:rank", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
+      setIsRank(true);
+      setTimeout(() => {
+        setIsRank(false);
+      }, 10000);
+    })
+
   }, [session]);
-  
+
   useEffect(() => {
     const mySession = session;
 
@@ -495,10 +504,17 @@ function SwipeableTextMobileStepper() {
     result = result.slice(0, -1);
 
     session?.signal({
-      data: result,
       to: [],
       type: "gameover"
     })
+
+    setTimeout(() => {
+      session?.signal({
+        data: result,
+        to: [],
+        type: "rank"
+      })
+    }, 5000)
   }
 
   const handleSignalWord = (event: any) => {
@@ -1265,13 +1281,12 @@ function SwipeableTextMobileStepper() {
                 <GamestartMain></GamestartMain>
               ) : null}
               {isGameover ? (
-                <>
-                  <AlertPage text={"게임종료"}></AlertPage>
-                  <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
-                </>
-              ) : isCorrect ? (
-              <AlertPage text={"정답"}></AlertPage>
-              ): isRoundover ? (
+                <AlertPage text={"게임종료"}></AlertPage>
+                ) : isRank ? (
+                <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                ):isCorrect ? (
+                <AlertPage text={"정답"}></AlertPage>
+                ): isRoundover ? (
                 <AlertPage text={"시간초과"}></AlertPage>
                     ) : null}
             </div>
