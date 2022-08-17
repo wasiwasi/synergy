@@ -497,32 +497,17 @@ function SwipeableTextMobileStepper() {
   }
 
   const sendMessageByClick = () => {
-    if (message !== "") {
-      setMessages(
-        [
-          ...messages,
-          {
-            userName: myUserName,
-            text: message,
-            boxClass: "messages__box--operator",
-          },
-        ],
-      );
-      setMessage("");
-      const mySession = session;
-
-      mySession?.signal({
-        data: `${myUserName},${message}`,
-        to: [],
-        type: "chat",
+    if(isExaminer) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
       });
-    }
-  }
-
-  const sendMessageByEnter = (e : any) => {
-    if (e.key === "Enter") {
+    } else {
       if (message !== "") {
-        setMessages([
+        setMessages(
+          [
             ...messages,
             {
               userName: myUserName,
@@ -539,9 +524,42 @@ function SwipeableTextMobileStepper() {
           to: [],
           type: "chat",
         });
-
       }
     }
+  }
+
+  const sendMessageByEnter = (e : any) => {
+    if(isExaminer) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sorry...",
+        text: "출제자는 채팅을 칠 수 없습니다.",
+        timer: 1000,
+      });
+    } else {
+      if (e.key === "Enter") {
+        if (message !== "") {
+          setMessages([
+              ...messages,
+              {
+                userName: myUserName,
+                text: message,
+                boxClass: "messages__box--operator",
+              },
+            ],
+          );
+          setMessage("");
+          const mySession = session;
+
+          mySession?.signal({
+            data: `${myUserName},${message}`,
+            to: [],
+            type: "chat",
+          });
+
+        }
+      }
+  }
   }
 
   const handleChatMessageChange = (e : any) => {
