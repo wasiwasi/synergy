@@ -187,6 +187,7 @@ const InvitePage = () => {
   const [scoreMarks, setScoreMarks] = useState<string>("");
   const [scoreExaminers, setScoreExaminers] = useState<string>("");
   const [isRank, setIsRank] = useState<boolean>(false);
+  const [correctorName, setCorrectorName] = useState<string>("");
   const [round, setRound] = useState(0)
 
   const didMount = useRef(false);
@@ -397,6 +398,7 @@ const InvitePage = () => {
 
     mySession?.off("signal:correct");
     mySession?.on("signal:correct", (event: any) => {
+      setCorrectorName(event.data.split(",")[1]);
       setIsCorrect(true);
     });
 
@@ -1124,7 +1126,7 @@ const InvitePage = () => {
                       ) : isRank ? (
                       <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
                       ):isCorrect ? (
-                      <AlertPage text={"정답"}></AlertPage>
+                      <AlertPage text={correctorName + "님 정답"}></AlertPage>
                       ): isRoundover ? (
                       <AlertPage text={"시간초과"}></AlertPage>
                     ) : null}
