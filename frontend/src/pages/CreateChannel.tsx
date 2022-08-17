@@ -1167,11 +1167,28 @@ function SwipeableTextMobileStepper() {
           }}>
           {/* <div id="session">
           <div id="session-header"> */}
-              <h1 id="session-title">{mySessionId}</h1>
-              <div>
-                <Button onClick={handleCopyClipBoard}>초대 링크 복사하기 📋</Button>
-              </div>
-              </Box>
+              <BrandWrapper
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Brand to="/">
+                      <Logo>
+                        <LogoImg
+                          style={{
+                            margin: 0,
+                          }}
+                          src="/images/common/logo_A306.png"
+                          alt="SYNERGY logo img"
+                        />
+                      </Logo>
+                    </Brand>
+                  </BrandWrapper>
+            </Box>
+            {isPlaying ? (
               <Paper id='info'
                 sx={{
                   // position: 'sticky',
@@ -1191,36 +1208,66 @@ function SwipeableTextMobileStepper() {
                   justifyContent: 'space-evenly',
                   alignItems: 'center',
                 }}>
-                  <Box id='round'>
-                    <span>{round} 라운드 중</span>
-                    <h1 style={{
-                      color: 'indigo',
-                      fontWeight: 'bold'
-                    }}>{Number(currentRound)+1}라운드</h1>
-                  </Box>
-                  <Box id='category'>
-                    {isExaminer === true ?
+                <Box id='round'>
+                  <span>{round} 라운드 중</span>
+                  <h1 style={{
+                    color: 'indigo',
+                    fontWeight: 'bold'
+                  }}>{Number(currentRound) + 1}라운드</h1>
+                </Box>
+                <Box id='category'>
+                  {isExaminer === true ?
                     <Box>
                       <h3 style={{
                         color: 'skyblue',
-                        fontWeight: 'bold'}}>{subjectName}</h3>
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h3>
                       <h1 style={{
                         color: 'skyblue',
                         fontWeight: 'bold'
                       }}>{answer}</h1>
                     </Box>
                     :
-                      <h1 style={{
-                        color: 'skyblue',
-                        fontWeight: 'bold'
-                      }}>{subjectName}</h1>}
-                  </Box>
-                  <Box id='category'>
-                    <span>남은 시간</span>
-                    <h1>{timer}초</h1>
-                  </Box>
+                    <h1 style={{
+                      color: 'skyblue',
+                      fontWeight: 'bold'
+                    }}>{subjectName}</h1>}
+                </Box>
+                <Box id='category'>
+                  <span>남은 시간</span>
+                  <h1>{timer}초</h1>
+                </Box>
+              </Paper>)
+              : (<Paper id='info'
+              sx={{
+                // position: 'sticky',
+                top: 0,
+                left: 0,
+                right: 0,
 
-              </Paper>
+                width: '60%',
+                height: '100%',
+                // bgcolor: 'orange',
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20,
+                boxShadow: 4,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 2,
+                }}>
+                <Box sx={{
+                  width:"82px"
+                }}></Box>
+                <Box id='category'>
+                  <h1>몸으로 말해요</h1>
+                </Box>
+                <Box id='link'>
+                  <Button onClick={handleCopyClipBoard}>초대 링크 📋</Button>
+              </Box>
+            </Paper>)}
               <Box id='buttons'
                 sx={{
                   width: '20%',
@@ -1528,6 +1575,48 @@ const style = {
   p: 4,
 };
 
+export const BrandWrapper = styled.div`
+  // position: relative;
+  // margin: 100px 100px
+  align-items: center;
+  display: flex;
+  // align-text: center;
+  align-self: center;
+`;
+
+export const Brand = styled(Link)`
+  // position: absolute;
+  // display: flex;
+  text-decoration: none;
+`;
+
+export const Logo = styled.div`
+  // position: absolute; 
+  display: flex;
+`;
+
+export const LogoImg = styled.img`
+  height: 30px;
+  // margin: 0 auto;
+  margin-left: 20px;
+  margin-right: 10px;
+`;
+
+export const LogoName = styled.span`
+  margin-left: 6px;
+  // padding-top: 1px;
+  font-size: 20px;
+  font-weight: 700;
+  // align-items: center;
+  // align-self: center;
+  display: flex;
+  color: #000;
+  
+  &:hover {
+    color: #000;
+  }
+
+`;
 
 function BasicModal() {
   const [open, setOpen] = useState(false);
