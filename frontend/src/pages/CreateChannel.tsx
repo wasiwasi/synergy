@@ -1727,7 +1727,7 @@ function BasicModal() {
   const handleClose = () => setOpen(false);
 
   return (
-    <Container>
+    <div>
       <Button onClick={handleOpen}><span>게임 방법</span></Button>
       <Dialog
         open={open}
@@ -1756,6 +1756,6 @@ function BasicModal() {
 
           </DialogContent>
       </Dialog>
-    </Container>
+    </div>
   );
 }
