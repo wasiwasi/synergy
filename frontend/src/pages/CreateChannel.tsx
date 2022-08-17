@@ -1,10 +1,9 @@
-<<<<<<< HEAD
 /* eslint-disable */
 // import BasicSelect from '../components/common/Select';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MobileStepper from '@mui/material/MobileStepper';
@@ -22,7 +21,8 @@ import styled from "@emotion/styled";
 import {Button, Grid} from "@mui/material/";
 
 import "./Signup.css";
-
+import "./modules/Gamestart.css";
+  
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Connection, OpenVidu, Publisher, Session, StreamManager, Subscriber } from "openvidu-browser";
 import "../components/openvidu/App.css";
@@ -35,6 +35,9 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 
 import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
+import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
@@ -92,6 +95,7 @@ function SwipeableTextMobileStepper() {
   const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
   const [currentVideoDeviceId, setCurrentVideoDeviceId] = useState<string | undefined>("");
   const [myConnectionId, setMyConnectionId] = useState<string>("");
+  const [examinerId, setExaminerId] = useState<string>("");
    
   const [audiostate, setAudiostate] = useState<boolean>(true);
   const [audioallowed, setAudioallowed] = useState<boolean>(true);
@@ -103,6 +107,8 @@ function SwipeableTextMobileStepper() {
 
   const [joinLink, setJoinLink] = useState<string>("");
 
+  let [subjectName, setSubjectName] = useState<string>("");
+  let [answer, setAnswer] = useState<string[]>([]);
   let [examiners, setExaminers] = useState<string[]>([]);
   let [subjects, setSubjects] = useState<string[]>([]);
   let [scores, setScores] = useState<number[]>([]);
@@ -110,7 +116,7 @@ function SwipeableTextMobileStepper() {
   let [isPlaying, setIsPlaying] = useState<boolean>(false);
   let [currentRound, setCurrentRound] = useState<number>(0);
   let [timer, setTimer] = useState<number>(0);
-  let [isCorrect, setIsCorrect] = useState<boolean>(false);
+  let [categoryName, setCategoryName] = useState<string>("");
 
   const [isExaminer, setIsExaminer] = useState<boolean>(false);
 
@@ -138,7 +144,18 @@ function SwipeableTextMobileStepper() {
 
   const [hostName, sethostName] = useState<string>("");
 
+  const [isGamestart, setIsGamestart] = useState<boolean>(false);
+  const [isGameover, setIsGameover] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [isRoundover, setIsRoundover] = useState<boolean>(false);
+  const [scoreMarks, setScoreMarks] = useState<string>("");
+  const [scoreExaminers, setScoreExaminers] = useState<string>("");
+  const [isRank, setIsRank] = useState<boolean>(false);
+  
+
   const didMount = useRef(false);
+  const scrollRef = useRef<null|HTMLDivElement>(null);
+
 
   useEffect(() => {
     let token = localStorage.getItem("access-token");
@@ -161,6 +178,7 @@ function SwipeableTextMobileStepper() {
       
       // category, round에 기본 값 부여
       setCategory(copy[0][0].id);
+      setCategoryName(copy[0][0].name);
       setRound(copy[1][0].id);
     });
     //닉네임 가져와서 세팅
@@ -285,6 +303,47 @@ function SwipeableTextMobileStepper() {
 
   useEffect(() => {
     const mySession = session;
+
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      let parsedData = event.data.split(',');
+      setSubjectName(parsedData[1]);
+      setRound(parsedData[0]);
+      setIsPlaying(true);
+      setIsGamestart(true);
+      setTimeout(() => {
+        setIsGamestart(false);
+      }, 5000);
+    })
+
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
+      setIsGameover(true);
+      setTimer(-1);
+      setTimeout(() => {
+        setIsGameover(false);
+      }, 5000);
+    })
+
+    mySession?.off("signal:rank");
+    mySession?.on("signal:rank", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
+      setIsRank(true);
+      setTimeout(() => {
+        setIsRank(false);
+      }, 10000);
+    })
+
+  }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
+
     mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event : any) => {
       let chatdata = event.data.split(",");
@@ -293,7 +352,6 @@ function SwipeableTextMobileStepper() {
           scores[examiners.indexOf(event.from.connectionId)]++ // 맞춘 사람 점수++
           console.log("Correct!!")
           setScores(scores); // scores 갱신
-          setIsCorrect(true);
           setTimer(-1);
           sendSignalCorrect(event.from.connectionId); // 맞췄다고 시그널
         }
@@ -310,12 +368,12 @@ function SwipeableTextMobileStepper() {
         );
       }
     });
-  }, [session, messages]);
+  }, [session, messages, isPlaying, currentRound, subjects, examiners, scores]);
 
   // 게임 시작할 때 최대 라운드 수도 함께 
   const sendSignalGameStart = () => {
     session?.signal({
-      data: String(round),
+      data: String(round)+","+categoryName,
       to: [],
       type: "gamestart"
     })
@@ -325,6 +383,8 @@ function SwipeableTextMobileStepper() {
     const mySession = session;
     mySession?.off("signal:word");
     mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
       handleSignalWord(event)
     })
   // }, [session, myConnectionId, audiostate, videostate, isPlaying])
@@ -363,7 +423,7 @@ function SwipeableTextMobileStepper() {
     session?.on("signal:time", (event: any) => {
       console.log(event.data);
     })
-  }, [session, timer])
+  }, [session])
 
   // connectionId라는 connection id를 갖는 참가자가 맞췄다고 signal
   const sendSignalCorrect = (connectionId: string) => {
@@ -377,9 +437,7 @@ function SwipeableTextMobileStepper() {
   useEffect(() => {
     session?.off("signal:correct"); 
     session?.on("signal:correct", (event: any) => { // correct 시그널이 오면
-
-      setIsCorrect(false);
-
+      setIsCorrect(true);
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         setTimeout(() => {
@@ -388,8 +446,10 @@ function SwipeableTextMobileStepper() {
         }, 3000);
       } else { // round가 다 끝났다면
         setIsPlaying(false); // 게임 종료
-        sendSignalGameOver(); // 게임 종료됐다는 시그널
-        setCurrentRound(0); // 라운드 0으로 초기화
+        setTimeout(() => {
+          sendSignalGameOver(); // 게임 종료됐다는 시그널
+        }, 3000);
+        // setCurrentRound(0); // 라운드 0으로 초기화
         return;
       }
     }) 
@@ -411,6 +471,9 @@ function SwipeableTextMobileStepper() {
         setIsCorrect(false);
         return;
       }
+
+      setIsRoundover(true);
+      
       if(currentRound < round-1) { // 아직 round가 남았다면
         setCurrentRound(++currentRound); // round 증가시키고
         console.log("round:"+currentRound);
@@ -430,35 +493,36 @@ function SwipeableTextMobileStepper() {
   const sendSignalGameOver = () => {
     let result: string = '';
 
-    for(let score in scores) {
+    for(let score of scores) {
       result += score+","
     }
     result = result.slice(0, -1) + "|";
 
-    for(let conId in examiners) {
+    for(let conId of examiners) {
       result += conId+","
     }
     result = result.slice(0, -1);
 
     session?.signal({
-      data: result,
       to: [],
       type: "gameover"
     })
-  }
 
-  useEffect(() => {
-    session?.off("signal:gameover");
-    session?.on("signal:gameover", (event: any) => {
-      setTimer(-1);
-      setIsPlaying(false);
-    })
-  }, [session])
+    setTimeout(() => {
+      session?.signal({
+        data: result,
+        to: [],
+        type: "rank"
+      })
+    }, 5000)
+  }
 
   const handleSignalWord = (event: any) => {
     const answer = event.data.split(",")[0];
     const examinerId = event.data.split(",")[1];
-
+    setAnswer(answer)
+    setCurrentRound(event.data.split(",")[2])
+    setExaminerId(examinerId)
     if (examinerId === myConnectionId) { // 내가 출제자라면
       // 카메라를 키고 카메라를 끄지 못하도록.
       if(!videostate) {
@@ -563,6 +627,7 @@ function SwipeableTextMobileStepper() {
   }
   }
 
+
   const handleChatMessageChange = (e : any) => {
     setMessage(e.target.value);
   }
@@ -630,12 +695,10 @@ function SwipeableTextMobileStepper() {
 
   const leaveSession = () => {
     axios
-      .delete(`${BE_URL}/api/channels/leave/${mySessionId}`,
+      .post(`${BE_URL}/api/channels/leave/${mySessionId}`,
         {
-          data : {
-            nickName: myUserName,
-            connectionId: myConnectionId,
-          } 
+          nickName: myUserName,
+          connectionId: myConnectionId,
         })
       .then((res) => {
         console.log("방 나가기 성공");
@@ -876,7 +939,6 @@ function SwipeableTextMobileStepper() {
       publisher?.publishVideo(!videostate);
       setVideostate(!videostate);
     } else {
-
       Swal.fire({
         icon: "warning",
         title: "Sorry...",
@@ -892,6 +954,7 @@ function SwipeableTextMobileStepper() {
 
     setTimeout(() => {
       setIsPlaying(true);
+      setIsGameover(false);
       setTimer(INITIAL_TIME);
       setCurrentRound(0);
       initExaminerAndScores().then(
@@ -966,7 +1029,6 @@ function SwipeableTextMobileStepper() {
    */
 
    // idx번째 출제자에게 정답 알려줌
-
   const giveWordToExaminer = (idx: number) => {
       session?.signal({
         "to": [],
@@ -974,6 +1036,10 @@ function SwipeableTextMobileStepper() {
         "data": subjects[idx]+","+examiners[(idx+1)%examiners.length]+","+idx
       })
   }
+
+  useEffect(()=>{
+    scrollRef.current?.scrollIntoView();
+  },[messages]);
 
   return (
   <Container>
@@ -1142,13 +1208,37 @@ function SwipeableTextMobileStepper() {
                   borderBottomRightRadius: 20,
                   boxShadow: 4,
                   display: 'flex',
-                  justifyContent: 'center',
+                  justifyContent: 'space-evenly',
                   alignItems: 'center',
                 }}>
-                  <h1 style={{
-                    color: 'skyblue',
-                    fontWeight: 'bold'
-                  }}>게임 종류</h1>
+                  <Box id='round'>
+                    <span>{round} 라운드 중</span>
+                    <h1 style={{
+                      color: 'indigo',
+                      fontWeight: 'bold'
+                    }}>{Number(currentRound)+1}라운드</h1>
+                  </Box>
+                  <Box id='category'>
+                    {isExaminer === true ?
+                    <Box>
+                      <h3 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'}}>{subjectName}</h3>
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{answer}</h1>
+                    </Box>
+                    :
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h1>}
+                  </Box>
+                  <Box id='category'>
+                    <span>남은 시간</span>
+                    <h1>{timer}초</h1>
+                  </Box>
 
               </Paper>
               <Box id='buttons'
@@ -1205,7 +1295,21 @@ function SwipeableTextMobileStepper() {
             width: '100%',
             height: '90%',
             // margin: 10
-            }}>
+                }}>
+            <div className="chbox">
+              {isGamestart === true ? (
+                <GamestartMain></GamestartMain>
+              ) : null}
+              {isGameover ? (
+                <AlertPage text={"게임종료"}></AlertPage>
+                ) : isRank ? (
+                <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                ):isCorrect ? (
+                <AlertPage text={"정답"}></AlertPage>
+                ): isRoundover ? (
+                <AlertPage text={"시간초과"}></AlertPage>
+                    ) : null}
+            </div>
             {/* 큰 화면 카메라 */}
             {/* {mainStreamManager !== undefined ? (
               <div id="main-video" className="col-md-6">
@@ -1250,7 +1354,7 @@ function SwipeableTextMobileStepper() {
             ))} */}
             {isPlaying == true ?         
               streamManagers.map((sub: any, i: any) => (
-                sub.stream.connection.connectionId != examiners[0] ?
+                sub.stream.connection.connectionId != examinerId ?
                   <Grid
                     item sm={4} md={4}
                     key={i}
@@ -1357,8 +1461,7 @@ function SwipeableTextMobileStepper() {
             }}
           >
             <Messages messages={messages} myUserName={myUserName} />
-            {/*<div />
-           </div> */}
+            <div  ref ={scrollRef}/>
           </Box>
             <input
               id="chat_message"

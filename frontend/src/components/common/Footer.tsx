@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, Route, BrowserRouter } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, Route, BrowserRouter,useLocation } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
@@ -11,16 +11,24 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 
+
 const Footer = () => {
-  if (window.location.pathname === '/join') return null;
+
+  const location = useLocation();
+  useEffect(()=>{
+    
+  }, [location])
+  if (window.location.pathname === '/join'||window.location.pathname === '/channel/createchannel') return null;
+  
+  
   return (
     <Container>
       <Wrapper>
         <BrandWrapper>
           <Brand to="/">
             <Logo>
-              <LogoImg src="/images/common/logo_A306.png" alt="A306 logo img" />
-              <LogoName>A306</LogoName>
+              <LogoImg src="/images/common/logo_A306.png" alt="SYNERGY logo img" />
+              <LogoName>SYNERGY</LogoName>
             </Logo>
           </Brand>
         </BrandWrapper>
@@ -31,7 +39,7 @@ const Footer = () => {
             <HeadMsg>문의 및 고객센터</HeadMsg>
             1:1 라이브챗
             <br />
-            Email: A306@gmail.com
+            Email: SYNERGY@gmail.com
             <br />
             운영 시간 : 오전 9시 ~ 오후 6시 (주말 및 공휴일 휴무)
           </ServiceMsg>

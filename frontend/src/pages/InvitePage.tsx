@@ -51,10 +51,15 @@ import {
 import "../components/openvidu/App.css";
 import Messages from "../components/openvidu/Messages";
 import UserVideoComponent from "../components/openvidu/UserVideoComponent";
+import Swal from "sweetalert2";
+import GamestartMain from "./modules/GamestartMain"
+import AlertPage from "./modules/AlertPage";
+import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
 const OPENVIDU_SERVER_SECRET = process.env.REACT_APP_OPENVIDU_SERVER_SECRET;
 const BE_URL = process.env.REACT_APP_BACKEND_URL;
+const JOIN_MEMBER_LIMIT = 6;
 
 const themeA306 = createTheme({
   palette: {
@@ -122,6 +127,7 @@ const InvitePage = () => {
   >(undefined);
   const [publisher, setPublisher] = useState<Publisher | undefined>(undefined);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [streamManagers, setStreamManagers] = useState<StreamManager[]>([]);
 
   const [myConnectionId, setMyConnectionId] = useState<string>("");
 
@@ -134,12 +140,20 @@ const InvitePage = () => {
   const [message, setMessage] = useState<string>("");
   const emptyAllOV = () => {
     setOV(null);
-    setSession(undefined);
-    setSubscribers([]);
     setMySessionId("");
     setMyUserName("");
+    setSession(undefined);
     setMainStreamManager(undefined);
     setPublisher(undefined);
+    setSubscribers([]);
+    setStreamManagers([]);
+    setMyConnectionId("");
+    setAudiostate(true);
+    setAudioallowed(false);
+    setVideostate(true);
+    setVideoallowed(false);
+    setMessages([]);
+    setMessage("");
   };
   //닉네임 확인
   const [nickName, setNickName] = useState<string>("");
@@ -155,8 +169,28 @@ const InvitePage = () => {
 
   const [hostName, sethostName] = useState<string>("");
   const [hostConnectionId, setHostConnectionId] = useState<string>("");
+  //게임관련
+  
+  let [isPlaying, setIsPlaying] = useState<boolean>(false);
+  let [currentRound, setCurrentRound] = useState<number>(0);
+  let [timer, setTimer] = useState<number>(0);
+  let [categoryName, setCategoryName] = useState<string>("");
+  let [subjectName, setSubjectName] = useState<string>("");
+  let [answer, setAnswer] = useState<string[]>([]);
+  const [examinerId, setExaminerId] = useState<string>("");
+  const [isExaminer, setIsExaminer] = useState<boolean>(false);
+  const [isGamestart, setIsGamestart] = useState<boolean>(false);
+  const [isGameover, setIsGameover] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [isRoundover, setIsRoundover] = useState<boolean>(false);
+  const [scoreMarks, setScoreMarks] = useState<string>("");
+  const [scoreExaminers, setScoreExaminers] = useState<string>("");
+  const [isRank, setIsRank] = useState<boolean>(false);
+  const [round, setRound] = useState(0)
 
   const didMount = useRef(false);
+
+  const scrollRef = useRef<null|HTMLDivElement>(null);
 
   // URL에서 방 코드를 가져옴
   useEffect(() => {
@@ -204,6 +238,8 @@ const InvitePage = () => {
       // Update the state with the new subscribers
       subscribers.push(subscriber);
       setSubscribers([...subscribers]);
+      streamManagers.push(subscriber);
+      setStreamManagers([...streamManagers]);
     });
 
     // On every Stream destroyed...
@@ -221,28 +257,22 @@ const InvitePage = () => {
       console.warn(exception);
     });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
-    // chatting
-    mySession?.on("signal:chat", (event: any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      console.log(chatdata);
-      if (chatdata[0] !== myUserName) {
-        setMessages([
-          ...messages,
-          {
-            userName: chatdata[0],
-            text: chatdata[1],
-            boxClass: "messages__box--visitor",
-          },
-        ]);
-      }
-    });
     mySession?.on("sessionDisconnected", (event: any) => {
-      alert("서버와의 접속이 끊어졌습니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "서버와의 접속이 끊어졌습니다.",
+        timer: 1000,
+      });
       navigate("/");
     });
 
@@ -283,6 +313,8 @@ const InvitePage = () => {
           // Set the main video in the page to display our webcam and store our Publisher
           setMainStreamManager(publisher);
           setPublisher(publisher);
+          streamManagers.push(publisher as StreamManager)
+          setStreamManagers([...streamManagers])
         })
         .catch((error: any) => {
           console.log(
@@ -295,6 +327,7 @@ const InvitePage = () => {
   }, [session]);
   useEffect(() => {
     const mySession = session;
+    mySession?.off("signal:chat");
     mySession?.on("signal:chat", (event: any) => {
       let chatdata = event.data.split(",");
       // let chatdata = event.;
@@ -323,35 +356,104 @@ const InvitePage = () => {
 
   useEffect(() => {
     const mySession = session;
-    mySession?.on("signal:chat", (event : any) => {
-      let chatdata = event.data.split(",");
-      // let chatdata = event.;
-      if (chatdata[0] !== myUserName) {
-        console.log("messages: "+messages);
+    mySession?.off("signal:gamestart");
+    mySession?.on("signal:gamestart", (event: any) => {
+      let parsedData = event.data.split(',');
+      setSubjectName(parsedData[1]);
+      setRound(parsedData[0]);
+      setIsPlaying(true);
+      setIsGamestart(true);
+      setTimeout(() => {
+        setIsGamestart(false);
+      }, 5000);
+    })
 
-        // messages.push({
-        //   userName: chatdata[0],
-        //   text: chatdata[1],
-        //   boxClass: "messages__box--visitor",
-        // });
+    mySession?.off("signal:gameover");
+    mySession?.on("signal:gameover", (event: any) => {
+      setIsPlaying(false);
+      setIsCorrect(false);
+      setIsRoundover(false);
+      setIsGameover(true);
+      setTimeout(() => {
+        setIsGameover(false);
+      }, 5000);
+    })
 
-        // setMessages([...messages]);
-
-        setMessages([
-            ...messages,
-            {
-              userName: chatdata[0],
-              text: chatdata[1],
-              boxClass: "messages__box--visitor",
-            },
-          ],
-        );
-      }
+    mySession?.off("signal:rank");
+    mySession?.on("signal:rank", (event: any) => {
+      let parsedData = event.data.split('|');
+      setScoreMarks(parsedData[0]);
+      setScoreExaminers(parsedData[1]);
+      setIsRank(true);
+      setTimeout(() => {
+        setIsRank(false);
+      }, 10000);
+    })
+    mySession?.off("signal:time");
+    mySession?.on("signal:time", (event: any) => {
+      setTimer(event.data);
     });
-  }, [session, messages]);
 
-  const onEnter = async () => {
-    await joinSession();
+    mySession?.off("signal:correct");
+    mySession?.on("signal:correct", (event: any) => {
+      setIsCorrect(true);
+    });
+
+    mySession?.off("signal:roundover");
+    mySession?.on("signal:roundover", (event: any) => {
+      setIsRoundover(true);
+    });
+
+  }, [session]);
+
+  useEffect(() => {
+    const mySession = session;
+    mySession?.off("signal:word");
+    mySession?.on("signal:word", (event: any) => {
+      setIsCorrect(false);
+      setIsRoundover(false);
+      handleSignalWord(event)
+    })
+  }, [session, myConnectionId, audiostate, videostate, isPlaying]);
+
+  const handleSignalWord = (event: any) => {
+    const answer = event.data.split(",")[0];
+    const examinerId = event.data.split(",")[1];
+    setAnswer(answer)
+    setCurrentRound(event.data.split(",")[2])
+    setExaminerId(examinerId)
+    if (examinerId === myConnectionId) { // 내가 출제자라면
+      // 카메라를 키고 카메라를 끄지 못하도록.
+      if(!videostate) {
+        reverseVideoState()
+      }
+      // 마이크를 끄고 마이크를 키지 못하도록.
+      if(audiostate) {
+        reverseAudioState()
+      }
+      setIsExaminer(true);
+    } else { // 내가 출제자가 아니라면
+      setIsExaminer(false);
+      console.log("I'm not examiner")
+    }
+  }
+
+  const onEnter = () => {
+    axios
+      .get(`${BE_URL}/api/channels/info/${mySessionId}`)
+      .then((response) => {
+        if (response.data.currentParticipantNumber >= JOIN_MEMBER_LIMIT) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "참여하려는 채널이 꽉 찼습니다.",
+            timer: 1000,
+          });
+          navigate("/");
+          return;
+        }
+        joinSession();
+    })
   };
 
   // 닉네임
@@ -389,18 +491,37 @@ const InvitePage = () => {
         })
         .then((response: any) => {
           if (response.status == 226) {
-            alert("중복된 닉네임입니다.");
+            Swal.fire({
+              icon: "question",
+              title: "Oops...",
+              text: "중복된 닉네임입니다",
+              timer: 1000,
+            });
           } else {
-            alert("사용가능한 닉네임입니다.");
+            Swal.fire({
+              icon: "success",
+              title: "사용가능한 닉네임입니다.",
+              timer: 1000,
+            });
             setUsableNickName(true);
             setMyUserName(nickName);
           }
         })
         .catch((error: any) => {
-          alert("서버 오류");
+          Swal.fire({
+            icon: "warning",
+            title: "Sorry...",
+            text: "서버 오류입니다.",
+            timer: 1000,
+          });
         });
     } else {
-      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+      Swal.fire({
+        icon: "error",
+        title: "닉네임을 다시 입력해주세요",
+        text: "6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.",
+        timer: 1000,
+      });
     }
   };
 
@@ -414,7 +535,6 @@ const InvitePage = () => {
           boxClass: "messages__box--operator",
         },
       ]);
-
       setMessage("");
       const mySession = session;
 
@@ -426,9 +546,9 @@ const InvitePage = () => {
     }
   };
 
-  const sendMessageByEnter = (e : any) => {
+  const sendMessageByEnter = (e: any) => {
     if (e.key === "Enter") {
-      if (message !== "") {
+      if (message !== "") { 
         setMessages([
           ...messages,
           {
@@ -449,8 +569,7 @@ const InvitePage = () => {
     }
   };
 
-  const handleChatMessageChange = (e : any) => {
-    console.log("message event occur");
+  const handleChatMessageChange = (e: any) => {
     setMessage(e.target.value);
   };
   // chatting
@@ -488,6 +607,12 @@ const InvitePage = () => {
       varSubscribers.splice(index, 1);
       setSubscribers(varSubscribers);
     }
+    let varStreamMangers = streamManagers;
+    let index2 = varStreamMangers.indexOf(streamManager, 0);
+    if (index2 > -1) {
+      varStreamMangers.splice(index2, 1);
+      setStreamManagers(varStreamMangers);
+    }
   };
   // 참가자 백엔드에 등록
   const recordParticipant = (conId: string) => {
@@ -504,6 +629,16 @@ const InvitePage = () => {
       })
       .then((response: any) => {
         console.log(response);
+      })
+      .catch((error: any) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `참여하려는 채널이 꽉 찼습니다.`,
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        leaveSession();
       });
   };
 
@@ -550,6 +685,14 @@ const InvitePage = () => {
       .catch((e: any) => {
         console.log("방 삭제 실패");
       });
+    
+    axios
+    .delete(OPENVIDU_SERVER_URL + `/sessions/${mySessionId}`, {
+      headers: {
+        Authorization: "Basic " + btoa("OPENVIDUAPP:" + OPENVIDU_SERVER_SECRET),
+        "Content-Type": "application/json",
+      },
+    });
   };
 
   const switchCamera = async () => {
@@ -628,7 +771,13 @@ const InvitePage = () => {
               "Content-Type": "application/json",
             },
           });
-          alert(`참가하려는 ${sessionId}방이 존재하지 않습니다.`);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `참가하려는 ${sessionId}방이 존재하지 않습니다.`,
+            showConfirmButton: false,
+            timer: 1500,
+          });
           reject(response);
         })
         .catch((response: any) => {
@@ -641,20 +790,44 @@ const InvitePage = () => {
               "No connection to OpenVidu Server. This may be a certificate error at " +
                 OPENVIDU_SERVER_URL
             );
-            if (
-              window.confirm(
+            //swal
+            Swal.fire({
+              title: "모든 문제집을 삭제하시겠습니까?",
+              text:
                 'No connection to OpenVidu Server. This may be a certificate error at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"\n\nClick OK to navigate and accept it. ' +
-                  'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
-                  OPENVIDU_SERVER_URL +
-                  '"'
-              )
-            ) {
-              window.location.assign(
-                OPENVIDU_SERVER_URL + "/accept-certificate"
-              );
-            }
+                OPENVIDU_SERVER_URL +
+                '"\n\nClick OK to navigate and accept it. ' +
+                'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+                OPENVIDU_SERVER_URL +
+                '"',
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#3085d6",
+              cancelButtonColor: "#d33",
+              confirmButtonText: "예, 전부 삭제합니다",
+              cancelButtonText: "취소하기",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.assign(
+                  OPENVIDU_SERVER_URL + "/accept-certificate"
+                );
+              }
+            });
+            //원래 confrim
+            // if (
+            //   window.confirm(
+            //     'No connection to OpenVidu Server. This may be a certificate error at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"\n\nClick OK to navigate and accept it. ' +
+            //       'If no certificate warning is shown, then check that your OpenVidu Server is up and running at "' +
+            //       OPENVIDU_SERVER_URL +
+            //       '"'
+            //   )
+            // ) {
+            //   window.location.assign(
+            //     OPENVIDU_SERVER_URL + "/accept-certificate"
+            //   );
+            // }
           }
         });
     });
@@ -699,36 +872,44 @@ const InvitePage = () => {
     setVideostate(!videostate);
   };
 
+  useEffect(()=>{
+    scrollRef.current?.scrollIntoView();
+  },[messages]);
   return (
     <Container>
       <Wrapper>
         <ThemeProvider theme={themeA306}>
           {session === undefined ? (
             <InvitePageForm>
-              <InvitePageHead>Brand</InvitePageHead>
+              <InvitePageHead>SYNERGY</InvitePageHead>
 
               <InvitePageMsg>
                 {hostName} 님의 방에 입장하시겠습니까?
               </InvitePageMsg>
 
               <InvitePageInput>
-                <FormControl variant="standard" fullWidth>
-                  <InputLabel htmlFor="component-helper" shrink>
-                    Nick Name
-                  </InputLabel>
-                  <Input
-                    id="component-helper-nickname"
-                    placeholder="닉네임을 입력해 주세요."
-                    // value={nickName}
-                    onChange={onChangeNickName}
-                    required
-                    aria-describedby="component-helper-text"
-                  />
-                </FormControl>
-                <NickNameButton onClick={nickNameCheck}>
-                  닉네임 중복체크
-                </NickNameButton>
-
+                <Grid container spacing={2}>
+                  <Grid item  xs={8} >
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                  </Grid>
+                  <Grid item  xs={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
+                  </Grid>
+                  </Grid>
                 {nickName.length > 0 && (
                   <div className={`${isNickName ? "success" : "error"}`}>
                     {nickNameError}
@@ -736,14 +917,13 @@ const InvitePage = () => {
                 )}
               </InvitePageInput>
 
-              <InvitePageInput>
+              <InvitePageInput onClick={onEnter}>
                 <Button
                   type="submit"
                   variant="contained"
                   size="medium"
                   fullWidth
                   disabled={!(isNickName && usableNickName)}
-                  onClick={onEnter}
                 >
                   채널 입장하기
                 </Button>
@@ -797,9 +977,8 @@ const InvitePage = () => {
                             margin: 0,
                           }}
                           src="/images/common/logo_A306.png"
-                          alt="A306 logo img"
+                          alt="SYNERGY logo img"
                         />
-                        <LogoName>A306</LogoName>
                       </Logo>
                     </Brand>
                   </BrandWrapper>
@@ -811,27 +990,47 @@ const InvitePage = () => {
                     top: 0,
                     left: 0,
                     right: 0,
-
-                    width: "60%",
-                    height: "100%",
+  
+                    width: '60%',
+                    height: '100%',
+                    // bgcolor: 'orange',
                     borderTopLeftRadius: 0,
                     borderTopRightRadius: 0,
                     borderBottomLeftRadius: 20,
                     borderBottomRightRadius: 20,
                     boxShadow: 4,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <h1
-                    style={{
-                      color: "skyblue",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    게임 종류
-                  </h1>
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                  }}>
+                  <Box id='round'>
+                    <span>{round} 라운드 중</span>
+                    <h1 style={{
+                      color: 'indigo',
+                      fontWeight: 'bold'
+                    }}>{Number(currentRound)+1}라운드</h1>
+                  </Box>
+                  <Box id='category'>
+                    {isExaminer === true ?
+                    <Box>
+                      <h3 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'}}>{subjectName}</h3>
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{answer}</h1>
+                    </Box>
+                    :
+                      <h1 style={{
+                        color: 'skyblue',
+                        fontWeight: 'bold'
+                      }}>{subjectName}</h1>}
+                  </Box>
+                  <Box id='category'>
+                    <span>남은 시간</span>
+                    <h1>{timer}초</h1>
+                  </Box>
                 </Paper>
                 <Box
                   id="buttons"
@@ -865,30 +1064,41 @@ const InvitePage = () => {
                   height: "85%",
                 }}
               >
-                <Box
-                  id="conference"
+                <Box id='conference'
                   sx={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    width: "75%",
-                    height: "100%",
-                    display: "flex",
-                  }}
-                >
-                  <Box
-                    id="cam"
-                    sx={{
-                      // display: 'flex',
-                      // backgroundColor: 'powderblue',
-                      flexGrow: 1,
-                      width: "100%",
-                      height: "90%",
-                      // margin: 10
-                    }}
-                  >
-                    {/* 큰 화면 카메라 */}
-                    {/* {mainStreamManager !== undefined ? (
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection:'column',
+                    width: '75%',
+                    height: '100%',
+                    display: 'flex',
+                    margin: 2,
+                    padding: 2
+                    }}>
+                   <Box id='cam' 
+                    sx={{ 
+                    // display: 'flex',
+                    // backgroundColor: 'powderblue',
+                    width: '100%',
+                    height: '90%',
+                    // margin: 10
+                        }}>
+                  <div className="chbox">
+                    {isGamestart === true ? (
+                      <GamestartMain></GamestartMain>
+                    ) : null}
+                    {isGameover ? (
+                      <AlertPage text={"게임종료"}></AlertPage>
+                      ) : isRank ? (
+                      <ScoreRate mark={scoreMarks} examiners={scoreExaminers} channelId={mySessionId as string}></ScoreRate>
+                      ):isCorrect ? (
+                      <AlertPage text={"정답"}></AlertPage>
+                      ): isRoundover ? (
+                      <AlertPage text={"시간초과"}></AlertPage>
+                    ) : null}
+                  </div>
+                  {/* 큰 화면 카메라 */}
+                  {/* {mainStreamManager !== undefined ? (
                   <div id="main-video" className="col-md-6">
                     <UserVideoComponent
                       streamManager={mainStreamManager}
@@ -908,30 +1118,43 @@ const InvitePage = () => {
                       spacing={{ xs: 1, md: 1 }}
                       columns={{ xs: 4, sm: 8, md: 12 }}
                     >
-                      {publisher !== undefined ? (
-                        <Grid
-                          item
-                          sm={4}
-                          md={4}
-                          onClick={() => handleMainVideoStream(publisher)}
-                        >
-                          <UserVideoComponent streamManager={publisher} />
+                      {isPlaying == true ?         
+                        streamManagers.map((sub: any, i: any) => (
+                          sub.stream.connection.connectionId != examinerId ?
+                            <Grid
+                              item sm={4} md={4}
+                              key={i}
+                              onClick={() => handleMainVideoStream(sub)}>
+                              <UserVideoComponent streamManager={sub} />
+                            </Grid>
+                          :       
+                            <Grid
+                              item sm={4} md={4}
+                              key={i}
+                              onClick={() => handleMainVideoStream(sub)}>
+                              <Box
+                                sx={{
+                                  border: 6,
+                                  borderColor: 'limegreen',
+                                  height: '100.8%'
+                                }}>
+                                <UserVideoComponent
+                                style={{border: 'solid'}} streamManager={sub} />
+                              </Box>
+                            </Grid>
+                            ))
+                        :
+                        streamManagers.map((sub, i) => (
+                          <Grid
+                            item sm={4} md={4}
+                            key={i}
+                            onClick={() => handleMainVideoStream(sub)}
+                          >
+                            <UserVideoComponent streamManager={sub} />
+                          </Grid>
+                        ))}               
                         </Grid>
-                      ) : null}
-                      {subscribers.map((sub, i) => (
-                        <Grid
-                          item
-                          sm={4}
-                          md={4}
-                          key={i}
-                          // className="stream-container col-md-6 col-xs-6"
-                          onClick={() => handleMainVideoStream(sub)}
-                        >
-                          <UserVideoComponent streamManager={sub} />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
+                      </Box>
                   <Box
                     id="settings"
                     sx={{
@@ -943,92 +1166,81 @@ const InvitePage = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Button>
-                      <SettingsIcon />
+                    <Button
+                      onClick={reverseAudioState}>
+                          {audiostate ? (
+                            <MicOutlinedIcon
+                              color='success' />
+                          ) : (
+                            <MicOutlinedIcon
+                              color='disabled' />
+                          )}
                     </Button>
-                    {audiostate ? (
-                      <Button onClick={reverseAudioState}>
-                        <MicOutlinedIcon color="success" />
-                      </Button>
-                    ) : (
-                      <Button onClick={reverseAudioState}>
-                        <MicOutlinedIcon color="disabled" />
-                      </Button>
-                    )}
-                    {videostate ? (
-                      <Button onClick={reverseVideoState}>
-                        <VideocamIcon color="success" />
-                      </Button>
-                    ) : (
-                      <Button onClick={reverseVideoState}>
-                        <VideocamIcon color="disabled" />
-                      </Button>
-                    )}
+                    <Button
+                        onClick={reverseVideoState}>
+                        {videostate ? (
+                          <VideocamIcon 
+                          color='success'
+                          />
+                        ) : (
+                          <VideocamIcon 
+                          color='disabled'
+                          />
+                        )}
+                    </Button>
                     <Button onClick={leaveSession}>
                       <ExitToAppIcon color="error" />
                     </Button>
                   </Box>
                 </Box>
-                <Box
-                  id="chat"
-                  sx={{
-                    // backgroundColor: 'grey',
-                    width: "25%",
-                    height: "100%",
-                    // margin: 10
-                  }}
-                >
-                  {/* <div className="chatbox__footer"> */}
-                  <Box
-                    className="chatspace"
-                    sx={{
-                      backgroundColor: "#85B6FF",
-                      width: "100%",
-                      height: "400px",
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <h3>채팅</h3>
-                    <Box
-                      className="chatbox__messages"
-                      sx={{
-                        backgroundColor: "white",
-                        margin: "10px",
-                        width: "80%",
-                        height: "300px",
-                        borderRadius: "20px",
-                        overflow: "auto",
-                      }}
-                    >
-                      <Messages messages={messages} />
-                      {/* <div />
-            </div> */}
-                    </Box>
-                    <input
-                      id="chat_message"
-                      type="text"
-                      style={{
-                        margin: "10px",
-                        width: "70%",
-                        borderRadius: "20px",
-                        border: "none",
-                      }}
-                      placeholder="Write a message..."
-                      onChange={handleChatMessageChange}
-                      onKeyPress={sendMessageByEnter}
-                      value={message}
-                    />
-                    <Button
-                      className="chatbox__send--footer"
-                      sx={{ borderRadius: "20px", border: "none" }}
-                      onClick={sendMessageByClick}
-                    >
-                      Enter
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
+                <Box id='chat' 
+          sx={{
+          width: '25%',
+          height: '100%'
+          // margin: 10
+        }}>
+         
+          <Box className="chatspace" 
+          sx={{
+            backgroundColor: '#ddd', 
+            width: '100%', 
+            height: '70%', 
+            borderRadius: '20px'
+          }}
+        >
+          <h3 style={{paddingTop: '5px'}}>채팅</h3>
+          <Box 
+          className="chatbox__messages" 
+          sx={{
+            backgroundColor: '#A8C0D6', 
+            margin: 'auto', 
+            width: '90%', 
+            height: '75%', 
+            borderRadius: '20px', 
+            overflow: 'auto'
+            }}
+          >
+            <Messages messages={messages} myUserName={myUserName} />
+            <div  ref ={scrollRef}/>
+          </Box>
+            <input
+              id="chat_message"
+              type="text"
+              style={{margin: '15px', width:'70%', borderRadius: '20px', border: 'none'}}
+              placeholder="Write a message..."
+              onChange={handleChatMessageChange}
+              onKeyPress={sendMessageByEnter}
+              value={message}
+            />
+            <Button
+              className="chatbox__send--footer"
+              sx={{borderRadius: '20px', border: 'none'}}
+              onClick={sendMessageByClick}
+            >
+              Enter
+            </Button></Box>
+          </Box>
+          </Box></Box>
           ) : null}
         </ThemeProvider>
       </Wrapper>
