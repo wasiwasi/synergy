@@ -9,7 +9,6 @@ const HomeProduct = () => {
   return (
     <HomeProductLayout
       sxBackground={{
-        backgroundColor: "rgb(200,232,228)",
         backgroundPosition: "center",
       }}
     >

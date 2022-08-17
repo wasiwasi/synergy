@@ -27,7 +27,7 @@ const Footer = () => {
         <BrandWrapper>
           <Brand to="/">
             <Logo>
-              <LogoImg src="/images/common/logo_A306.png" alt="SYNERGY logo img" />
+              <LogoImg src="/logo_A306_2.png" alt="SYNERGY logo img" />
               <LogoName>SYNERGY</LogoName>
             </Logo>
           </Brand>
