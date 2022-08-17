@@ -21,7 +21,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -46,72 +46,68 @@ const style = {
   p: 4,
 };
 // 아래와 같은 형태로 호출해야함.
-    //점수 테스트를 위한거 0815
-    // const [marks, setMarks] = useState("100, 200, 10, 1");
-    // 
-    // const [examiners, setExaminers] = useState(
-    //   "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
-    // );
-  
-    // <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" />
+//점수 테스트를 위한거 0815
+// const [marks, setMarks] = useState("100, 200, 10, 1");
+//
+// const [examiners, setExaminers] = useState(
+//   "con_SJsKJY0dxR,con_OZeqyIkRTK,con_RRGCKKWCdp,con_F7nsBnj8fq"
+// );
+
+// <ScoreRate mark={marks} examiners={examiners} channelId="CC1488" />
 function ScoreRate(props: {
   mark: string;
   examiners: string;
   channelId: string;
 }) {
   const [participantList, setParticipantList] = useState(new Map());
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
   const [orderList, setOrderList] = useState<string[]>([]);
   const [examinerList, setExaminerList] = useState<string[]>([]);
-  const [score,setScore] =useState<number[]>([]);
+  const [score, setScore] = useState<number[]>([]);
 
   const getParticipantList = (channelId: string) => {
-    axios.get(`${BE_URL}/api/channels/info/${channelId}`)
-    .then((res) => {
+    axios.get(`${BE_URL}/api/channels/info/${channelId}`).then((res) => {
       let temp = res.data.participantList;
-        
+
       temp.map((object: { nickName: ""; channelId: ""; connectionId: "" }) => {
-        setParticipantList((prev)=> new Map(prev).set(object.connectionId, object.nickName));
+        setParticipantList((prev) =>
+          new Map(prev).set(object.connectionId, object.nickName)
+        );
       });
     });
   };
-  const getOrderList =(examinerList:string[])=>{
+  const getOrderList = (examinerList: string[]) => {
     let order = [...orderList];
-      
-    examinerList.map((val,index)=>{
-        let name = participantList.get(val);
-        
-        order[index]=name;
 
-  
-    })
-      setOrderList(order);
-  }
-  const setDataArray=(examiners:string, mark:string)=>{
-    examiners.split(',').map((val,index)=>{
-      examinerList[index] =val;
+    examinerList.map((val, index) => {
+      let name = participantList.get(val);
+
+      order[index] = name;
+    });
+    setOrderList(order);
+  };
+  const setDataArray = (examiners: string, mark: string) => {
+    examiners.split(",").map((val, index) => {
+      examinerList[index] = val;
     });
     setExaminerList(examinerList);
-    
-    mark.split(',').map((val,index)=>{
-      score[index] =Number(val);
+
+    mark.split(",").map((val, index) => {
+      score[index] = Number(val);
     });
     setScore(score);
-  }
+  };
 
   useEffect(() => {
-    setDataArray(props.examiners,props.mark);
+    setDataArray(props.examiners, props.mark);
     getParticipantList(props.channelId);
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     getOrderList(examinerList);
-  },[participantList])
+  }, [participantList]);
 
-
-  
   const sort = (obj: any) => {
     let items = Object.keys(obj).map(function (key) {
       return [key, obj[key]];
@@ -139,68 +135,58 @@ function ScoreRate(props: {
 
   let result;
   result = sort(dic);
-  
 
   return (
     <Container>
-      <Button onClick={handleOpen}>랭크 오픈</Button>
       <RankDialog
-          fullWidth
-          open={open}
-          onClose={handleClose}
-          // TransitionComponent={Transition}
-          aria-labelledby="form-dialog-title"
-        >
-          <RankDialogTitle id="form-dialog-title">
-            <Title>
-            랭킹
-            </Title>
-          </RankDialogTitle>
-          <RankDialogContent>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <CustomTableCell align="center"> 순위 </CustomTableCell>
-                    <CustomTableCell align="center"> 닉네임 </CustomTableCell>
-                    <CustomTableCell align="center"> 개수 </CustomTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {result.map((val, idx) => {
-                    return (
-                      <TableRow key={idx}>
-                        <BodyTableCell
-                          component="th"
-                          scope="row"
-                          align="center"
-                        >
-                          {idx + 1 === 1 && '🥇'}
-                          {idx + 1 === 2 && '🥈'}
-                          {idx + 1 === 3 && '🥉'}
-                          {idx + 1 >= 4 && idx + 1}
-                        </BodyTableCell>
-                        <BodyTableCell align="center">
-                          {orderList[val.index]}
-                        </BodyTableCell>
-                        <BodyTableCell align="center">
-                          {val.score}
-                        </BodyTableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <RankDialogActions>
-              <CancelButton
-                onClick={() => {
-                  handleClose();
-                }}
-              />
-            </RankDialogActions>
-          </RankDialogContent>
-        </RankDialog>
+        fullWidth
+        open={open}
+        onClose={handleClose}
+        // TransitionComponent={Transition}
+        aria-labelledby="form-dialog-title"
+      >
+        <RankDialogTitle id="form-dialog-title">
+          <Title>랭킹</Title>
+        </RankDialogTitle>
+        <RankDialogContent>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <CustomTableCell align="center"> 순위 </CustomTableCell>
+                  <CustomTableCell align="center"> 닉네임 </CustomTableCell>
+                  <CustomTableCell align="center"> 개수 </CustomTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {result.map((val, idx) => {
+                  return (
+                    <TableRow key={idx}>
+                      <BodyTableCell component="th" scope="row" align="center">
+                        {idx + 1 === 1 && "🥇"}
+                        {idx + 1 === 2 && "🥈"}
+                        {idx + 1 === 3 && "🥉"}
+                        {idx + 1 >= 4 && idx + 1}
+                      </BodyTableCell>
+                      <BodyTableCell align="center">
+                        {orderList[val.index]}
+                      </BodyTableCell>
+                      <BodyTableCell align="center">{val.score}</BodyTableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <RankDialogActions>
+            <CancelButton
+              onClick={() => {
+                handleClose();
+              }}
+            />
+          </RankDialogActions>
+        </RankDialogContent>
+      </RankDialog>
       {/* <Modal open={open} onClose={handleClose}>
         <TableContainer component={Paper}>
           <Table sx={style} aria-label="simple table">
