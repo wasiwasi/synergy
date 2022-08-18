@@ -248,9 +248,9 @@ const Login = () => {
               </Button>
             </LoginInput>
 
-            <LinkFindPassword to="/signup">
+            {/* <LinkFindPassword to="/signup">
               비밀번호를 잊으셨나요?
-            </LinkFindPassword>
+            </LinkFindPassword> */}
             <SignupMsg>
               계정이 없으신가요?
               <LinkSignup to="/signup"> 가입하기</LinkSignup>
@@ -289,17 +289,17 @@ const LoginInput = styled.div`
   margin: 15px 0px;
 `;
 
-const LinkFindPassword = styled(Link)`
-  display: block;
-  text-decoration: none;
-  margin: 10px;
-  font-size: 13px;
-  color: #769fcd;
+// const LinkFindPassword = styled(Link)`
+//   display: block;
+//   text-decoration: none;
+//   margin: 10px;
+//   font-size: 13px;
+//   color: #769fcd;
 
-  &:hover {
-    color: #769fcd;
-  }
-`;
+//   &:hover {
+//     color: #769fcd;
+//   }
+// `;
 
 const SignupMsg = styled.div`
   text-decoration: none;
