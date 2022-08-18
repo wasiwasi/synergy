@@ -908,57 +908,63 @@ const InvitePage = () => {
     <Container>
       <Wrapper>
         <ThemeProvider theme={themeA306}>
+          
           {session === undefined ? (
-            <InvitePageForm>
-              <InvitePageHead>SYNERGY</InvitePageHead>
+            <InvitePageAll>
+              
+              <InvitePageForm>
+              <InvitePageWrapper>
+                <InvitePageHead>SYNERGY</InvitePageHead>
 
-              <InvitePageMsg>
-                {hostName} 님의 방에 입장하시겠습니까?
-              </InvitePageMsg>
+                <InvitePageMsg>
+                  {hostName} 님의 방에 입장하시겠습니까?
+                </InvitePageMsg>
 
-              <InvitePageInput>
-                <Grid container spacing={2}>
-                  <Grid item  xs={8} >
-                  <FormControl variant="standard" fullWidth>
-                    <InputLabel htmlFor="component-helper" shrink>
-                      Nick Name
-                    </InputLabel>
-                    <Input
-                      id="component-helper-nickname"
-                      placeholder="닉네임을 입력해 주세요."
-                      // value={nickName}
-                      onChange={onChangeNickName}
-                      required
-                      aria-describedby="component-helper-text"
-                    />
-                  </FormControl>
-                  </Grid>
-                  <Grid item  xs={4}>
-                  <NickNameButton onClick={nickNameCheck}>
-                    닉네임 중복체크
-                  </NickNameButton>
-                  </Grid>
-                  </Grid>
-                {nickName.length > 0 && (
-                  <div className={`${isNickName ? "success" : "error"}`}>
-                    {nickNameError}
-                  </div>
-                )}
-              </InvitePageInput>
+                <InvitePageInput>
+                  <Grid container spacing={2}>
+                    <Grid item  xs={8} >
+                    <FormControl variant="standard" fullWidth>
+                      <InputLabel htmlFor="component-helper" shrink>
+                        Nick Name
+                      </InputLabel>
+                      <Input
+                        id="component-helper-nickname"
+                        placeholder="닉네임을 입력해 주세요."
+                        // value={nickName}
+                        onChange={onChangeNickName}
+                        required
+                        aria-describedby="component-helper-text"
+                      />
+                    </FormControl>
+                    </Grid>
+                    <Grid item  xs={4}>
+                    <NickNameButton onClick={nickNameCheck}>
+                      닉네임 중복체크
+                    </NickNameButton>
+                    </Grid>
+                    </Grid>
+                  {nickName.length > 0 && (
+                    <div className={`${isNickName ? "success" : "error"}`}>
+                      {nickNameError}
+                    </div>
+                  )}
+                </InvitePageInput>
 
-              <InvitePageInput onClick={onEnter}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="medium"
-                  fullWidth
-                  disabled={!(isNickName && usableNickName)}
-                >
-                  채널 입장하기
-                </Button>
-                <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div>
-              </InvitePageInput>
-            </InvitePageForm>
+                <InvitePageInput onClick={onEnter}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="medium"
+                    fullWidth
+                    disabled={!(isNickName && usableNickName)}
+                  >
+                    채널 입장하기
+                  </Button>
+                  <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div>
+                </InvitePageInput>
+                </InvitePageWrapper>
+              </InvitePageForm>
+            </InvitePageAll>
           ) : null}
           {/* session이 있을 때 */}
           {session !== undefined ? (
@@ -1349,6 +1355,7 @@ const InvitePage = () => {
 
           ) : null}
         </ThemeProvider>
+        
       </Wrapper>
     </Container>
   );
@@ -1417,28 +1424,35 @@ const style = {
 };
 
 const Container = styled.div`
-  // position: sticky;
-  // align-self: center;
-  // top: 0;
-  // left: 0;
   height: 100vh;
-  // width: 100%;
-  // // padding:150px 0;
-  // background-color: #D7D7D7;
   background: lightCyan;
 `;
 
 const Wrapper = styled.div`
-  display: flex;
+  // display: flex;
   // align-items: center;
   // text-align: center;
   // background-color: #D7D7D7;
-  justify-content: center;
+  // justify-content: center;
   // z-index: 5;
 `;
 
+const InvitePageAll = styled.div`
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const InvitePageWrapper = styled.div`
+  width: 500px;
+  display: inline-block;
+`;
+
 const InvitePageHead = styled.h1`
-  color: #000000;
+  color: deepskyblue;
   margin: 40px;
 `;
 
@@ -1449,12 +1463,14 @@ const InvitePageMsg = styled.h5`
 `;
 
 const InvitePageForm = styled.div`
-  // display: flex;
-  // flex-direction: column;
-  // align-items: right;
-  width: 500px;
-  display: inline-block;
-  // position: absolute;
+  display: flex;
+  justify-content: center;
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const InvitePageInput = styled.div`

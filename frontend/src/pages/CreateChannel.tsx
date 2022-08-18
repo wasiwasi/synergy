@@ -1429,7 +1429,10 @@ function SwipeableTextMobileStepper() {
             height: '90%',
             // margin: 10
                 }}>
-            <div className="chbox">
+            <div className="chbox"
+              style={{
+                width: '100%'
+              }}>
               {isGamestart === true ? (
                 <GamestartMain></GamestartMain>
               ) : null}
