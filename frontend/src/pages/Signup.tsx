@@ -505,6 +505,11 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
 `;
 
 const Wrapper = styled.div`
@@ -514,6 +519,12 @@ const Wrapper = styled.div`
   // background-color: #D7D7D7;
   justify-content: center;
   // z-index: 5;
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const SignupHead = styled.h1`
