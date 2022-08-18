@@ -11,6 +11,7 @@ import Input from "@mui/material/Input";
 import InputLabel from "@mui/material/InputLabel";
 
 import Button from "@mui/material/Button";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 import Box from "@mui/material/Box";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -53,22 +54,27 @@ const themeA306 = createTheme({
 });
 
 const Mypage = () => {
-  const colums: GridColDef[] = [
+  const columns: GridColDef[] = [
     {
       field: "id",
-      headerName: "ID",
-      width: 90,
+      headerName: "No",
+      width: 150,
     },
-    { field: "title", headerName: "Title", width: 150 },
+    { field: "title", headerName: "문제집", 
+    width: 200
+  },
     {
       field: "removeSubject",
-
-      headerName: "remove ",
+      headerName: "삭제하기",
+      width: 200,
       renderCell: (cellValues) => {
         // return console.log(cellValues);
 
         const id = cellValues.row.id;
-        return <Button onClick={() => removeSubject(id)}>remove</Button>;
+        return <Button onClick={() => removeSubject(id)}>
+          <DeleteForeverIcon
+            color='error' />
+        </Button>;
       },
     },
   ];
@@ -479,7 +485,7 @@ const Mypage = () => {
               ) : (
                 <DataGrid
                   rows={mypage[0]}
-                  columns={colums}
+                  columns={columns}
                   pageSize={5}
                   rowsPerPageOptions={[5]}
                   disableSelectionOnClick

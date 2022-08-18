@@ -262,15 +262,27 @@ const Login = () => {
   );
 };
 
-const Container = styled.div``;
-
-const Wrapper = styled.div`
+const Container = styled.div`
+  height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const Wrapper = styled.div`
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const LoginHead = styled.h1`
-  color: #000000;
+  color: deepskyblue;
   margin: 40px;
 `;
 

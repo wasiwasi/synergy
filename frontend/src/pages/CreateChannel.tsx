@@ -1,6 +1,6 @@
 /* eslint-disable */
 // import BasicSelect from '../components/common/Select';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation, Route } from 'react-router-dom';
 import axios from 'axios'
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
@@ -36,6 +36,8 @@ import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import SendIcon from '@mui/icons-material/Send';
+import HelpIcon from '@mui/icons-material/Help';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 
 import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
@@ -592,6 +594,10 @@ function SwipeableTextMobileStepper() {
     handleBack()
   }
 
+  const toHome = () => {
+    <Link to = '/'></Link>
+  }
+
   const sendMessageByClick = () => {
     if(isExaminer === true) {
       Swal.fire({
@@ -1088,7 +1094,8 @@ function SwipeableTextMobileStepper() {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
             height: 50,
             pl: 2,
             pt: 10,
@@ -1097,12 +1104,32 @@ function SwipeableTextMobileStepper() {
           }}
         >
           <Typography
+            sx={{
+              typography: 'subtitle2',
+              fontSize: 'h4.fontSize',
+              fontWeight: 'bold',
+              color: 'deepSkyBlue',
+              justifySelf: 'left',
+              paddingLeft: 20
+            }}>
+            <Link to="/">
+              <HomeRoundedIcon
+              fontSize='large' />
+            </Link>
+          </Typography>
+          <Typography
           sx={{
             typography: 'subtitle2',
             fontSize: 'h4.fontSize',
             fontWeight: 'bold',
             color: 'deepSkyBlue',
+            justifySelf: 'safeCenter'
           }}><span>{steps[activeStep].label}</span></Typography>
+          <Box
+            sx={{
+              paddingRight: 25
+            }}>
+          </Box>
         </Paper>
         <div style={{ 
           display: 'flex',
@@ -1121,14 +1148,16 @@ function SwipeableTextMobileStepper() {
                     activeStep < maxSteps - 1 ?  choice(steps[activeStep].choice[index]) : undefined
                     }}
                   sx={{
-                    bgcolor: colors[index],
+                    background: `linear-gradient(white, ${colors[index]} 8%, white 250%)`,
                     color: 'white',
                     height: 250,
                     margin: 2,
                     marginBottom: 0,
-                    fontSize: 25,
+                    fontSize: 30,
                     width: 300,
                     zIndex: 1,
+                    borderRadius: 8,
+                    boxShadow: 10,
                   }}>
                   <div>{steps[activeStep].choice[index]}</div>
                 </Button> : 
@@ -1294,7 +1323,8 @@ function SwipeableTextMobileStepper() {
                   <h1>{timer}초</h1>
                 </Box>
               </Paper>)
-              : (<Paper id='info'
+              : 
+              (<Paper id='info'
               sx={{
                 // position: 'sticky',
                 top: 0,
@@ -1315,13 +1345,26 @@ function SwipeableTextMobileStepper() {
                 padding: 2,
                 }}>
                 <Box sx={{
-                  width:"82px"
+                  width:"82px",
+                  paddingLeft: '15%'
                 }}></Box>
                 <Box id='category'>
                   <h1>몸으로 말해요</h1>
                 </Box>
-                <Box id='link'>
-                  <Button onClick={handleCopyClipBoard}><span>초대 링크 📋</span></Button>
+                <Box 
+                  id='link'
+                  sx={{
+                    paddingRight: '10%'
+                  }}>
+                  <Button 
+                    color='success'
+                    onClick={handleCopyClipBoard}>
+                    <div
+                      style={{
+                        fontSize: 25,
+                      }}>💌</div>
+                      <span>초대 링크</span>
+                  </Button>
               </Box>
             </Paper>)}
               <Box id='buttons'
@@ -1335,15 +1378,22 @@ function SwipeableTextMobileStepper() {
                 {
                   isPlaying === false ? (
                     <Button
+                      variant='contained'
                       onClick={initGame}
                     >
-                      <div>게임 시작</div>
+                      <div style={{
+                        fontSize: 20,
+                      }}>게임 시작</div>
                     </Button>
                   ) : (
                     <Button
+                      variant='contained'
+                      color='error'
                       onClick={sendSignalGameOver}
                     >
-                       <div>게임 종료</div>
+                       <div style={{
+                        fontSize: 20,
+                      }}>게임 종료</div>
                     </Button>
                   )
                 }
@@ -1480,7 +1530,7 @@ function SwipeableTextMobileStepper() {
               width: '100%',
               height: '10%',
               display: 'flex',
-              justifyContent: 'space-evenly',
+              justifyContent: 'center',
               alignItems: 'center',
               marginTop: 3
             }}>
@@ -1513,6 +1563,10 @@ function SwipeableTextMobileStepper() {
               <Button
                 color = 'success'
                 variant='contained'
+                sx={{
+                  marginLeft: 2,
+                  marginRight: 2
+                }}
                 onClick={reverseVideoState}>
                 <VideocamIcon
                   sx={{
@@ -1734,7 +1788,15 @@ function BasicModal() {
 
   return (
     <div>
-      <Button onClick={handleOpen}><span>게임 방법</span></Button>
+      <Button onClick={handleOpen}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+      <span>게임 방법</span>
+        <HelpIcon color='success'></HelpIcon>
+        
+      </Button>
       <Dialog
         open={open}
         onClose={handleClose}

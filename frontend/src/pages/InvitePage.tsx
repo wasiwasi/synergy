@@ -62,6 +62,7 @@ import Swal from "sweetalert2";
 import GamestartMain from "./modules/GamestartMain"
 import AlertPage from "./modules/AlertPage";
 import SendIcon from '@mui/icons-material/Send';
+import HelpIcon from '@mui/icons-material/Help';
 import ScoreRate from "./modules/ScoreRate";
 
 const OPENVIDU_SERVER_URL = process.env.REACT_APP_OPENVIDU_SERVER_URL;
@@ -1101,7 +1102,10 @@ const InvitePage = () => {
                     alignItems: "center",
                   }}
                 >
-                  {nickName}
+                  <Box
+                    fontSize={25}>
+                    {nickName}
+                  </Box>
                   <BasicModal/>
                 </Box>
               </Box>
@@ -1214,7 +1218,7 @@ const InvitePage = () => {
                       width: "100%",
                       height: "10%",
                       display: "flex",
-                      justifyContent: "space-evenly",
+                      justifyContent: "center",
                       alignItems: "center",
                       marginTop: 3
                     }}
@@ -1246,6 +1250,10 @@ const InvitePage = () => {
               <Button
                 color = 'success'
                 variant='contained'
+                sx={{
+                  marginLeft: 2,
+                  marginRight: 2
+                }}
                 onClick={reverseVideoState}>
                 <VideocamIcon
                   sx={{
@@ -1351,7 +1359,14 @@ function BasicModal() {
 
   return (
     <div>
-      <Button onClick={handleOpen}><span>게임 방법</span></Button>
+      <Button onClick={handleOpen}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+        <span>게임 방법</span>
+        <HelpIcon color='success'></HelpIcon>
+      </Button>
       <Dialog
         open={open}
         onClose={handleClose}
