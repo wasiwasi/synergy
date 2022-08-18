@@ -1264,6 +1264,10 @@ const InvitePage = () => {
               <Button
                 color = 'warning'
                 variant='contained'
+                sx={{
+                  marginLeft: 2,
+                  marginRight: 2
+                }}
                 onClick={reverseVideoState}>
                 <VideocamOffIcon
                   sx={{
