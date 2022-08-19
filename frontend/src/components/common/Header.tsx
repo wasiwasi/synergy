@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Route, BrowserRouter } from "react-router-dom";
-
-
+import { Link, Route, BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
@@ -9,28 +7,57 @@ import styled from '@emotion/styled';
 
 
 import Button from '@mui/material/Button';
+import { useEffect } from 'react';
 
-
-
-
-
+import Swal from "sweetalert2";
 
 interface MenuListProps {
   isExpanded: boolean;
 }
 
-
-
-
 const Header = () => {
 
+  const [isLogin, setIslogin] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleMenuClick = () => {
     setIsExpanded(!isExpanded);
     console.log(isExpanded)
   };
 
+  useEffect(() => {
+    //잘못된 접근 제한
+    if (isLogin) {
+      if (window.location.pathname === '/login' || window.location.pathname === '/signup') navigate("/");
+    } else {
+      if (window.location.pathname === '/logout' || window.location.pathname === '/users/mypage'
+          || window.location.pathname === '/channel/gamechannel') navigate("/");
+      else if(window.location.pathname === '/channel/createchannel') {
+        navigate("/");
+        Swal.fire({
+          title: `채널을 생성하실 수 없습니다!`,
+          text: "로그인을 하여 채널을 생성하거나, 초대받은 링크를 통해서 들어가세요~",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+        });
+      }
+    }
+    //로그인 상태 체크
+    if (localStorage.getItem("access-token")) {
+      setIslogin(true);
+    } else {
+      setIslogin(false);
+    }
+  }, [location]);
+
+  if (window.location.pathname === '/join') return null;
+
+  if (window.location.pathname === '/channel/createchannel') return null;
   return ( 
     <>
       <div></div>
@@ -41,24 +68,26 @@ const Header = () => {
               <Logo>
                 <LogoImg
                   src="/images/common/logo_A306.png"
-                  alt="A306 logo img"
+                  alt="SYNERGY logo img"
                 />
-              <LogoName>A306</LogoName>
               </Logo>
             </Brand>
           </BrandWrapper>
           
 
           <Navigate>
-
-            <PageLink to="/login">로그인</PageLink>
-            <PageLink to="/signup">회원가입</PageLink>
-            <PageLink to="/users/mypage">마이페이지</PageLink>
-            <PageLink to="/channel/createchannel">채널생성</PageLink>
-            <PageLink to="/channel/gamechannel">게임채널</PageLink>
-            <Button variant="contained">문의하기</Button>
-
-
+            {!isLogin ? (
+              <>
+                <PageLink to="/login">로그인</PageLink>
+                <PageLink to="/signup">회원가입</PageLink>
+              </>
+            ) : (
+              <>
+                <PageLink to="/logout">로그아웃</PageLink>
+                <PageLink to="/users/mypage">마이페이지</PageLink>
+                  <PageLink to="/channel/createchannel">채널생성</PageLink>
+              </>
+            )}
           </Navigate>
           <MenuButton isExpanded={isExpanded} onClick={handleMenuClick} >
             <MenuIcon className="fa-solid fa-bars"></MenuIcon>
@@ -67,13 +96,19 @@ const Header = () => {
           
         </Wrapper>
 
-          <NavMobile isExpanded={isExpanded}>
-            <PageLinkMobile to="/login">로그인</PageLinkMobile>
-            <PageLinkMobile to="/signup">회원가입</PageLinkMobile>
-            <PageLinkMobile to="/users/mypage">마이페이지</PageLinkMobile>
-            <PageLinkMobile to="/channel/createchannel">채널생성</PageLinkMobile>
-            <PageLinkMobile to="/channel/gamechannel">게임채널</PageLinkMobile>
-            <Button variant="contained">문의하기</Button>
+        <NavMobile isExpanded={isExpanded}>
+          {!isLogin ? (
+            <>
+              <PageLinkMobile to="/login">로그인</PageLinkMobile>
+              <PageLinkMobile to="/signup">회원가입</PageLinkMobile>
+            </>
+          ) : (
+            <>
+              <PageLinkMobile to="/logout">로그아웃</PageLinkMobile>
+              <PageLinkMobile to="/users/mypage">마이페이지</PageLinkMobile>
+              <PageLinkMobile to="/channel/createchannel">채널생성</PageLinkMobile>
+            </>
+          )}
         </NavMobile>
       </Container>
     </>
@@ -91,6 +126,7 @@ const Container = styled.header`
   width: 100%;
   // padding:150px 0;
   background-color: #F7FBFC;
+  z-index: 2;
 `;
 
 const Wrapper = styled.div`
@@ -110,7 +146,7 @@ const Wrapper = styled.div`
   align-self: center;
 `;
 
-const BrandWrapper = styled.div`
+export const BrandWrapper = styled.div`
   // position: relative;
   // margin: 100px 100px
   align-items: center;
@@ -119,26 +155,25 @@ const BrandWrapper = styled.div`
   align-self: center;
 `;
 
-const Brand = styled(Link)`
+export const Brand = styled(Link)`
   // position: absolute;
   // display: flex;
   text-decoration: none;
 `;
 
-const Logo = styled.div`
+export const Logo = styled.div`
   // position: absolute; 
   display: flex;
 `;
 
-const LogoImg = styled.img`
-  width: 30px;
+export const LogoImg = styled.img`
   height: 30px;
   // margin: 0 auto;
   margin-left: 20px;
   margin-right: 10px;
 `;
 
-const LogoName = styled.span`
+export const LogoName = styled.span`
   margin-left: 6px;
   // padding-top: 1px;
   font-size: 20px;

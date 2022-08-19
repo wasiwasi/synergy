@@ -11,8 +11,8 @@ import java.util.ArrayList;
 @Setter
 @AllArgsConstructor
 public class ChannelInfoReq {
-    final  String channelId;
-    final String hostEmail;
+    final String channelId;
+    final String hostNickName;
     final Integer currentParticipantNumber;
     final ArrayList<Participant> participantList;
 }

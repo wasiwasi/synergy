@@ -8,7 +8,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -22,11 +22,13 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid"; // Grid version 1
 
 import TextField from "@mui/material/TextField";
 import "./Signup.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Swal from "sweetalert2";
 
 const themeA306 = createTheme({
   palette: {
@@ -43,6 +45,7 @@ const themeA306 = createTheme({
 });
 
 const Signup = () => {
+  const BE_URL = process.env.REACT_APP_BACKEND_URL;
   //닉네임, 이메일, 비밀번호, 비밀번호 확인
   const [nickName, setNickName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -72,23 +75,45 @@ const Signup = () => {
   const [usableNickName, setUsableNickName] = useState<boolean>(false);
   const [usableEmail, setUsableEmail] = useState<boolean>(false);
 
+  const signupRef = useRef<any>();
+
   // 회원가입 버튼 클릭
   const onSignUp = () => {
-    axios
-      .post(
-        "https://i7a306.p.ssafy.io:8080/users/signup",
+    if (!usableEmail) {
+      Swal.fire({
+        icon: "error",
+        title: "닉네임 중복을 확인해주세요!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else if (!usableNickName) {
+      Swal.fire({
+        icon: "error",
+        title: "이메일 중복을 확인해주세요!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else if (usableEmail && usableNickName) {
+      //여러번 요청보내는 것을 방지
+      signupRef.current.disabled = true;
+      axios
+        .post(
+          `${BE_URL}/users/signup`,
 
-        {
-          email: email,
-          nickname: nickName,
-          password: password,
-        }
-      )
-      .then((res) => {
-        console.log("response:", res);
-        {
-          console.log(res.status);
-          alert("이메일 인증 완료 후 로그인 해주세요 :)");
+          {
+            email: email,
+            nickname: nickName,
+            password: password,
+          }
+        )
+        .then((res) => {
+          Swal.fire({
+            icon: "success",
+            title: "회원 가입 성공하였습니다",
+            text: "이메일인증 후 로그인하여 주세요",
+            showConfirmButton: false,
+            timer: 1500,
+          });
 
           // 입력된 내용 다 지우는 코드
           setNickName("");
@@ -97,12 +122,30 @@ const Signup = () => {
           setPasswordConfirm("");
 
           navigate("/Login");
-        }
-      })
-      .catch((error) => {
-        alert("다시 시도해 주세요.");
-        console.log(error.message);
-      });
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.response.status === 409) {
+            Swal.fire({
+              icon: "warning",
+              title: error.response.data.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "아이디와 비밀 번호를 확인해주세요",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
+          // console.log(error.message);
+        })
+        .finally(() => {
+          signupRef.current.disabled = false;
+        });
+    }
   };
 
   // 닉네임
@@ -222,20 +265,29 @@ const Signup = () => {
     e.preventDefault();
     if (isNickName) {
       axios
-        .post("https://i7a306.p.ssafy.io:8080/users/nickname", {
+        .post(`${BE_URL}/users/nickname`, {
           nickname: nickName,
         })
         .then((response) => {
-          {
-            alert("사용가능한 닉네임입니다.");
-            setUsableNickName(true);
-          }
+          Swal.fire({
+            icon: "success",
+            title: "사용가능한 닉네임입니다.",
+          });
+          setUsableNickName(true);
         })
         .catch((error) => {
-          alert("중복된 닉네임입니다.");
+          Swal.fire({
+            icon: "error",
+            title: "중복된 닉네임입니다.",
+            timer: 1500,
+          });
         });
     } else {
-      alert("6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.");
+      Swal.fire({
+        icon: "warning",
+        title: "닉네임을 다시 한번 확인해주세요",
+        text: "6~12자 영소문자와 한글로 된 닉네임만 사용 가능합니다.",
+      });
     }
   };
 
@@ -244,18 +296,31 @@ const Signup = () => {
     e.preventDefault();
     if (isEmail) {
       axios
-        .post("https://i7a306.p.ssafy.io:8080/users/email", { email: email })
+        .post(`${BE_URL}/users/email`, { email: email })
         .then((response) => {
-          {
-            alert("사용가능한 이메일입니다.");
-            setUsableEmail(true);
-          }
+          Swal.fire({
+            icon: "success",
+            title: "이메일 사용 가능합니다",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          setUsableEmail(true);
         })
         .catch((error) => {
-          alert("중복된 이메일입니다.");
+          Swal.fire({
+            icon: "warning",
+            title: "중복된 이메일입니다",
+            showConfirmButton: false,
+            timer: 1500,
+          });
         });
     } else {
-      alert("이메일 형식을 확인해주세요");
+      Swal.fire({
+        icon: "error",
+        title: "이메일 형식을 확인해주세요",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
 
@@ -267,27 +332,33 @@ const Signup = () => {
             <SignupHead>회원 가입</SignupHead>
 
             <SignupMsg>
-              이미 Brand 회원이신가요?
+              이미 SYNERGY 회원이신가요?
               <LinkLogin to="/login"> 로그인</LinkLogin>
             </SignupMsg>
 
             <SignupInput>
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="component-helper" shrink>
-                  Nick Name
-                </InputLabel>
-                <Input
-                  id="component-helper-nickname"
-                  placeholder="닉네임을 입력해 주세요."
-                  // value={nickName}
-                  onChange={onChangeNickName}
-                  required
-                  aria-describedby="component-helper-text"
-                />
-              </FormControl>
-              <NickNameButton onClick={nickNameCheck}>
-                닉네임 중복체크
-              </NickNameButton>
+              <Grid item container xs={12} spacing={1}>
+                <Grid item xs={12} sm={8}>
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Nick Name
+                    </InputLabel>
+                    <Input
+                      id="component-helper-nickname"
+                      placeholder="닉네임을 입력해 주세요."
+                      // value={nickName}
+                      onChange={onChangeNickName}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <NickNameButton onClick={nickNameCheck}>
+                    닉네임 중복체크
+                  </NickNameButton>
+                </Grid>
+              </Grid>
 
               {nickName.length > 0 && (
                 <div className={`${isNickName ? "success" : "error"}`}>
@@ -295,28 +366,38 @@ const Signup = () => {
                 </div>
               )}
             </SignupInput>
+
             <SignupInput>
-              <FormControl variant="standard" fullWidth>
-                <InputLabel htmlFor="component-helper" shrink>
-                  Email
-                </InputLabel>
-                <Input
-                  id="component-helper-email"
-                  placeholder="이메일을 입력해 주세요."
-                  // value={email}
-                  onChange={onChangeEmail}
-                  required
-                  aria-describedby="component-helper-text"
-                />
-              </FormControl>
-              <EmailButton onClick={emailCheck}>이메일 중복체크</EmailButton>
+              <Grid item container xs={12} spacing={1}>
+                <Grid item xs={12} sm={8}>
+                  <FormControl variant="standard" fullWidth>
+                    <InputLabel htmlFor="component-helper" shrink>
+                      Email
+                    </InputLabel>
+
+                    <Input
+                      id="component-helper-email"
+                      placeholder="이메일을 입력해 주세요."
+                      // value={email}
+                      onChange={onChangeEmail}
+                      required
+                      aria-describedby="component-helper-text"
+                    />
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <EmailButton onClick={emailCheck}>
+                    이메일 중복체크
+                  </EmailButton>
+                </Grid>
+              </Grid>
               {email.length > 0 && (
                 <div className={`${isEmail ? "success" : "error"}`}>
                   {emailError}
                 </div>
               )}
             </SignupInput>
-
             <SignupInput>
               <FormControl variant="standard" fullWidth>
                 <InputLabel htmlFor="standard-adornment-password" shrink>
@@ -384,13 +465,12 @@ const Signup = () => {
                 </div>
               )}
             </SignupInput>
-            <SignupInput onClick={onSignUp}>
+            <SignupInput>
               <Button
                 type="submit"
                 variant="contained"
                 size="medium"
                 fullWidth
-                // && usableNickName && usableEmail 추가하기
                 disabled={
                   !(
                     isNickName &&
@@ -401,11 +481,13 @@ const Signup = () => {
                     usableEmail
                   )
                 }
+                ref={signupRef}
+                onClick={onSignUp}
               >
                 회원 가입
               </Button>
-              <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div>
-              <div>{!usableEmail ? "이메일 중복체크를 해주세요" : ""}</div>
+              {/* <div>{!usableNickName ? "닉네임 중복체크를 해주세요" : ""}</div> */}
+              {/* <div>{!usableEmail ? "이메일 중복체크를 해주세요" : ""}</div> */}
             </SignupInput>
           </SignupForm>
         </ThemeProvider>
@@ -423,6 +505,11 @@ const Container = styled.div`
   // width: 100%;
   // // padding:150px 0;
   // background-color: #D7D7D7;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
 `;
 
 const Wrapper = styled.div`
@@ -432,6 +519,12 @@ const Wrapper = styled.div`
   // background-color: #D7D7D7;
   justify-content: center;
   // z-index: 5;
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const SignupHead = styled.h1`

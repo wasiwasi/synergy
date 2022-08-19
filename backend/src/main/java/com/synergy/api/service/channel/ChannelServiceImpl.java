@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 public class ChannelServiceImpl implements ChannelService{
 
-    private final Logger log = LoggerFactory.getLogger(ChannelController.class);
+    private final Logger log = LoggerFactory.getLogger(ChannelServiceImpl.class);
 
     @Value("${OPENVIDU_URL}")
     private String OPENVIDU_URL;
@@ -42,7 +43,7 @@ public class ChannelServiceImpl implements ChannelService{
 
     @Override
     public Channel getChannelByChannelId(String channelId) {
-        return null;
+        return channelList.get(channelId);
     }
 
     @Override
@@ -112,31 +113,31 @@ public class ChannelServiceImpl implements ChannelService{
             log.debug(OPENVIDU_AUTH);
             //확인용도
 
-            HttpURLConnection  connection = null;
-
-            try{
-                URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
-                connection = (HttpURLConnection) url.openConnection();
-
-                connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
-
-                int responseCode = connection.getResponseCode();
-                log.debug("Find Channel in OpenVidu response code : {}",responseCode);
-
-                if(responseCode==200)return true;
-                else return false;
-
-            }catch (Exception e){
-                e.printStackTrace();
-                return  false;
-            }finally {
-                if(connection!=null){
-                    connection.disconnect();
-                }
-            }
-
         }
-        return false;
+
+        HttpURLConnection  connection = null;
+
+        try{
+            URL url = new URL(OPENVIDU_URL+"api/sessions/"+channelId);
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestProperty("Authorization",OPENVIDU_AUTH);
+
+            int responseCode = connection.getResponseCode();
+            log.debug("Find Channel in OpenVidu response code : {}",responseCode);
+
+            if(responseCode==200)return true;
+            else return false;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return  false;
+        }finally {
+            if(connection!=null){
+                connection.disconnect();
+            }
+        }
+
     }
 
     @Override
@@ -190,7 +191,7 @@ public class ChannelServiceImpl implements ChannelService{
 
         for(Channel channel: channelList.values()){
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channel.getChannelId(),
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             list.add(channelInfoReq);
@@ -205,7 +206,7 @@ public class ChannelServiceImpl implements ChannelService{
         if(channel==null)return null;
         else{
             ChannelInfoReq channelInfoReq = new ChannelInfoReq(channelId,
-                    channel.getHost().getEmail(),
+                    channel.getHost().getNickName(),
                     channel.getNumOfMember(),
                     channel.findAllParticipant());
             return channelInfoReq;
@@ -231,5 +232,15 @@ public class ChannelServiceImpl implements ChannelService{
             channelId=this.generateRandomChannelId();
         }
         return channelId;
+    }
+
+    @Override
+    public String getNicknameByConnectionId(String channelId, String connectionId) {
+        Channel channel = channelList.get(channelId);
+        ConcurrentMap<String, Participant> participantList = channel.getParticipantList();
+        return participantList.entrySet().stream()
+                .filter(e -> connectionId.equals(e.getValue().getConnectionId()))
+                .map(Map.Entry::getKey)
+                .findFirst().get();
     }
 }
