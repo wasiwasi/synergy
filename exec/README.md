@@ -389,9 +389,11 @@ Jenkins: 8085
 ### 환경변수
 
 - applications.properties
+
   ![applicationpropertiesimage](./img/applicationpropertiesimage.png)
 
 - .env
+
   ![env](./img/envimage.png)
 
 ### 구글 gmail smtp
