@@ -80,7 +80,7 @@
   }
 }
 .zoom-in-out-box {
-  width: 450px;
+  width: 600px;
   height: 50px;
   /* background: #f50057; */
   animation: zoom-in-zoom-out 1s ease infinite;
