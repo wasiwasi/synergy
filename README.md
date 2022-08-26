@@ -87,7 +87,7 @@
 
 ---
 
-![Untitled](./images/Untitled.png)
+![Untitled](../images/Untitled.png)
 
 ### ERD
 
