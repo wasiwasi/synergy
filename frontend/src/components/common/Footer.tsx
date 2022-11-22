@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, Route, BrowserRouter } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, Route, BrowserRouter,useLocation } from "react-router-dom";
 
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
@@ -11,15 +11,24 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 
+
 const Footer = () => {
+
+  const location = useLocation();
+  useEffect(()=>{
+    
+  }, [location])
+  if (window.location.pathname === '/join'||window.location.pathname === '/channel/createchannel') return null;
+  
+  
   return (
     <Container>
       <Wrapper>
         <BrandWrapper>
           <Brand to="/">
             <Logo>
-              <LogoImg src="/images/common/logo_A306.png" alt="A306 logo img" />
-              <LogoName>A306</LogoName>
+              <LogoImg src="/logo_A306_2.png" alt="SYNERGY logo img" />
+              <LogoName>SYNERGY</LogoName>
             </Logo>
           </Brand>
         </BrandWrapper>
@@ -30,7 +39,7 @@ const Footer = () => {
             <HeadMsg>문의 및 고객센터</HeadMsg>
             1:1 라이브챗
             <br />
-            Email: A306@gmail.com
+            Email: SYNERGY@gmail.com
             <br />
             운영 시간 : 오전 9시 ~ 오후 6시 (주말 및 공휴일 휴무)
           </ServiceMsg>
@@ -48,7 +57,7 @@ const Footer = () => {
             <SnsIcon href="#" target="_blank" rel="noopener noreferrer">
               <InstagramIcon></InstagramIcon>
             </SnsIcon>
-            <TwitterIcon></TwitterIcon>
+            {/* <TwitterIcon></TwitterIcon> */}
           </SnsWrapper>
         </ServiceWrapper>
       </Wrapper>
@@ -64,7 +73,7 @@ const Container = styled.footer`
   // height: 100px;
   // width: 100%;
   // padding:150px 0;
-  // background-color: #39A2DB;
+  background-color: deepSkyBlue;
   // height: 100px;
   margin-top: auto;
 `;
@@ -148,6 +157,7 @@ const HeadMsg = styled.div`
 const ServiceWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  color: white;
 `;
 
 const ServiceMsg = styled.div`
@@ -165,13 +175,13 @@ const SnsWrapper = styled.div`
 
 const SnsIcon = styled.a`
   margin-left: 10px;
-  color: #000;
+  color: white;
 
   &:first-of-type {
     margin-left: 0;
   }
   &:hover {
-    color: #000;
+    color: #3396f4;
   }
 `;
 

@@ -16,8 +16,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.lang.reflect.MalformedParametersException;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -34,6 +37,11 @@ public class AuthService {
         if(req.getEmail() == null || req.getPassword() == null)
             throw new IllegalArgumentException("please enter email and password");
 
+        // 이메일 형식이 맞아야 하고, 비밀번호도 8자리 이상이어야 한다
+        String regex = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$";
+        if(!Pattern.matches(regex, req.getEmail()) || req.getPassword().length() < 8)
+            throw new MalformedParametersException("please check email or password");
+
         log.debug("req email: "+req.getEmail()+" req password: "+req.getPassword());
 
         // 사용자 이메일로 사용자가 존재하는지 확인
@@ -42,6 +50,12 @@ public class AuthService {
         // 입력으로 들어온 비밀번호와 DB에 저장된 암호를 비교해 비밀번호가 맞는지 확인
         checkPassword(req.getPassword(), user.getPassword());
 
+        // 이메일 인증을 마친 사용자인지 확인
+        log.debug(user.getAuth_status() ? "true" : "false");
+        if(!user.getAuth_status()){
+            throw new IllegalStateException("Need Email Auth");
+        }
+
         String accessToken = JwtTokenUtil.getToken(String.valueOf(user.getId()));
         log.debug("created access token "+accessToken);
 
@@ -49,6 +63,11 @@ public class AuthService {
         log.debug("created refresh token "+refreshToken);
 
         return new TokenRes(accessToken, refreshToken.getRefreshToken());
+    }
+
+    public void logout(String accessToken) {
+        if(accessToken == null)
+            throw new IllegalStateException("Access Denied");
     }
 
     public void checkPassword(String rawPass, String encodedPassword) {

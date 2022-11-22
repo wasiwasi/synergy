@@ -24,6 +24,8 @@ import Button from "@mui/material/Button";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+import Swal from "sweetalert2";
+
 const themeA306 = createTheme({
   palette: {
     primary: {
@@ -45,6 +47,8 @@ interface State {
 }
 
 const Login = () => {
+  const BE_URL = process.env.REACT_APP_BACKEND_URL;
+
   const [values, setValues] = React.useState<State>({
     email: "string",
     password: "",
@@ -54,9 +58,9 @@ const Login = () => {
   const navigate = useNavigate();
 
   // 유효성 검사
-  const [isEmail, setIsEmail] = useState<boolean>(true);
-  const [isPassword, setIsPassword] = useState<boolean>(true);
-
+  const [isEmail, setIsEmail] = useState<boolean>(false);
+  const [isPassword, setIsPassword] = useState<boolean>(false);
+  const [isEmpty, setIsEmpty] = useState<boolean>(true);
   // const router = useRouter();
 
   //에러메시지 저장
@@ -65,10 +69,10 @@ const Login = () => {
   const [passwordError, setPasswordError] =
     useState<string>("비밀번호를 입력해 주세요.");
 
-  // 회원가입 버튼 클릭
+  // 로그인 버튼 클릭
   const onLogin = () => {
     axios
-      .post("https://i7a306.p.ssafy.io:8080/auth/login", {
+      .post(`${BE_URL}/auth/login`, {
         email: values.email,
         password: values.password,
       })
@@ -76,15 +80,29 @@ const Login = () => {
         if (res.data.accessToken) {
           localStorage.setItem("access-token", res.data.accessToken);
         }
-
-        alert("로그인 되었습니다. :)");
+        Swal.fire({
+          icon: "success",
+          title: "로그인 되었습니다. :)",
+          showConfirmButton: false,
+          timer: 1500,
+        });
 
         navigate("/");
       })
       .catch((error) => {
-        alert("다시 시도해 주세요.");
-        // console.log(error.message);
-        // console.log(error.response.data.statusCode);
+        if (error.response.status === 412) {
+          Swal.fire({
+            icon: "question",
+            title: "이메일 인증 후 이용해주세요.",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "로그인 다시 시도해 주세요.",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
       });
   };
 
@@ -101,13 +119,16 @@ const Login = () => {
 
     if (event.target.value === "") {
       setEmailError("이메일을 입력해 주세요.");
-      setIsEmail(true);
+      setIsEmail(false);
+      setIsEmpty(true);
     } else if (!emailRegex.test(emailCurrent)) {
       setEmailError("이메일 형식에 맞게 입력해 주세요.");
       setIsEmail(false);
+      setIsEmpty(false);
     } else {
-      setEmailError("올바른 이메일 형식입니다!");
+      setEmailError("");
       setIsEmail(true);
+      setIsEmpty(false);
     }
   };
 
@@ -120,13 +141,16 @@ const Login = () => {
 
     if (event.target.value === "") {
       setPasswordError("비밀번호를 입력해 주세요.");
-      setIsPassword(true);
-    } else if (event.target.value.length < 8) {
-      setPasswordError("비밀번호는 8자리 이상 입니다.");
       setIsPassword(false);
+      setIsEmpty(true);
+    } else if (event.target.value.length < 8) {
+      setPasswordError("");
+      setIsPassword(false);
+      setIsEmpty(false);
     } else {
-      setPasswordError("8자리 이상 입니다!");
+      setPasswordError("");
       setIsPassword(true);
+      setIsEmpty(false);
     }
   };
 
@@ -149,12 +173,12 @@ const Login = () => {
       <Wrapper>
         <ThemeProvider theme={themeA306}>
           <LoginForm>
-            <LoginHead>A306</LoginHead>
-            <LoginMsg>A306에 오신것을 환영합니다.</LoginMsg>
+            <LoginHead>SYNERGY</LoginHead>
+            <LoginMsg>SYNERGY에 오신것을 환영합니다.</LoginMsg>
 
             <LoginInput>
               <FormControl
-                error={isEmail === true ? false : true}
+                error={!isEmail && !isEmpty}
                 variant="standard"
                 fullWidth
               >
@@ -176,7 +200,7 @@ const Login = () => {
 
             <LoginInput>
               <FormControl
-                error={isPassword === true ? false : true}
+                error={!isPassword && !isEmpty}
                 variant="standard"
                 fullWidth
               >
@@ -214,7 +238,7 @@ const Login = () => {
 
             <LoginInput>
               <Button
-                // disabled={ (isEmail === true ? false : true) || (isPassword === true ? false : true) }
+                disabled={!(isEmail && isPassword && !isEmpty)}
                 variant="contained"
                 size="medium"
                 fullWidth
@@ -224,9 +248,9 @@ const Login = () => {
               </Button>
             </LoginInput>
 
-            <LinkFindPassword to="/signup">
+            {/* <LinkFindPassword to="/signup">
               비밀번호를 잊으셨나요?
-            </LinkFindPassword>
+            </LinkFindPassword> */}
             <SignupMsg>
               계정이 없으신가요?
               <LinkSignup to="/signup"> 가입하기</LinkSignup>
@@ -238,15 +262,27 @@ const Login = () => {
   );
 };
 
-const Container = styled.div``;
-
-const Wrapper = styled.div`
+const Container = styled.div`
+  height: 100vh;
+  width: 100%;
   display: flex;
   justify-content: center;
+  background: linear-gradient(lightCyan, skyBlue, deepSkyBlue);
+`;
+
+const Wrapper = styled.div`
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px 5px;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 2em 0 4em;
+  margin: 2em;
+  background: white;
 `;
 
 const LoginHead = styled.h1`
-  color: #000000;
+  color: deepskyblue;
   margin: 40px;
 `;
 
@@ -265,17 +301,17 @@ const LoginInput = styled.div`
   margin: 15px 0px;
 `;
 
-const LinkFindPassword = styled(Link)`
-  display: block;
-  text-decoration: none;
-  margin: 10px;
-  font-size: 13px;
-  color: #769fcd;
+// const LinkFindPassword = styled(Link)`
+//   display: block;
+//   text-decoration: none;
+//   margin: 10px;
+//   font-size: 13px;
+//   color: #769fcd;
 
-  &:hover {
-    color: #769fcd;
-  }
-`;
+//   &:hover {
+//     color: #769fcd;
+//   }
+// `;
 
 const SignupMsg = styled.div`
   text-decoration: none;
